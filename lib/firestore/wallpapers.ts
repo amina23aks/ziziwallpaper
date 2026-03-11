@@ -52,9 +52,15 @@ export async function getWallpaperById(id: string) {
 }
 
 export async function listWallpapers(maxItems = 20) {
-  const snapshot = await getDocs(
-    query(wallpapersCollection, orderBy("createdAt", "desc"), limit(maxItems))
-  );
+  let snapshot;
+
+  try {
+    snapshot = await getDocs(
+      query(wallpapersCollection, orderBy("createdAt", "desc"), limit(maxItems))
+    );
+  } catch {
+    snapshot = await getDocs(query(wallpapersCollection, limit(maxItems)));
+  }
 
   return snapshot.docs.map((item) => ({
     id: item.id,
@@ -67,14 +73,22 @@ export async function listRecentWallpapers(maxItems = 6) {
 }
 
 export async function listPublishedWallpapers(maxItems = 30) {
-  const snapshot = await getDocs(
-    query(
-      wallpapersCollection,
-      where("isPublished", "==", true),
-      orderBy("createdAt", "desc"),
-      limit(maxItems)
-    )
-  );
+  let snapshot;
+
+  try {
+    snapshot = await getDocs(
+      query(
+        wallpapersCollection,
+        where("isPublished", "==", true),
+        orderBy("createdAt", "desc"),
+        limit(maxItems)
+      )
+    );
+  } catch {
+    snapshot = await getDocs(
+      query(wallpapersCollection, where("isPublished", "==", true), limit(maxItems))
+    );
+  }
 
   return snapshot.docs.map((item) => ({
     id: item.id,

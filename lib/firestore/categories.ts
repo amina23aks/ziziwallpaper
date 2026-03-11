@@ -26,9 +26,15 @@ export async function createCategory(data: CreateCategoryInput) {
 }
 
 export async function listCategories(maxItems = 100) {
-  const snapshot = await getDocs(
-    query(categoriesCollection, orderBy("order", "asc"), limit(maxItems))
-  );
+  let snapshot;
+
+  try {
+    snapshot = await getDocs(
+      query(categoriesCollection, orderBy("order", "asc"), limit(maxItems))
+    );
+  } catch {
+    snapshot = await getDocs(query(categoriesCollection, limit(maxItems)));
+  }
 
   return snapshot.docs.map((item) => ({
     id: item.id,
@@ -37,14 +43,22 @@ export async function listCategories(maxItems = 100) {
 }
 
 export async function listActiveCategories(maxItems = 30) {
-  const snapshot = await getDocs(
-    query(
-      categoriesCollection,
-      where("isActive", "==", true),
-      orderBy("order", "asc"),
-      limit(maxItems)
-    )
-  );
+  let snapshot;
+
+  try {
+    snapshot = await getDocs(
+      query(
+        categoriesCollection,
+        where("isActive", "==", true),
+        orderBy("order", "asc"),
+        limit(maxItems)
+      )
+    );
+  } catch {
+    snapshot = await getDocs(
+      query(categoriesCollection, where("isActive", "==", true), limit(maxItems))
+    );
+  }
 
   return snapshot.docs.map((item) => ({
     id: item.id,

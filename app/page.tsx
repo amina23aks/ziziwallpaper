@@ -18,8 +18,8 @@ export default function HomePage() {
     async function loadData() {
       try {
         const [publishedWallpapers, activeCategories] = await Promise.all([
-          listPublishedWallpapers(40),
-          listActiveCategories(30),
+          listPublishedWallpapers(100),
+          listActiveCategories(100),
         ]);
         setWallpapers(publishedWallpapers);
         setCategories(activeCategories);

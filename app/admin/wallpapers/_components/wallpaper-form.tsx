@@ -17,7 +17,6 @@ const wallpaperSchema = z.object({
   description: z.string().optional(),
   searchKeywords: z.string().optional(),
   moodTags: z.string().optional(),
-  isPublished: z.boolean(),
 });
 
 const inlineCategorySchema = z.object({
@@ -43,32 +42,13 @@ function slugify(text: string) {
     .toLowerCase()
     .trim()
     .replace(/\s+/g, "-")
-    .replace(/[^\w\u0600-\u06FF-]+/g, "")
-    .replace(/--+/g, "-");
+    .replace(/[^a-z0-9\u0600-\u06FF-]/g, "-")
+    .replace(/--+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function FieldHint({ children }: { children: React.ReactNode }) {
   return <p className="text-xs leading-5 text-zinc-500 sm:text-sm">{children}</p>;
-}
-
-function SectionCard({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6">
-      <div className="mb-4 space-y-1 sm:mb-5">
-        <h2 className="text-lg font-bold text-zinc-900 sm:text-xl">{title}</h2>
-        {subtitle && <p className="text-sm text-zinc-600">{subtitle}</p>}
-      </div>
-      <div className="space-y-4">{children}</div>
-    </section>
-  );
 }
 
 export function WallpaperForm({
@@ -83,7 +63,6 @@ export function WallpaperForm({
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileInputKey, setFileInputKey] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategorySlugs, setSelectedCategorySlugs] = useState<string[]>([]);
@@ -108,7 +87,6 @@ export function WallpaperForm({
       description: initialWallpaper?.description ?? "",
       searchKeywords: initialWallpaper?.searchKeywords?.join(", ") ?? "",
       moodTags: initialWallpaper?.moodTags?.join(", ") ?? "",
-      isPublished: initialWallpaper?.isPublished ?? false,
     },
   });
 
@@ -138,7 +116,6 @@ export function WallpaperForm({
       description: initialWallpaper.description ?? "",
       searchKeywords: initialWallpaper.searchKeywords?.join(", ") ?? "",
       moodTags: initialWallpaper.moodTags?.join(", ") ?? "",
-      isPublished: initialWallpaper.isPublished,
     });
   }, [initialWallpaper, reset]);
 
@@ -153,18 +130,15 @@ export function WallpaperForm({
     );
   };
 
-  const handleUploadImage = async () => {
+  const handleFileSelect = async (file: File | null) => {
     setStatusMessage(null);
 
-    if (!selectedFile) {
-      setStatusMessage({ type: "error", message: "اختر صورة أولاً ثم اضغط رفع الصورة." });
-      return;
-    }
+    if (!file) return;
 
     setIsUploading(true);
 
     try {
-      const uploadedImage = await uploadImageToCloudinary(selectedFile);
+      const uploadedImage = await uploadImageToCloudinary(file);
       setUploadedImages((prev) => [
         ...prev,
         {
@@ -175,9 +149,8 @@ export function WallpaperForm({
           height: uploadedImage.height,
         },
       ]);
-      setSelectedFile(null);
       setFileInputKey((prev) => prev + 1);
-      setStatusMessage({ type: "success", message: "تم رفع الصورة." });
+      setStatusMessage({ type: "success", message: "تم رفع الصورة وإضافتها للمعاينة." });
     } catch {
       setStatusMessage({ type: "error", message: "تعذر رفع الصورة حالياً." });
     } finally {
@@ -193,7 +166,7 @@ export function WallpaperForm({
     const parsed = inlineCategorySchema.safeParse(newCategory);
 
     if (!parsed.success) {
-      setStatusMessage({ type: "error", message: "تحقق من بيانات التصنيف الجديد." });
+      setStatusMessage({ type: "error", message: "تحقق من بيانات التصنيف." });
       return;
     }
 
@@ -206,8 +179,16 @@ export function WallpaperForm({
         isActive: true,
       });
 
-      const refreshed = await listCategories();
-      setCategories(refreshed);
+      const createdCategory: Category = {
+        id: `temp-${Date.now()}`,
+        nameAr: parsed.data.nameAr,
+        nameEn: parsed.data.nameEn,
+        slug: parsed.data.slug,
+        order: categories.length,
+        isActive: true,
+      };
+
+      setCategories((prev) => [...prev, createdCategory]);
       setSelectedCategorySlugs((prev) => [...new Set([...prev, parsed.data.slug])]);
       setNewCategory({ nameAr: "", nameEn: "", slug: "" });
       setShowInlineCategoryForm(false);
@@ -251,7 +232,7 @@ export function WallpaperForm({
         secureUrl: image.secureUrl,
         alt: values.title.trim(),
       })),
-      isPublished: values.isPublished,
+      isPublished: true,
     };
 
     setIsSaving(true);
@@ -262,11 +243,10 @@ export function WallpaperForm({
         setStatusMessage({ type: "success", message: "تم تحديث الخلفية بنجاح." });
       } else {
         await createWallpaper(payload);
-        setStatusMessage({ type: "success", message: "تم حفظ الخلفية بنجاح." });
-        reset({ title: "", description: "", searchKeywords: "", moodTags: "", isPublished: false });
+        setStatusMessage({ type: "success", message: "تم حفظ الخلفية." });
+        reset({ title: "", description: "", searchKeywords: "", moodTags: "" });
         setSelectedCategorySlugs([]);
         setUploadedImages([]);
-        setSelectedFile(null);
         setFileInputKey((prev) => prev + 1);
       }
 
@@ -279,51 +259,58 @@ export function WallpaperForm({
   };
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-      <header className="mb-5 flex items-center justify-between rounded-2xl border border-zinc-200 bg-white px-4 py-4">
-        <div>
-          <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">
-            {mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية جديدة"}
-          </h1>
-          <p className="mt-1 text-sm text-zinc-600">أدخل البيانات الأساسية ثم احفظ.</p>
-        </div>
+    <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
+      <header className="mb-4 flex items-center justify-between">
+        <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">
+          {mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية"}
+        </h1>
         <Link href="/admin/wallpapers" className="text-sm font-semibold text-zinc-700">
-          العودة للقائمة
+          العودة
         </Link>
       </header>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <SectionCard title="معلومات الخلفية">
-          <div className="space-y-2">
-            <label htmlFor="title" className="block text-sm font-semibold text-zinc-800">
-              عنوان الخلفية
-            </label>
-            <input
-              id="title"
-              type="text"
-              {...register("title")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500"
-              placeholder="مثال: خلفية جبلية داكنة"
-            />
-            <FieldHint>عنوان واضح يساعدك على التعرف على الخلفية بسرعة.</FieldHint>
-            {errors.title && <p className="text-sm text-red-600">{errors.title.message}</p>}
-          </div>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5"
+      >
+        <div className="space-y-2">
+          <label htmlFor="title" className="block text-sm font-semibold text-zinc-800">
+            عنوان الخلفية
+          </label>
+          <input
+            id="title"
+            type="text"
+            {...register("title")}
+            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500"
+            placeholder="مثال: خلفية ليلية"
+          />
+          {errors.title && <p className="text-sm text-red-600">{errors.title.message}</p>}
+        </div>
 
-          <div className="space-y-2">
-            <label htmlFor="description" className="block text-sm font-semibold text-zinc-800">
-              وصف
-            </label>
-            <textarea
-              id="description"
-              rows={3}
-              {...register("description")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500"
-              placeholder="وصف مختصر (اختياري)"
-            />
-          </div>
-        </SectionCard>
+        <div className="space-y-2">
+          <label htmlFor="description" className="block text-sm font-semibold text-zinc-800">
+            وصف مختصر
+          </label>
+          <textarea
+            id="description"
+            rows={3}
+            {...register("description")}
+            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500"
+            placeholder="اختياري"
+          />
+        </div>
 
-        <SectionCard title="التصنيفات" subtitle="اختر تصنيفاً واحداً أو أكثر.">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-semibold text-zinc-800">التصنيفات</label>
+            <button
+              type="button"
+              onClick={() => setShowInlineCategoryForm((prev) => !prev)}
+              className="text-xs font-semibold text-zinc-700"
+            >
+              + إضافة تصنيف
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             {categories.map((category) => {
               const active = selectedCategorySlugs.includes(category.slug);
@@ -343,16 +330,7 @@ export function WallpaperForm({
               );
             })}
           </div>
-
-          <FieldHint>التصنيفات المختارة: {selectedCategoriesText}</FieldHint>
-
-          <button
-            type="button"
-            onClick={() => setShowInlineCategoryForm((prev) => !prev)}
-            className="text-sm font-semibold text-zinc-700"
-          >
-            + إضافة تصنيف
-          </button>
+          <FieldHint>المحدد حالياً: {selectedCategoriesText}</FieldHint>
 
           {showInlineCategoryForm && (
             <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
@@ -400,9 +378,9 @@ export function WallpaperForm({
               </button>
             </div>
           )}
-        </SectionCard>
+        </div>
 
-        <SectionCard title="الكلمات والوسوم">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-2">
             <label htmlFor="searchKeywords" className="block text-sm font-semibold text-zinc-800">
               كلمات البحث
@@ -415,7 +393,6 @@ export function WallpaperForm({
               placeholder="ليل، هدوء، سماء"
             />
           </div>
-
           <div className="space-y-2">
             <label htmlFor="moodTags" className="block text-sm font-semibold text-zinc-800">
               Mood Tags
@@ -428,88 +405,75 @@ export function WallpaperForm({
               placeholder="calm, focus"
             />
           </div>
-        </SectionCard>
+        </div>
 
-        <SectionCard title="الصور">
+        <div className="space-y-2">
+          <label className="block text-sm font-semibold text-zinc-800">الصورة</label>
           <input
             key={fileInputKey}
             type="file"
             accept="image/*"
-            onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
+            onChange={(event) => handleFileSelect(event.target.files?.[0] ?? null)}
             className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
           />
+          <FieldHint>عند اختيار الصورة يتم رفعها مباشرة وإضافتها للمعاينة.</FieldHint>
+          {isUploading && <p className="text-sm text-zinc-600">جاري رفع الصورة...</p>}
+        </div>
 
-          <button
-            type="button"
-            onClick={handleUploadImage}
-            disabled={isUploading || !selectedFile}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white disabled:opacity-60 sm:w-auto"
-          >
-            {isUploading ? "جاري رفع الصورة..." : "رفع الصورة"}
-          </button>
-
-          {uploadedImages.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-zinc-800">معاينة الصور</p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {uploadedImages.map((image, index) => (
-                  <article key={image.publicId} className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-                    <div className="relative aspect-square bg-zinc-100">
-                      <Image
-                        src={image.secureUrl}
-                        alt={title.trim() || `صورة ${index + 1}`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 50vw, 180px"
-                        unoptimized
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeUploadedImage(image.publicId)}
-                      className="w-full border-t border-zinc-200 px-2 py-2 text-xs font-semibold text-red-700"
-                    >
-                      إزالة
-                    </button>
-                  </article>
-                ))}
-              </div>
+        {uploadedImages.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-zinc-800">معاينة الصور</p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {uploadedImages.map((image, index) => (
+                <article key={image.publicId} className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                  <div className="relative aspect-square bg-zinc-100">
+                    <Image
+                      src={image.secureUrl}
+                      alt={title.trim() || `صورة ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 50vw, 180px"
+                      unoptimized
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeUploadedImage(image.publicId)}
+                    className="w-full border-t border-zinc-200 px-2 py-2 text-xs font-semibold text-red-700"
+                  >
+                    إزالة
+                  </button>
+                </article>
+              ))}
             </div>
-          )}
-        </SectionCard>
+          </div>
+        )}
 
-        <SectionCard title="النشر والحفظ">
-          <label className="flex items-center gap-2 text-sm font-medium text-zinc-800">
-            <input type="checkbox" {...register("isPublished")} className="h-4 w-4" />
-            إظهار الخلفية في الصفحة الرئيسية
-          </label>
-
-          {statusMessage && (
-            <div
-              className={`rounded-xl border px-4 py-3 text-sm font-medium ${
-                statusMessage.type === "success"
-                  ? "border-green-200 bg-green-50 text-green-800"
-                  : "border-red-200 bg-red-50 text-red-800"
-              }`}
-            >
-              {statusMessage.message}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSaving || isUploading}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+        {statusMessage && (
+          <div
+            className={`rounded-xl border px-4 py-3 text-sm font-medium ${
+              statusMessage.type === "success"
+                ? "border-green-200 bg-green-50 text-green-800"
+                : "border-red-200 bg-red-50 text-red-800"
+            }`}
           >
-            {isSaving
-              ? mode === "edit"
-                ? "جاري تحديث الخلفية..."
-                : "جاري حفظ الخلفية..."
-              : mode === "edit"
-                ? "حفظ التعديلات"
-                : "حفظ الخلفية"}
-          </button>
-        </SectionCard>
+            {statusMessage.message}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSaving || isUploading}
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+        >
+          {isSaving
+            ? mode === "edit"
+              ? "جاري حفظ التعديلات..."
+              : "جاري حفظ الخلفية..."
+            : mode === "edit"
+              ? "حفظ التعديلات"
+              : "حفظ الخلفية"}
+        </button>
       </form>
     </main>
   );
