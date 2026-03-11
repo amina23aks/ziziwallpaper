@@ -95,12 +95,12 @@ export default function AdminWallpapersPage() {
                 </div>
 
                 <div className="flex gap-2 self-end sm:self-auto">
-                  <button
-                    type="button"
+                  <Link
+                    href={wallpaper.id ? `/admin/wallpapers/${wallpaper.id}/edit` : "#"}
                     className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700"
                   >
                     تعديل
-                  </button>
+                  </Link>
                   <button
                     type="button"
                     onClick={() => handleDelete(wallpaper.id)}

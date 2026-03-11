@@ -4,17 +4,20 @@ import {
   deleteDoc,
   doc,
   getCountFromServer,
+  getDoc,
   getDocs,
   limit,
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import type { Wallpaper } from "@/types/wallpaper";
 
 type CreateWallpaperInput = Omit<Wallpaper, "id" | "createdAt" | "updatedAt">;
+type UpdateWallpaperInput = Omit<Wallpaper, "id" | "createdAt" | "updatedAt">;
 
 const wallpapersCollection = collection(db, "wallpapers");
 
@@ -26,6 +29,26 @@ export async function createWallpaper(data: CreateWallpaperInput) {
   });
 
   return docRef.id;
+}
+
+export async function updateWallpaper(id: string, data: UpdateWallpaperInput) {
+  await updateDoc(doc(db, "wallpapers", id), {
+    ...data,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function getWallpaperById(id: string) {
+  const snapshot = await getDoc(doc(db, "wallpapers", id));
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return {
+    id: snapshot.id,
+    ...(snapshot.data() as Omit<Wallpaper, "id">),
+  };
 }
 
 export async function listWallpapers(maxItems = 20) {
@@ -43,7 +66,7 @@ export async function listRecentWallpapers(maxItems = 6) {
   return listWallpapers(maxItems);
 }
 
-export async function listPublishedWallpapers(maxItems = 18) {
+export async function listPublishedWallpapers(maxItems = 30) {
   const snapshot = await getDocs(
     query(
       wallpapersCollection,
