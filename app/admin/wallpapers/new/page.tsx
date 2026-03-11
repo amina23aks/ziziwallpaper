@@ -216,7 +216,7 @@ export default function NewWallpaperPage() {
               id="title"
               type="text"
               {...register("title")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-500"
+              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500 outline-none transition focus:border-zinc-500"
               placeholder="مثال: خلفية ليلية هادئة"
             />
             <FieldHint>اسم واضح ومباشر ليسهل التعرف على الخلفية داخل التطبيق.</FieldHint>
@@ -231,7 +231,7 @@ export default function NewWallpaperPage() {
               id="description"
               rows={4}
               {...register("description")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-500"
+              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500 outline-none transition focus:border-zinc-500"
               placeholder="اكتب وصفاً بسيطاً يوضح طابع الخلفية أو ألوانها"
             />
             <FieldHint>الوصف اختياري، لكنه يساعد في تنظيم المحتوى وفهم الخلفية بسرعة.</FieldHint>
@@ -250,7 +250,7 @@ export default function NewWallpaperPage() {
               id="categorySlugs"
               type="text"
               {...register("categorySlugs")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-500"
+              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500 outline-none transition focus:border-zinc-500"
               placeholder="nature, abstract, dark"
             />
             <FieldHint>
@@ -266,7 +266,7 @@ export default function NewWallpaperPage() {
               id="searchKeywords"
               type="text"
               {...register("searchKeywords")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-500"
+              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500 outline-none transition focus:border-zinc-500"
               placeholder="ليل, نجوم, هدوء"
             />
             <FieldHint>
@@ -282,7 +282,7 @@ export default function NewWallpaperPage() {
               id="moodTags"
               type="text"
               {...register("moodTags")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-500"
+              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500 outline-none transition focus:border-zinc-500"
               placeholder="calm, focus, cozy"
             />
             <FieldHint>
@@ -305,10 +305,10 @@ export default function NewWallpaperPage() {
                 const file = event.target.files?.[0] ?? null;
                 setSelectedFile(file);
               }}
-              className="block w-full cursor-pointer rounded-xl border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-700"
+              className="block w-full cursor-pointer rounded-xl border border-zinc-300 bg-white px-3 py-2.5 text-sm font-medium text-zinc-900 file:ml-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-zinc-700"
             />
             <FieldHint>
-              بعد اختيار الصورة، اضغط على &quot;رفع الصورة&quot; لإضافتها إلى قائمة الصور المرفوعة.
+              بعد اختيار الصورة، اضغط على &quot;رفع الصورة&quot; لإضافتها إلى المعاينة قبل الحفظ.
             </FieldHint>
           </div>
 
@@ -324,7 +324,7 @@ export default function NewWallpaperPage() {
           {uploadedImages.length > 0 && (
             <div className="space-y-3">
               <p className="text-sm font-semibold text-zinc-800">
-                الصور المرفوعة ({uploadedImages.length})
+                معاينة الصور ({uploadedImages.length})
               </p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {uploadedImages.map((image, index) => (
@@ -371,7 +371,7 @@ export default function NewWallpaperPage() {
               className="mt-0.5 h-5 w-5 rounded border-zinc-300"
             />
             <span className="space-y-1">
-              <span className="block text-sm font-semibold text-zinc-800">نشر الخلفية فوراً</span>
+              <span className="block text-sm font-semibold text-zinc-800">إظهار الخلفية في الصفحة الرئيسية</span>
               <span className="block text-xs leading-5 text-zinc-500 sm:text-sm">
                 عند التفعيل، ستكون الخلفية جاهزة للعرض مباشرة بعد الحفظ.
               </span>
