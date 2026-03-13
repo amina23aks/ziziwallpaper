@@ -1,42 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { createCategory, listCategories } from "@/lib/firestore/categories";
+import { deleteCategory, listCategories, updateCategory } from "@/lib/firestore/categories";
 import type { Category } from "@/types/category";
-
-const categorySchema = z.object({
-  nameAr: z.string().trim().min(1, "الاسم العربي مطلوب"),
-  nameEn: z.string().trim().min(1, "الاسم الإنجليزي مطلوب"),
-  slug: z.string().trim().min(1, "Slug مطلوب"),
-  order: z.coerce.number().min(0),
-  isActive: z.boolean(),
-});
-
-type CategoryFormValues = z.infer<typeof categorySchema>;
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
   const [statusMessage, setStatusMessage] = useState<string>("");
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setError,
-    formState: { errors },
-  } = useForm<CategoryFormValues>({
-    defaultValues: {
-      nameAr: "",
-      nameEn: "",
-      slug: "",
-      order: 0,
-      isActive: true,
-    },
-  });
 
   async function loadCategories() {
     setIsLoading(true);
@@ -52,133 +26,137 @@ export default function AdminCategoriesPage() {
     loadCategories();
   }, []);
 
-  const onSubmit = async (values: CategoryFormValues) => {
+  const startEdit = (category: Category) => {
+    if (!category.id) return;
+    setEditingId(category.id);
+    setEditingName(category.nameAr);
     setStatusMessage("");
-    const parsed = categorySchema.safeParse(values);
+  };
 
-    if (!parsed.success) {
-      const fieldErrors = parsed.error.flatten().fieldErrors;
-      if (fieldErrors.nameAr?.[0]) setError("nameAr", { message: fieldErrors.nameAr[0] });
-      if (fieldErrors.nameEn?.[0]) setError("nameEn", { message: fieldErrors.nameEn[0] });
-      if (fieldErrors.slug?.[0]) setError("slug", { message: fieldErrors.slug[0] });
+  const saveEdit = async () => {
+    if (!editingId || !editingName.trim()) {
+      setStatusMessage("يرجى إدخال اسم عربي صالح.");
       return;
     }
 
-    setIsSaving(true);
+    try {
+      await updateCategory(editingId, { nameAr: editingName.trim(), nameEn: editingName.trim() });
+      setCategories((prev) =>
+        prev.map((category) =>
+          category.id === editingId
+            ? { ...category, nameAr: editingName.trim(), nameEn: editingName.trim() }
+            : category
+        )
+      );
+      setStatusMessage("تم تحديث التصنيف.");
+      setEditingId(null);
+      setEditingName("");
+    } catch {
+      setStatusMessage("تعذر تحديث التصنيف حالياً.");
+    }
+  };
+
+  const handleDelete = async (category: Category) => {
+    if (!category.id) return;
 
     try {
-      await createCategory(parsed.data);
-      await loadCategories();
-      setStatusMessage("تمت إضافة التصنيف بنجاح.");
-      reset({ nameAr: "", nameEn: "", slug: "", order: 0, isActive: true });
+      await deleteCategory(category.id);
+      setCategories((prev) => prev.filter((item) => item.id !== category.id));
+      setStatusMessage("تم حذف التصنيف.");
     } catch {
-      setStatusMessage("تعذر إضافة التصنيف حالياً.");
-    } finally {
-      setIsSaving(false);
+      setStatusMessage("تعذر حذف التصنيف حالياً.");
     }
   };
 
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
-      <header>
-        <h1 className="text-2xl font-extrabold text-zinc-900 sm:text-3xl">إدارة التصنيفات</h1>
-        <p className="mt-1 text-sm text-zinc-700">أنشئ تصنيفات جديدة واعرض التصنيفات الحالية.</p>
+    <main className="mx-auto w-full max-w-4xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
+      <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+        <div>
+          <h1 className="text-2xl font-black text-zinc-900 dark:text-zinc-100">إدارة التصنيفات</h1>
+          <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">تعديل الاسم العربي أو حذف التصنيف.</p>
+        </div>
+        <Link
+          href="/admin/wallpapers"
+          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-zinc-300 px-3 text-sm font-semibold text-zinc-700 dark:border-zinc-700 dark:text-zinc-200"
+        >
+          ← الخلفيات
+        </Link>
       </header>
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
-        <h2 className="mb-4 text-lg font-bold text-zinc-900">إضافة تصنيف</h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-zinc-800">الاسم بالعربية</label>
-            <input
-              {...register("nameAr")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-500"
-              placeholder="مثال: الطبيعة"
-            />
-            {errors.nameAr && <p className="text-xs text-red-600">{errors.nameAr.message}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-zinc-800">الاسم بالإنجليزية</label>
-            <input
-              {...register("nameEn")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-500"
-              placeholder="Nature"
-            />
-            {errors.nameEn && <p className="text-xs text-red-600">{errors.nameEn.message}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-zinc-800">Slug</label>
-            <input
-              {...register("slug")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-500"
-              placeholder="nature"
-            />
-            {errors.slug && <p className="text-xs text-red-600">{errors.slug.message}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-zinc-800">الترتيب</label>
-            <input
-              type="number"
-              {...register("order")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900"
-            />
-          </div>
-
-          <label className="sm:col-span-2 flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
-            <input type="checkbox" {...register("isActive")} className="h-4 w-4" />
-            <span className="text-sm font-medium text-zinc-800">تصنيف نشط</span>
-          </label>
-
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="sm:col-span-2 inline-flex min-h-11 items-center justify-center rounded-xl bg-zinc-900 px-4 text-sm font-semibold text-white disabled:opacity-60"
-          >
-            {isSaving ? "جاري الحفظ..." : "حفظ التصنيف"}
-          </button>
-        </form>
-      </section>
-
       {statusMessage && (
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200">
           {statusMessage}
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-zinc-900">التصنيفات الحالية</h2>
-          <span className="text-xs text-zinc-600">تعديل لاحقاً</span>
-        </div>
-
+      <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-5">
         {isLoading ? (
-          <p className="text-sm text-zinc-600">جاري تحميل التصنيفات...</p>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300">جاري تحميل التصنيفات...</p>
         ) : categories.length === 0 ? (
-          <p className="text-sm text-zinc-600">لا توجد تصنيفات حتى الآن.</p>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300">لا توجد تصنيفات حتى الآن.</p>
         ) : (
           <div className="space-y-2">
-            {categories.map((category, index) => (
-              <article
-                key={category.id ?? index}
-                className="flex items-center justify-between rounded-xl border border-zinc-200 p-3"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-zinc-900">{category.nameAr}</p>
-                  <p className="text-xs text-zinc-600">
-                    {category.slug} • {category.nameEn}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700"
+            {categories.map((category, index) => {
+              const isEditing = category.id === editingId;
+
+              return (
+                <article
+                  key={category.id ?? index}
+                  className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  تعديل قريباً
-                </button>
-              </article>
-            ))}
+                  <div className="w-full sm:max-w-sm">
+                    {isEditing ? (
+                      <input
+                        value={editingName}
+                        onChange={(event) => setEditingName(event.target.value)}
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-400"
+                        placeholder="اسم التصنيف بالعربية"
+                      />
+                    ) : (
+                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{category.nameAr}</p>
+                    )}
+                    <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">slug: {category.slug}</p>
+                  </div>
+
+                  <div className="flex gap-2 self-end sm:self-auto">
+                    {isEditing ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={saveEdit}
+                          className="rounded-lg border border-zinc-300 bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white dark:border-zinc-700 dark:bg-zinc-100 dark:text-zinc-900"
+                        >
+                          حفظ
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(null)}
+                          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700 dark:border-zinc-700 dark:text-zinc-200"
+                        >
+                          إلغاء
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => startEdit(category)}
+                        className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700 dark:border-zinc-700 dark:text-zinc-200"
+                      >
+                        ✏️ تعديل
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(category)}
+                      className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+                    >
+                      🗑️ حذف
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
       </section>

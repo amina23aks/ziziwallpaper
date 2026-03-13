@@ -1,11 +1,14 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   getDocs,
   limit,
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
@@ -23,6 +26,17 @@ export async function createCategory(data: CreateCategoryInput) {
   });
 
   return docRef.id;
+}
+
+export async function updateCategory(id: string, data: Partial<CreateCategoryInput>) {
+  await updateDoc(doc(db, "categories", id), {
+    ...data,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function deleteCategory(id: string) {
+  await deleteDoc(doc(db, "categories", id));
 }
 
 export async function listCategories(maxItems = 100) {
