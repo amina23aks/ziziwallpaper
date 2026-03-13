@@ -14,7 +14,8 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
+// Auth is not needed for the first admin flow yet, so keep it lazy.
+export const getClientAuth = () => getAuth(app);
 export const db = getFirestore(app);
 
 export default app;
