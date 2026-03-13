@@ -8,8 +8,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/upload";
 import { createCategory, listCategories } from "@/lib/firestore/categories";
+import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { createWallpaper, updateWallpaper } from "@/lib/firestore/wallpapers";
 import type { Category } from "@/types/category";
+import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper, WallpaperImage } from "@/types/wallpaper";
 
 const wallpaperSchema = z.object({
@@ -63,7 +65,9 @@ export function WallpaperForm({
   const [isUploading, setIsUploading] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [questionPrompts, setQuestionPrompts] = useState<QuestionPrompt[]>([]);
   const [selectedCategorySlugs, setSelectedCategorySlugs] = useState<string[]>([]);
+  const [selectedQuestionPromptSlugs, setSelectedQuestionPromptSlugs] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<UploadedImagePreview[]>([]);
   const [showInlineCategoryForm, setShowInlineCategoryForm] = useState(false);
   const [newCategoryNameAr, setNewCategoryNameAr] = useState("");
@@ -91,18 +95,23 @@ export function WallpaperForm({
   const title = watch("title");
 
   useEffect(() => {
-    async function loadCategories() {
-      const result = await listCategories();
-      setCategories(result);
+    async function loadPageData() {
+      const [categoriesResult, promptsResult] = await Promise.all([
+        listCategories(),
+        listQuestionPrompts(),
+      ]);
+      setCategories(categoriesResult);
+      setQuestionPrompts(promptsResult);
     }
 
-    loadCategories();
+    loadPageData();
   }, []);
 
   useEffect(() => {
     if (!initialWallpaper) return;
 
     setSelectedCategorySlugs(initialWallpaper.categorySlugs ?? []);
+    setSelectedQuestionPromptSlugs(initialWallpaper.questionPromptSlugs ?? []);
     setUploadedImages(
       (initialWallpaper.images ?? []).map((image, index) => ({
         ...image,
@@ -124,6 +133,12 @@ export function WallpaperForm({
 
   const toggleCategory = (slug: string) => {
     setSelectedCategorySlugs((prev) =>
+      prev.includes(slug) ? prev.filter((item) => item !== slug) : [...prev, slug]
+    );
+  };
+
+  const toggleQuestionPrompt = (slug: string) => {
+    setSelectedQuestionPromptSlugs((prev) =>
       prev.includes(slug) ? prev.filter((item) => item !== slug) : [...prev, slug]
     );
   };
@@ -237,6 +252,7 @@ export function WallpaperForm({
       title: values.title.trim(),
       description: values.description?.trim() ?? "",
       categorySlugs: selectedCategorySlugs,
+      questionPromptSlugs: selectedQuestionPromptSlugs,
       searchKeywords: splitCommaSeparated(values.searchKeywords),
       moodTags: splitCommaSeparated(values.moodTags),
       images: uploadedImages.map((image) => ({
@@ -257,6 +273,7 @@ export function WallpaperForm({
         setStatusMessage({ type: "success", message: "تم حفظ الخلفية." });
         reset({ title: "", description: "", searchKeywords: "", moodTags: "" });
         setSelectedCategorySlugs([]);
+        setSelectedQuestionPromptSlugs([]);
         setUploadedImages([]);
         setFileInputKey((prev) => prev + 1);
       }
@@ -271,35 +288,26 @@ export function WallpaperForm({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
-      <header className="mb-5 space-y-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">
-            {mode === "edit" ? "🖊️ تعديل الخلفية" : "🖼️ إضافة خلفية"}
-          </h1>
-          <Link href="/admin/wallpapers" className="text-sm font-semibold text-zinc-800 hover:underline">
-            ← رجوع للخلفيات
-          </Link>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/admin/wallpapers"
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 text-sm font-semibold text-zinc-800"
-          >
-            📁 صفحة الخلفيات
-          </Link>
-          <Link
-            href="/"
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 text-sm font-semibold text-zinc-800"
-          >
-            🏠 الصفحة الرئيسية
-          </Link>
-        </div>
+      <header className="mb-5 flex flex-wrap items-center gap-2">
+        <Link
+          href="/admin"
+          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-zinc-900 px-3 text-sm font-semibold text-white"
+        >
+          لوحة التحكم
+        </Link>
+        <Link href="/" className="inline-flex min-h-9 items-center justify-center text-xs font-semibold text-zinc-700 hover:underline">
+          عرض الموقع
+        </Link>
       </header>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6"
       >
+        <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">
+          {mode === "edit" ? "🖊️ تعديل الخلفية" : "🖼️ إضافة خلفية"}
+        </h1>
+
         <div className="space-y-2">
           <label htmlFor="title" className="block text-sm font-semibold text-zinc-900">
             عنوان الخلفية
@@ -376,6 +384,30 @@ export function WallpaperForm({
               </button>
             </div>
           )}
+        </div>
+
+        <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 sm:p-4">
+          <label className="block text-sm font-semibold text-zinc-900">اقتراحات زر ؟</label>
+          <div className="flex flex-wrap gap-2">
+            {questionPrompts.map((prompt) => {
+              const active = selectedQuestionPromptSlugs.includes(prompt.slug);
+              return (
+                <button
+                  key={prompt.slug}
+                  type="button"
+                  onClick={() => toggleQuestionPrompt(prompt.slug)}
+                  className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+                    active
+                      ? "border-zinc-900 bg-zinc-900 text-white"
+                      : "border-zinc-300 bg-white text-zinc-800"
+                  }`}
+                >
+                  {prompt.questionAr}
+                </button>
+              );
+            })}
+          </div>
+          <FieldHint>اختياري: يمكنك ربط الخلفية مع أكثر من سؤال.</FieldHint>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

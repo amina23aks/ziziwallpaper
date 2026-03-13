@@ -94,18 +94,22 @@ export default function AdminCategoriesPage() {
 
   return (
     <main className="mx-auto w-full max-w-4xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
-      <header className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold text-zinc-900 sm:text-3xl">🗂️ التصنيفات</h1>
-          <p className="mt-1 text-sm text-zinc-700">تعديل الأسماء أو حذف التصنيفات غير المطلوبة.</p>
-        </div>
+      <header className="flex flex-wrap items-center gap-2">
         <Link
-          href="/admin/wallpapers"
-          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 text-sm font-semibold text-zinc-800"
+          href="/admin"
+          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-zinc-900 px-3 text-sm font-semibold text-white"
         >
-          ← الخلفيات
+          لوحة التحكم
+        </Link>
+        <Link href="/" className="inline-flex min-h-9 items-center justify-center text-xs font-semibold text-zinc-700 hover:underline">
+          عرض الموقع
         </Link>
       </header>
+
+      <section>
+        <h1 className="text-2xl font-extrabold text-zinc-900 sm:text-3xl">🗂️ التصنيفات</h1>
+        <p className="mt-1 text-sm text-zinc-700">تعديل الأسماء أو حذف التصنيفات غير المطلوبة.</p>
+      </section>
 
       {statusMessage && (
         <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800">

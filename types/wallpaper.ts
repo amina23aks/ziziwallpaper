@@ -12,6 +12,7 @@ export type Wallpaper = {
   categorySlugs: string[];
   searchKeywords: string[];
   moodTags: string[];
+  questionPromptSlugs?: string[];
   images: WallpaperImage[];
   isPublished: boolean;
   createdAt?: Timestamp | FieldValue | null;
