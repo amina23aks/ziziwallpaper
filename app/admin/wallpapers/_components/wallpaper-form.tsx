@@ -20,9 +20,7 @@ const wallpaperSchema = z.object({
 });
 
 const inlineCategorySchema = z.object({
-  nameAr: z.string().trim().min(1, "الاسم العربي مطلوب"),
-  nameEn: z.string().trim().min(1, "الاسم الإنجليزي مطلوب"),
-  slug: z.string().trim().min(1, "slug مطلوب"),
+  nameAr: z.string().trim().min(1, "اسم التصنيف مطلوب"),
 });
 
 type WallpaperFormValues = z.infer<typeof wallpaperSchema>;
@@ -48,7 +46,7 @@ function slugify(text: string) {
 }
 
 function FieldHint({ children }: { children: React.ReactNode }) {
-  return <p className="text-xs leading-5 text-zinc-500 sm:text-sm">{children}</p>;
+  return <p className="text-xs leading-5 text-zinc-600 sm:text-sm">{children}</p>;
 }
 
 export function WallpaperForm({
@@ -68,7 +66,7 @@ export function WallpaperForm({
   const [selectedCategorySlugs, setSelectedCategorySlugs] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<UploadedImagePreview[]>([]);
   const [showInlineCategoryForm, setShowInlineCategoryForm] = useState(false);
-  const [newCategory, setNewCategory] = useState({ nameAr: "", nameEn: "", slug: "" });
+  const [newCategoryNameAr, setNewCategoryNameAr] = useState("");
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
     message: string;
@@ -120,7 +118,7 @@ export function WallpaperForm({
   }, [initialWallpaper, reset]);
 
   const selectedCategoriesText = useMemo(() => {
-    if (selectedCategorySlugs.length === 0) return "لا يوجد";
+    if (selectedCategorySlugs.length === 0) return "لم يتم اختيار تصنيف";
     return selectedCategorySlugs.join("، ");
   }, [selectedCategorySlugs]);
 
@@ -150,7 +148,7 @@ export function WallpaperForm({
         },
       ]);
       setFileInputKey((prev) => prev + 1);
-      setStatusMessage({ type: "success", message: "تم رفع الصورة وإضافتها للمعاينة." });
+      setStatusMessage({ type: "success", message: "تم رفع الصورة وإضافتها." });
     } catch {
       setStatusMessage({ type: "error", message: "تعذر رفع الصورة حالياً." });
     } finally {
@@ -163,36 +161,49 @@ export function WallpaperForm({
   };
 
   const handleInlineCategorySave = async () => {
-    const parsed = inlineCategorySchema.safeParse(newCategory);
+    const parsed = inlineCategorySchema.safeParse({ nameAr: newCategoryNameAr });
 
     if (!parsed.success) {
-      setStatusMessage({ type: "error", message: "تحقق من بيانات التصنيف." });
+      setStatusMessage({ type: "error", message: "أدخل اسم التصنيف العربي." });
+      return;
+    }
+
+    const normalizedName = parsed.data.nameAr.trim();
+    const slug = slugify(normalizedName);
+
+    if (!slug) {
+      setStatusMessage({ type: "error", message: "تعذر إنشاء رابط التصنيف، جرّب اسماً آخر." });
+      return;
+    }
+
+    if (categories.some((category) => category.slug === slug)) {
+      setStatusMessage({ type: "error", message: "هذا التصنيف موجود بالفعل." });
       return;
     }
 
     try {
-      await createCategory({
-        nameAr: parsed.data.nameAr,
-        nameEn: parsed.data.nameEn,
-        slug: parsed.data.slug,
+      const createdId = await createCategory({
+        nameAr: normalizedName,
+        nameEn: slug,
+        slug,
         order: categories.length,
         isActive: true,
       });
 
       const createdCategory: Category = {
-        id: `temp-${Date.now()}`,
-        nameAr: parsed.data.nameAr,
-        nameEn: parsed.data.nameEn,
-        slug: parsed.data.slug,
+        id: createdId,
+        nameAr: normalizedName,
+        nameEn: slug,
+        slug,
         order: categories.length,
         isActive: true,
       };
 
       setCategories((prev) => [...prev, createdCategory]);
-      setSelectedCategorySlugs((prev) => [...new Set([...prev, parsed.data.slug])]);
-      setNewCategory({ nameAr: "", nameEn: "", slug: "" });
+      setSelectedCategorySlugs((prev) => [...new Set([...prev, slug])]);
+      setNewCategoryNameAr("");
       setShowInlineCategoryForm(false);
-      setStatusMessage({ type: "success", message: "تمت إضافة التصنيف واختياره." });
+      setStatusMessage({ type: "success", message: "تمت إضافة التصنيف واختياره تلقائياً." });
     } catch {
       setStatusMessage({ type: "error", message: "تعذر إضافة التصنيف الآن." });
     }
@@ -260,55 +271,71 @@ export function WallpaperForm({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
-      <header className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">
-          {mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية"}
-        </h1>
-        <Link href="/admin/wallpapers" className="text-sm font-semibold text-zinc-700">
-          العودة
-        </Link>
+      <header className="mb-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">
+            {mode === "edit" ? "🖊️ تعديل الخلفية" : "🖼️ إضافة خلفية"}
+          </h1>
+          <Link href="/admin/wallpapers" className="text-sm font-semibold text-zinc-800 hover:underline">
+            ← رجوع للخلفيات
+          </Link>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/wallpapers"
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 text-sm font-semibold text-zinc-800"
+          >
+            📁 صفحة الخلفيات
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 text-sm font-semibold text-zinc-800"
+          >
+            🏠 الصفحة الرئيسية
+          </Link>
+        </div>
       </header>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5"
+        className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6"
       >
         <div className="space-y-2">
-          <label htmlFor="title" className="block text-sm font-semibold text-zinc-800">
+          <label htmlFor="title" className="block text-sm font-semibold text-zinc-900">
             عنوان الخلفية
           </label>
           <input
             id="title"
             type="text"
             {...register("title")}
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500"
+            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400"
             placeholder="مثال: خلفية ليلية"
           />
           {errors.title && <p className="text-sm text-red-600">{errors.title.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="description" className="block text-sm font-semibold text-zinc-800">
+          <label htmlFor="description" className="block text-sm font-semibold text-zinc-900">
             وصف مختصر
           </label>
           <textarea
             id="description"
             rows={3}
             {...register("description")}
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500"
+            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400"
             placeholder="اختياري"
           />
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="block text-sm font-semibold text-zinc-800">التصنيفات</label>
+        <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 sm:p-4">
+          <div className="flex items-center justify-between gap-2">
+            <label className="block text-sm font-semibold text-zinc-900">التصنيفات</label>
             <button
               type="button"
               onClick={() => setShowInlineCategoryForm((prev) => !prev)}
-              className="text-xs font-semibold text-zinc-700"
+              className="text-xs font-semibold text-zinc-800"
             >
-              + إضافة تصنيف
+              ➕ إضافة تصنيف سريع
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -333,41 +360,12 @@ export function WallpaperForm({
           <FieldHint>المحدد حالياً: {selectedCategoriesText}</FieldHint>
 
           {showInlineCategoryForm && (
-            <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+            <div className="space-y-2 rounded-xl border border-zinc-200 bg-white p-3">
               <input
-                value={newCategory.nameAr}
-                onChange={(event) =>
-                  setNewCategory((prev) => ({
-                    ...prev,
-                    nameAr: event.target.value,
-                    slug: prev.slug || slugify(event.target.value),
-                  }))
-                }
-                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
-                placeholder="الاسم العربي"
-              />
-              <input
-                value={newCategory.nameEn}
-                onChange={(event) =>
-                  setNewCategory((prev) => ({
-                    ...prev,
-                    nameEn: event.target.value,
-                    slug: slugify(event.target.value) || prev.slug,
-                  }))
-                }
-                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
-                placeholder="English name"
-              />
-              <input
-                value={newCategory.slug}
-                onChange={(event) =>
-                  setNewCategory((prev) => ({
-                    ...prev,
-                    slug: slugify(event.target.value),
-                  }))
-                }
-                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
-                placeholder="slug"
+                value={newCategoryNameAr}
+                onChange={(event) => setNewCategoryNameAr(event.target.value)}
+                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400"
+                placeholder="اسم التصنيف بالعربية"
               />
               <button
                 type="button"
@@ -382,33 +380,36 @@ export function WallpaperForm({
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor="searchKeywords" className="block text-sm font-semibold text-zinc-800">
+            <label htmlFor="searchKeywords" className="block text-sm font-semibold text-zinc-900">
               كلمات البحث
             </label>
             <input
               id="searchKeywords"
               type="text"
               {...register("searchKeywords")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500"
+              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400"
               placeholder="ليل، هدوء، سماء"
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="moodTags" className="block text-sm font-semibold text-zinc-800">
-              Mood Tags
+            <label htmlFor="moodTags" className="block text-sm font-semibold text-zinc-900">
+              كلمات المزاج
             </label>
             <input
               id="moodTags"
               type="text"
               {...register("moodTags")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-500"
-              placeholder="calm, focus"
+              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400"
+              placeholder="هادئ، تركيز"
             />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-zinc-800">الصورة</label>
+        <section className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4">
+          <div>
+            <p className="text-sm font-semibold text-zinc-900">📤 رفع الصور</p>
+            <FieldHint>اختر صورة وسيتم رفعها تلقائياً وإضافتها للمعاينة.</FieldHint>
+          </div>
           <input
             key={fileInputKey}
             type="file"
@@ -416,38 +417,37 @@ export function WallpaperForm({
             onChange={(event) => handleFileSelect(event.target.files?.[0] ?? null)}
             className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
           />
-          <FieldHint>عند اختيار الصورة يتم رفعها مباشرة وإضافتها للمعاينة.</FieldHint>
-          {isUploading && <p className="text-sm text-zinc-600">جاري رفع الصورة...</p>}
-        </div>
+          {isUploading && <p className="text-sm text-zinc-700">جاري رفع الصورة...</p>}
 
-        {uploadedImages.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-zinc-800">معاينة الصور</p>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {uploadedImages.map((image, index) => (
-                <article key={image.publicId} className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-                  <div className="relative aspect-square bg-zinc-100">
-                    <Image
-                      src={image.secureUrl}
-                      alt={title.trim() || `صورة ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 50vw, 180px"
-                      unoptimized
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeUploadedImage(image.publicId)}
-                    className="w-full border-t border-zinc-200 px-2 py-2 text-xs font-semibold text-red-700"
-                  >
-                    إزالة
-                  </button>
-                </article>
-              ))}
+          {uploadedImages.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-zinc-900">المعاينة</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {uploadedImages.map((image, index) => (
+                  <article key={image.publicId} className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                    <div className="relative aspect-square bg-zinc-100">
+                      <Image
+                        src={image.secureUrl}
+                        alt={title.trim() || `صورة ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 50vw, 180px"
+                        unoptimized
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeUploadedImage(image.publicId)}
+                      className="w-full border-t border-zinc-200 px-2 py-2 text-xs font-semibold text-red-700 hover:bg-red-50"
+                    >
+                      🗑️ إزالة الصورة
+                    </button>
+                  </article>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </section>
 
         {statusMessage && (
           <div
@@ -471,8 +471,8 @@ export function WallpaperForm({
               ? "جاري حفظ التعديلات..."
               : "جاري حفظ الخلفية..."
             : mode === "edit"
-              ? "حفظ التعديلات"
-              : "حفظ الخلفية"}
+              ? "💾 حفظ التعديلات"
+              : "💾 حفظ الخلفية"}
         </button>
       </form>
     </main>
