@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { listRecentWallpapers } from "@/lib/firestore/wallpapers";
+import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import type { Wallpaper } from "@/types/wallpaper";
 
 export default function AdminDashboardPage() {
@@ -24,11 +25,17 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
-      <header className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-        <h1 className="text-2xl font-extrabold text-zinc-900">لوحة الإدارة</h1>
-        <p className="mt-1 text-sm text-zinc-700">اختر الإجراء المطلوب لإدارة المحتوى.</p>
-      </header>
+    <main className="mx-auto w-full max-w-5xl space-y-5 bg-zinc-950 px-4 py-6 sm:px-6 lg:px-8">
+      <AdminTopBar
+        title="لوحة الإدارة"
+        subtitle="إدارة المحتوى"
+        trailing={
+          <Link href="/" className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-300 hover:underline">
+            <span>⌂</span>
+            <span>Home</span>
+          </Link>
+        }
+      />
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Link
