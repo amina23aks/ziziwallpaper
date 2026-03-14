@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { ImageLightbox } from "@/app/_components/image-lightbox";
 import { getWallpaperById } from "@/lib/firestore/wallpapers";
 import { listCategories } from "@/lib/firestore/categories";
 import type { Category } from "@/types/category";
@@ -36,6 +37,8 @@ export default function WallpaperDetailsPage() {
   const [wallpaper, setWallpaper] = useState<Wallpaper | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -77,15 +80,14 @@ export default function WallpaperDetailsPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl bg-zinc-50 px-4 py-6 sm:px-6 lg:py-8">
-      <header className="mb-5 flex items-center justify-between">
-        <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">{wallpaper.title}</h1>
+      <header className="mb-4 flex items-center justify-between">
         <Link href="/" className="text-sm font-semibold text-zinc-800 hover:underline">
           العودة للرئيسية
         </Link>
       </header>
 
       <article className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 lg:p-5">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:items-start">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start">
           <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100">
             {hasMultipleImages ? (
               <>
@@ -111,10 +113,15 @@ export default function WallpaperDetailsPage() {
                   }}
                   className="overflow-hidden"
                   dir="ltr"
+                  onSlideChange={(swiper) => setActiveImageIndex(swiper.activeIndex)}
                 >
                   {wallpaper.images.map((image, index) => (
                     <SwiperSlide key={`${image.secureUrl}-${index}`}>
-                      <div className="relative aspect-[4/5] max-h-[70vh] w-full">
+                      <button
+                        type="button"
+                        onClick={() => setIsLightboxOpen(true)}
+                        className="relative block aspect-[4/5] max-h-[72vh] w-full"
+                      >
                         <Image
                           src={image.secureUrl}
                           alt={image.alt || wallpaper.title}
@@ -123,13 +130,17 @@ export default function WallpaperDetailsPage() {
                           sizes="(max-width: 1024px) 100vw, 54vw"
                           unoptimized
                         />
-                      </div>
+                      </button>
                     </SwiperSlide>
                   ))}
                 </Swiper>
               </>
             ) : (
-              <div className="relative aspect-[4/5] max-h-[70vh] w-full">
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(true)}
+                className="relative block aspect-[4/5] max-h-[72vh] w-full"
+              >
                 {wallpaper.images?.[0]?.secureUrl && (
                   <Image
                     src={wallpaper.images[0].secureUrl}
@@ -140,12 +151,16 @@ export default function WallpaperDetailsPage() {
                     unoptimized
                   />
                 )}
-              </div>
+              </button>
             )}
           </div>
 
           <section className="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5">
-            <h2 className="text-lg font-bold text-zinc-900">{wallpaper.title}</h2>
+            <h1 className="text-lg font-bold text-zinc-900">{wallpaper.title}</h1>
+
+            {categoryNames.length > 0 && (
+              <p className="text-xs font-medium text-zinc-500">{categoryNames.join(" • ")}</p>
+            )}
 
             {formattedDescription ? (
               <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">
@@ -155,25 +170,21 @@ export default function WallpaperDetailsPage() {
               <p className="text-sm text-zinc-500">لا يوجد وصف لهذه الخلفية.</p>
             )}
 
-            {categoryNames.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {categoryNames.map((name) => (
-                  <span
-                    key={name}
-                    className="rounded-full border border-zinc-300 bg-white px-3 py-1 text-xs font-semibold text-zinc-800"
-                  >
-                    {name}
-                  </span>
-                ))}
-              </div>
-            )}
-
             <div className="rounded-xl border border-dashed border-zinc-300 bg-white px-3 py-4 text-xs text-zinc-500">
               مساحة مخصصة للتعليقات قريباً.
             </div>
           </section>
         </div>
       </article>
+
+      {isLightboxOpen && wallpaper.images?.length > 0 && (
+        <ImageLightbox
+          images={wallpaper.images}
+          initialIndex={activeImageIndex}
+          onClose={() => setIsLightboxOpen(false)}
+          title={wallpaper.title}
+        />
+      )}
     </main>
   );
 }

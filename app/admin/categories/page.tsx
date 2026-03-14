@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import {
   deleteCategory,
   listCategories,
@@ -14,7 +14,7 @@ function slugify(text: string) {
     .toLowerCase()
     .trim()
     .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9\u0600-\u06FF-]/g, "-")
+    .replace(/[^a-z0-9؀-ۿ-]/g, "-")
     .replace(/--+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
@@ -93,24 +93,8 @@ export default function AdminCategoriesPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-4xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
-      <header className="rounded-2xl bg-zinc-950 p-4 sm:p-5">
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-        <Link
-          href="/admin"
-          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-white px-3 text-sm font-semibold text-zinc-950"
-        >
-          لوحة التحكم
-        </Link>
-        <Link href="/" className="inline-flex min-h-9 items-center justify-center rounded-lg border border-zinc-500 px-3 text-xs font-semibold text-zinc-100 hover:bg-zinc-900">
-          عرض الموقع
-        </Link>
-        </div>
-        <section>
-        <h1 className="text-2xl font-extrabold text-white sm:text-3xl">التصنيفات</h1>
-        <p className="mt-1 text-sm text-zinc-200">تعديل الأسماء أو حذف التصنيفات غير المطلوبة.</p>
-        </section>
-      </header>
+    <main className="mx-auto w-full max-w-4xl space-y-5 bg-zinc-950 px-4 py-6 sm:px-6 lg:px-8">
+      <AdminTopBar title="التصنيفات" subtitle="تعديل الأسماء أو حذف التصنيفات" backHref="/admin" />
 
       {statusMessage && (
         <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800">

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import { deleteWallpaper, listWallpapers } from "@/lib/firestore/wallpapers";
 import type { Wallpaper } from "@/types/wallpaper";
 
@@ -38,32 +39,20 @@ export default function AdminWallpapersPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
-      <header className="rounded-2xl bg-zinc-950 p-4 sm:p-5">
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-        <Link
-          href="/admin"
-          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-zinc-900 px-3 text-sm font-semibold text-white"
-        >
-          لوحة التحكم
-        </Link>
-        <Link href="/" className="inline-flex min-h-9 items-center justify-center rounded-lg border border-zinc-500 px-3 text-xs font-semibold text-zinc-100 hover:bg-zinc-900">
-          عرض الموقع
-        </Link>
-        </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold text-white sm:text-3xl">الخلفيات</h1>
-          <p className="mt-1 text-sm text-zinc-200">إدارة الخلفيات وتعديلها بسرعة.</p>
-        </div>
-        <Link
-          href="/admin/wallpapers/new"
-          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950"
-        >
-          ➕ إضافة خلفية
-        </Link>
-        </div>
-      </header>
+    <main className="mx-auto w-full max-w-6xl space-y-5 bg-zinc-950 px-4 py-6 sm:px-6 lg:px-8">
+      <AdminTopBar
+        title="الخلفيات"
+        subtitle="إدارة الخلفيات"
+        backHref="/admin"
+        trailing={
+          <Link
+            href="/admin/wallpapers/new"
+            className="inline-flex min-h-8 items-center justify-center rounded-lg bg-white px-3 text-xs font-semibold text-zinc-900"
+          >
+            إضافة خلفية
+          </Link>
+        }
+      />
 
       {statusMessage && (
         <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800">
@@ -71,50 +60,55 @@ export default function AdminWallpapersPage() {
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
+      <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
         {isLoading ? (
-          <p className="text-sm text-zinc-600">جاري تحميل الخلفيات...</p>
+          <p className="p-4 text-sm text-zinc-600">جاري تحميل الخلفيات...</p>
         ) : wallpapers.length === 0 ? (
-          <p className="text-sm text-zinc-600">لا توجد خلفيات محفوظة حتى الآن.</p>
+          <p className="p-4 text-sm text-zinc-600">لا توجد خلفيات محفوظة حتى الآن.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="divide-y divide-zinc-200">
             {wallpapers.map((wallpaper, index) => (
               <article
                 key={wallpaper.id ?? index}
-                className="overflow-hidden rounded-2xl border border-zinc-200 bg-white"
+                className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-[72px_minmax(0,1fr)_auto] sm:items-center sm:gap-4"
               >
-                <div className="relative aspect-[4/3] bg-zinc-100">
+                <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100">
                   {wallpaper.images?.[0]?.secureUrl ? (
                     <Image
                       src={wallpaper.images[0].secureUrl}
                       alt={wallpaper.title}
                       fill
                       className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      sizes="64px"
                       unoptimized
                     />
                   ) : null}
                 </div>
 
-                <div className="space-y-2 p-3">
+                <div className="min-w-0 space-y-1">
                   <p className="line-clamp-1 text-sm font-semibold text-zinc-900">{wallpaper.title}</p>
-                  <p className="text-xs text-zinc-600">{wallpaper.categorySlugs?.join("، ") || "بدون تصنيف"}</p>
+                  <p className="line-clamp-1 text-xs text-zinc-600">
+                    {wallpaper.categorySlugs?.join("، ") || "بدون تصنيف"}
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    الحالة: {wallpaper.isPublished ? "منشورة" : "غير منشورة"}
+                  </p>
+                </div>
 
-                  <div className="flex gap-2 pt-1">
-                    <Link
-                      href={wallpaper.id ? `/admin/wallpapers/${wallpaper.id}/edit` : "#"}
-                      className="inline-flex flex-1 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-800"
-                    >
-                      ✏️ تعديل
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(wallpaper.id)}
-                      className="inline-flex flex-1 items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700"
-                    >
-                      🗑️ حذف
-                    </button>
-                  </div>
+                <div className="flex gap-2 sm:justify-end">
+                  <Link
+                    href={wallpaper.id ? `/admin/wallpapers/${wallpaper.id}/edit` : "#"}
+                    className="inline-flex items-center justify-center rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-800"
+                  >
+                    تعديل
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(wallpaper.id)}
+                    className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700"
+                  >
+                    حذف
+                  </button>
                 </div>
               </article>
             ))}
