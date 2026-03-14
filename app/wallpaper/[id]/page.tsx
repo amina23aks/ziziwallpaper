@@ -5,14 +5,12 @@ import "swiper/css/navigation";
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { ImageLightbox } from "@/app/_components/image-lightbox";
 import { getWallpaperById } from "@/lib/firestore/wallpapers";
-import { listCategories } from "@/lib/firestore/categories";
-import type { Category } from "@/types/category";
 import type { Wallpaper } from "@/types/wallpaper";
 
 function ArrowLeftIcon() {
@@ -35,7 +33,6 @@ export default function WallpaperDetailsPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
   const [wallpaper, setWallpaper] = useState<Wallpaper | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -43,12 +40,8 @@ export default function WallpaperDetailsPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [wallpaperData, categoriesData] = await Promise.all([
-          getWallpaperById(id),
-          listCategories(100),
-        ]);
+        const wallpaperData = await getWallpaperById(id);
         setWallpaper(wallpaperData);
-        setCategories(categoriesData);
       } finally {
         setIsLoading(false);
       }
@@ -59,14 +52,6 @@ export default function WallpaperDetailsPage() {
     }
   }, [id]);
 
-  const categoryNames = useMemo(() => {
-    if (!wallpaper?.categorySlugs?.length) return [];
-
-    return wallpaper.categorySlugs
-      .map((slug) => categories.find((category) => category.slug === slug)?.nameAr ?? slug)
-      .filter(Boolean);
-  }, [categories, wallpaper]);
-
   if (isLoading) {
     return <main className="px-4 py-8 text-sm text-zinc-600">جاري تحميل الخلفية...</main>;
   }
@@ -76,6 +61,9 @@ export default function WallpaperDetailsPage() {
   }
 
   const hasMultipleImages = (wallpaper.images?.length ?? 0) > 1;
+  const imageCount = wallpaper.images?.length ?? 0;
+  const canGoPrev = hasMultipleImages && activeImageIndex > 0;
+  const canGoNext = hasMultipleImages && activeImageIndex < imageCount - 1;
   const formattedDescription = wallpaper.description?.trim();
 
   return (
@@ -87,24 +75,24 @@ export default function WallpaperDetailsPage() {
       </header>
 
       <article className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 lg:p-5">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start lg:[direction:ltr]">
           <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100">
             {hasMultipleImages ? (
               <>
-                <button
+                {canGoPrev && (<button
                   type="button"
                   className="wallpaper-prev absolute left-3 top-1/2 z-10 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm"
                   aria-label="السابق"
                 >
                   <ArrowLeftIcon />
-                </button>
-                <button
+                </button>)}
+                {canGoNext && (<button
                   type="button"
                   className="wallpaper-next absolute right-3 top-1/2 z-10 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm"
                   aria-label="التالي"
                 >
                   <ArrowRightIcon />
-                </button>
+                </button>)}
                 <Swiper
                   modules={[Navigation]}
                   navigation={{
@@ -126,7 +114,7 @@ export default function WallpaperDetailsPage() {
                           src={image.secureUrl}
                           alt={image.alt || wallpaper.title}
                           fill
-                          className="object-cover"
+                          className="object-contain"
                           sizes="(max-width: 1024px) 100vw, 54vw"
                           unoptimized
                         />
@@ -146,7 +134,7 @@ export default function WallpaperDetailsPage() {
                     src={wallpaper.images[0].secureUrl}
                     alt={wallpaper.images[0].alt || wallpaper.title}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     sizes="(max-width: 1024px) 100vw, 54vw"
                     unoptimized
                   />
@@ -155,12 +143,8 @@ export default function WallpaperDetailsPage() {
             )}
           </div>
 
-          <section className="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5">
+          <section className="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5 [direction:rtl]">
             <h1 className="text-lg font-bold text-zinc-900">{wallpaper.title}</h1>
-
-            {categoryNames.length > 0 && (
-              <p className="text-xs font-medium text-zinc-500">{categoryNames.join(" • ")}</p>
-            )}
 
             {formattedDescription ? (
               <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">

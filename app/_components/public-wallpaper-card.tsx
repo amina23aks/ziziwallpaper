@@ -84,7 +84,7 @@ export function PublicWallpaperCard({
                 src={currentImage.secureUrl}
                 alt={currentImage.alt || wallpaper.title}
                 fill
-                className="object-cover"
+                className="object-contain"
                 sizes="(max-width: 768px) 50vw, 25vw"
                 unoptimized
               />

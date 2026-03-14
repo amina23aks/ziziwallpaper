@@ -292,7 +292,7 @@ export function WallpaperForm({
       <AdminTopBar
         title={mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية"}
         subtitle="أدخل بيانات الخلفية"
-        backHref="/admin/wallpapers"
+        backHref="/admin"
         trailing={
           <Link href="/" className="text-xs font-semibold text-zinc-300 hover:underline">
             عرض الموقع
