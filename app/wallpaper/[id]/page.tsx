@@ -14,6 +14,22 @@ import { listCategories } from "@/lib/firestore/categories";
 import type { Category } from "@/types/category";
 import type { Wallpaper } from "@/types/wallpaper";
 
+function ArrowLeftIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
+      <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
+      <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function WallpaperDetailsPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -60,7 +76,7 @@ export default function WallpaperDetailsPage() {
   const formattedDescription = wallpaper.description?.trim();
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-4xl bg-zinc-50 px-4 py-6 sm:px-6">
+    <main className="mx-auto min-h-screen w-full max-w-6xl bg-zinc-50 px-4 py-6 sm:px-6 lg:py-8">
       <header className="mb-5 flex items-center justify-between">
         <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">{wallpaper.title}</h1>
         <Link href="/" className="text-sm font-semibold text-zinc-800 hover:underline">
@@ -68,82 +84,95 @@ export default function WallpaperDetailsPage() {
         </Link>
       </header>
 
-      <article className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="relative px-0 sm:px-10">
-          {hasMultipleImages ? (
-            <>
-              <button
-                type="button"
-                className="wallpaper-prev absolute left-3 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-sm font-bold text-white backdrop-blur-sm"
-                aria-label="السابق"
-              >
-                {"<"}
-              </button>
-              <button
-                type="button"
-                className="wallpaper-next absolute right-3 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-sm font-bold text-white backdrop-blur-sm"
-                aria-label="التالي"
-              >
-                {">"}
-              </button>
-              <Swiper
-                modules={[Navigation]}
-                navigation={{
-                  prevEl: ".wallpaper-prev",
-                  nextEl: ".wallpaper-next",
-                }}
-                className="overflow-hidden rounded-2xl" dir="ltr"
-              >
-                {wallpaper.images.map((image, index) => (
-                  <SwiperSlide key={`${image.secureUrl}-${index}`}>
-                    <div className="relative aspect-[4/5] bg-zinc-100">
-                      <Image
-                        src={image.secureUrl}
-                        alt={image.alt || wallpaper.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 680px"
-                        unoptimized
-                      />
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </>
-          ) : (
-            <div className="relative overflow-hidden rounded-2xl bg-zinc-100">
-              <div className="relative aspect-[4/5]">
+      <article className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 lg:p-5">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:items-start">
+          <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100">
+            {hasMultipleImages ? (
+              <>
+                <button
+                  type="button"
+                  className="wallpaper-prev absolute left-3 top-1/2 z-10 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm"
+                  aria-label="السابق"
+                >
+                  <ArrowLeftIcon />
+                </button>
+                <button
+                  type="button"
+                  className="wallpaper-next absolute right-3 top-1/2 z-10 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm"
+                  aria-label="التالي"
+                >
+                  <ArrowRightIcon />
+                </button>
+                <Swiper
+                  modules={[Navigation]}
+                  navigation={{
+                    prevEl: ".wallpaper-prev",
+                    nextEl: ".wallpaper-next",
+                  }}
+                  className="overflow-hidden"
+                  dir="ltr"
+                >
+                  {wallpaper.images.map((image, index) => (
+                    <SwiperSlide key={`${image.secureUrl}-${index}`}>
+                      <div className="relative aspect-[4/5] max-h-[70vh] w-full">
+                        <Image
+                          src={image.secureUrl}
+                          alt={image.alt || wallpaper.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 100vw, 54vw"
+                          unoptimized
+                        />
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </>
+            ) : (
+              <div className="relative aspect-[4/5] max-h-[70vh] w-full">
                 {wallpaper.images?.[0]?.secureUrl && (
                   <Image
                     src={wallpaper.images[0].secureUrl}
                     alt={wallpaper.images[0].alt || wallpaper.title}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 680px"
+                    sizes="(max-width: 1024px) 100vw, 54vw"
                     unoptimized
                   />
                 )}
               </div>
-            </div>
-          )}
-        </div>
-
-        {formattedDescription && (
-          <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">{formattedDescription}</p>
-        )}
-
-        {categoryNames.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {categoryNames.map((name) => (
-              <span
-                key={name}
-                className="rounded-full border border-zinc-300 bg-zinc-50 px-3 py-1 text-xs font-semibold text-zinc-800"
-              >
-                {name}
-              </span>
-            ))}
+            )}
           </div>
-        )}
+
+          <section className="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5">
+            <h2 className="text-lg font-bold text-zinc-900">{wallpaper.title}</h2>
+
+            {formattedDescription ? (
+              <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">
+                {formattedDescription}
+              </p>
+            ) : (
+              <p className="text-sm text-zinc-500">لا يوجد وصف لهذه الخلفية.</p>
+            )}
+
+            {categoryNames.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {categoryNames.map((name) => (
+                  <span
+                    key={name}
+                    className="rounded-full border border-zinc-300 bg-white px-3 py-1 text-xs font-semibold text-zinc-800"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="rounded-xl border border-dashed border-zinc-300 bg-white px-3 py-4 text-xs text-zinc-500">
+              مساحة مخصصة للتعليقات قريباً.
+            </div>
+          </section>
+        </div>
       </article>
     </main>
   );
