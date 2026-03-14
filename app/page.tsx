@@ -1,28 +1,35 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { listActiveCategories } from "@/lib/firestore/categories";
+import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
 import type { Category } from "@/types/category";
+import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper } from "@/types/wallpaper";
 
 export default function HomePage() {
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [questionPrompts, setQuestionPrompts] = useState<QuestionPrompt[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [publishedWallpapers, activeCategories] = await Promise.all([
+        const [publishedWallpapers, activeCategories, prompts] = await Promise.all([
           listPublishedWallpapers(100),
           listActiveCategories(100),
+          listQuestionPrompts(),
         ]);
         setWallpapers(publishedWallpapers);
         setCategories(activeCategories);
+        setQuestionPrompts(prompts);
       } finally {
         setIsLoading(false);
       }
@@ -55,11 +62,39 @@ export default function HomePage() {
           </div>
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-300 bg-white text-lg font-bold text-zinc-800 shadow-sm"
+            onClick={() => setIsQuestionsOpen((prev) => !prev)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-lg font-bold text-white shadow-sm"
+            aria-label="اقتراحات الأسئلة"
           >
             ؟
           </button>
         </header>
+
+        {isQuestionsOpen && (
+          <section className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
+            <p className="mb-2 text-sm font-bold text-zinc-900">اختر سؤالك</p>
+            <div className="grid grid-cols-2 gap-2">
+              {questionPrompts.map((prompt) => (
+                <Link
+                  key={prompt.slug}
+                  href={`/question/${prompt.slug}`}
+                  className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
+                >
+                  <div className="relative aspect-[4/3] bg-zinc-100">
+                    <Image
+                      src={prompt.imageUrl}
+                      alt={prompt.questionAr}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 45vw, 220px"
+                    />
+                  </div>
+                  <p className="p-2 text-center text-xs font-semibold text-zinc-800">{prompt.questionAr}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
           <input
@@ -110,9 +145,10 @@ export default function HomePage() {
         ) : (
           <section className="columns-2 gap-3 sm:columns-3">
             {filteredWallpapers.map((wallpaper, index) => (
-              <article
+              <Link
+                href={wallpaper.id ? `/wallpaper/${wallpaper.id}` : "#"}
                 key={wallpaper.id ?? index}
-                className="mb-3 break-inside-avoid overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm"
+                className="mb-3 block break-inside-avoid overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm"
               >
                 <div className={`relative ${index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"} bg-zinc-100`}>
                   {wallpaper.images?.[0]?.secureUrl && (
@@ -129,7 +165,7 @@ export default function HomePage() {
                 <div className="p-2.5">
                   <p className="line-clamp-1 text-sm font-semibold text-zinc-900">{wallpaper.title}</p>
                 </div>
-              </article>
+              </Link>
             ))}
           </section>
         )}

@@ -305,7 +305,7 @@ export function WallpaperForm({
         className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6"
       >
         <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">
-          {mode === "edit" ? "🖊️ تعديل الخلفية" : "🖼️ إضافة خلفية"}
+          {mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية"}
         </h1>
 
         <div className="space-y-2">

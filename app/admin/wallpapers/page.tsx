@@ -53,8 +53,8 @@ export default function AdminWallpapersPage() {
 
       <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-zinc-900 sm:text-3xl">🖼️ الخلفيات</h1>
-          <p className="mt-1 text-sm text-zinc-700">إدارة الخلفيات وتعديلها بسرعة.</p>
+          <h1 className="text-2xl font-extrabold text-zinc-900 sm:text-3xl">الخلفيات</h1>
+          <p className="mt-1 text-sm text-zinc-800">إدارة الخلفيات وتعديلها بسرعة.</p>
         </div>
         <Link
           href="/admin/wallpapers/new"

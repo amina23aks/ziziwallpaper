@@ -107,8 +107,8 @@ export default function AdminCategoriesPage() {
       </header>
 
       <section>
-        <h1 className="text-2xl font-extrabold text-zinc-900 sm:text-3xl">🗂️ التصنيفات</h1>
-        <p className="mt-1 text-sm text-zinc-700">تعديل الأسماء أو حذف التصنيفات غير المطلوبة.</p>
+        <h1 className="text-2xl font-extrabold text-zinc-900 sm:text-3xl">التصنيفات</h1>
+        <p className="mt-1 text-sm text-zinc-800">تعديل الأسماء أو حذف التصنيفات غير المطلوبة.</p>
       </section>
 
       {statusMessage && (
