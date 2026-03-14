@@ -288,25 +288,28 @@ export function WallpaperForm({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
-      <header className="mb-5 flex flex-wrap items-center gap-2">
+      <header className="mb-5 rounded-2xl bg-zinc-950 p-4 sm:p-5">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
         <Link
           href="/admin"
-          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-zinc-900 px-3 text-sm font-semibold text-white"
+          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-white px-3 text-sm font-semibold text-zinc-950"
         >
           لوحة التحكم
         </Link>
-        <Link href="/" className="inline-flex min-h-9 items-center justify-center text-xs font-semibold text-zinc-700 hover:underline">
+        <Link href="/" className="inline-flex min-h-9 items-center justify-center rounded-lg border border-zinc-500 px-3 text-xs font-semibold text-zinc-100 hover:bg-zinc-900">
           عرض الموقع
         </Link>
+        </div>
+        <h1 className="text-xl font-extrabold text-white sm:text-2xl">
+          {mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية"}
+        </h1>
+        <p className="mt-1 text-sm text-zinc-200">أدخل بيانات الخلفية واربطها بالتصنيفات والأسئلة المناسبة.</p>
       </header>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6"
       >
-        <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">
-          {mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية"}
-        </h1>
 
         <div className="space-y-2">
           <label htmlFor="title" className="block text-sm font-semibold text-zinc-900">

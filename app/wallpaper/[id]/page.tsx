@@ -73,14 +73,14 @@ export default function WallpaperDetailsPage() {
             <>
               <button
                 type="button"
-                className="wallpaper-prev absolute left-0 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-900 text-white sm:inline-flex"
+                className="wallpaper-prev absolute left-0 top-1/2 z-10 hidden h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-900 text-white shadow inline-flex"
                 aria-label="السابق"
               >
                 ‹
               </button>
               <button
                 type="button"
-                className="wallpaper-next absolute right-0 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-900 text-white sm:inline-flex"
+                className="wallpaper-next absolute right-0 top-1/2 z-10 hidden h-10 w-10 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-900 text-white shadow inline-flex"
                 aria-label="التالي"
               >
                 ›
@@ -91,7 +91,7 @@ export default function WallpaperDetailsPage() {
                   prevEl: ".wallpaper-prev",
                   nextEl: ".wallpaper-next",
                 }}
-                className="overflow-hidden rounded-2xl"
+                className="overflow-hidden rounded-2xl" dir="ltr"
               >
                 {wallpaper.images.map((image, index) => (
                   <SwiperSlide key={`${image.secureUrl}-${index}`}>
@@ -127,7 +127,9 @@ export default function WallpaperDetailsPage() {
           )}
         </div>
 
-        {wallpaper.description && <p className="text-sm leading-7 text-zinc-700">{wallpaper.description}</p>}
+        {wallpaper.description && (
+          <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">{wallpaper.description}</p>
+        )}
 
         {categoryNames.length > 0 && (
           <div className="flex flex-wrap gap-2">

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
@@ -143,29 +144,13 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <section className="columns-2 gap-3 sm:columns-3">
+          <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {filteredWallpapers.map((wallpaper, index) => (
-              <Link
-                href={wallpaper.id ? `/wallpaper/${wallpaper.id}` : "#"}
+              <PublicWallpaperCard
                 key={wallpaper.id ?? index}
-                className="mb-3 block break-inside-avoid overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm"
-              >
-                <div className={`relative ${index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"} bg-zinc-100`}>
-                  {wallpaper.images?.[0]?.secureUrl && (
-                    <Image
-                      src={wallpaper.images[0].secureUrl}
-                      alt={wallpaper.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 50vw, 33vw"
-                      unoptimized
-                    />
-                  )}
-                </div>
-                <div className="p-2.5">
-                  <p className="line-clamp-1 text-sm font-semibold text-zinc-900">{wallpaper.title}</p>
-                </div>
-              </Link>
+                wallpaper={wallpaper}
+                imageAspectClassName={index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"}
+              />
             ))}
           </section>
         )}

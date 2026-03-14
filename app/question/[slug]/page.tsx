@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapersByQuestionPrompt } from "@/lib/firestore/wallpapers";
 import type { QuestionPrompt } from "@/types/question-prompt";
@@ -69,27 +69,7 @@ export default function QuestionResultsPage() {
       ) : (
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {wallpapers.map((wallpaper, index) => (
-            <Link
-              key={wallpaper.id ?? index}
-              href={wallpaper.id ? `/wallpaper/${wallpaper.id}` : "#"}
-              className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm"
-            >
-              <div className="relative aspect-[3/4] bg-zinc-100">
-                {wallpaper.images?.[0]?.secureUrl && (
-                  <Image
-                    src={wallpaper.images[0].secureUrl}
-                    alt={wallpaper.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                    unoptimized
-                  />
-                )}
-              </div>
-              <div className="p-2.5">
-                <p className="line-clamp-1 text-sm font-semibold text-zinc-900">{wallpaper.title}</p>
-              </div>
-            </Link>
+            <PublicWallpaperCard key={wallpaper.id ?? index} wallpaper={wallpaper} />
           ))}
         </section>
       )}

@@ -39,30 +39,31 @@ export default function AdminWallpapersPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
-      <header className="flex flex-wrap items-center gap-2">
+      <header className="rounded-2xl bg-zinc-950 p-4 sm:p-5">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
         <Link
           href="/admin"
           className="inline-flex min-h-10 items-center justify-center rounded-xl bg-zinc-900 px-3 text-sm font-semibold text-white"
         >
           لوحة التحكم
         </Link>
-        <Link href="/" className="inline-flex min-h-9 items-center justify-center text-xs font-semibold text-zinc-700 hover:underline">
+        <Link href="/" className="inline-flex min-h-9 items-center justify-center rounded-lg border border-zinc-500 px-3 text-xs font-semibold text-zinc-100 hover:bg-zinc-900">
           عرض الموقع
         </Link>
-      </header>
-
-      <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-zinc-900 sm:text-3xl">الخلفيات</h1>
-          <p className="mt-1 text-sm text-zinc-800">إدارة الخلفيات وتعديلها بسرعة.</p>
+          <h1 className="text-2xl font-extrabold text-white sm:text-3xl">الخلفيات</h1>
+          <p className="mt-1 text-sm text-zinc-200">إدارة الخلفيات وتعديلها بسرعة.</p>
         </div>
         <Link
           href="/admin/wallpapers/new"
-          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-zinc-900 px-4 text-sm font-semibold text-white"
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950"
         >
           ➕ إضافة خلفية
         </Link>
-      </section>
+        </div>
+      </header>
 
       {statusMessage && (
         <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800">
