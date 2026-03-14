@@ -57,6 +57,7 @@ export default function WallpaperDetailsPage() {
   }
 
   const hasMultipleImages = (wallpaper.images?.length ?? 0) > 1;
+  const formattedDescription = wallpaper.description?.trim();
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-4xl bg-zinc-50 px-4 py-6 sm:px-6">
@@ -73,14 +74,14 @@ export default function WallpaperDetailsPage() {
             <>
               <button
                 type="button"
-                className="wallpaper-prev absolute left-0 top-1/2 z-10 inline-flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-900 text-white shadow"
+                className="wallpaper-prev absolute left-3 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-sm font-bold text-white backdrop-blur-sm"
                 aria-label="السابق"
               >
                 {"<"}
               </button>
               <button
                 type="button"
-                className="wallpaper-next absolute right-0 top-1/2 z-10 inline-flex h-10 w-10 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-900 text-white shadow"
+                className="wallpaper-next absolute right-3 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-sm font-bold text-white backdrop-blur-sm"
                 aria-label="التالي"
               >
                 {">"}
@@ -127,8 +128,8 @@ export default function WallpaperDetailsPage() {
           )}
         </div>
 
-        {wallpaper.description && (
-          <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">{wallpaper.description}</p>
+        {formattedDescription && (
+          <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">{formattedDescription}</p>
         )}
 
         {categoryNames.length > 0 && (

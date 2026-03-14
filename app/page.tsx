@@ -163,9 +163,11 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <section className="columns-2 gap-3 sm:columns-3">
             {filteredWallpapers.map((wallpaper, index) => (
-              <PublicWallpaperCard key={wallpaper.id ?? index} wallpaper={wallpaper} imageAspectClassName={index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"} />
+              <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
+                <PublicWallpaperCard wallpaper={wallpaper} imageAspectClassName={index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"} />
+              </div>
             ))}
           </section>
         )}

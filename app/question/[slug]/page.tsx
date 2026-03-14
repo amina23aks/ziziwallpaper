@@ -67,9 +67,11 @@ export default function QuestionResultsPage() {
           لا توجد خلفيات مرتبطة بهذا السؤال حالياً.
         </div>
       ) : (
-        <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <section className="columns-2 gap-3 sm:columns-3 lg:columns-4">
           {wallpapers.map((wallpaper, index) => (
-            <PublicWallpaperCard key={wallpaper.id ?? index} wallpaper={wallpaper} />
+            <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
+              <PublicWallpaperCard wallpaper={wallpaper} />
+            </div>
           ))}
         </section>
       )}
