@@ -63,7 +63,7 @@ export default function HomePage() {
           </div>
           <button
             type="button"
-            onClick={() => setIsQuestionsOpen((prev) => !prev)}
+            onClick={() => setIsQuestionsOpen(true)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-lg font-bold text-white shadow-sm"
             aria-label="اقتراحات الأسئلة"
           >
@@ -72,29 +72,48 @@ export default function HomePage() {
         </header>
 
         {isQuestionsOpen && (
-          <section className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
-            <p className="mb-2 text-sm font-bold text-zinc-900">اختر سؤالك</p>
-            <div className="grid grid-cols-2 gap-2">
-              {questionPrompts.map((prompt) => (
-                <Link
-                  key={prompt.slug}
-                  href={`/question/${prompt.slug}`}
-                  className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
+          <div
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 px-4"
+            onClick={() => setIsQuestionsOpen(false)}
+          >
+            <section
+              className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-3 shadow-xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-sm font-bold text-zinc-900">اختر سؤالك</p>
+                <button
+                  type="button"
+                  onClick={() => setIsQuestionsOpen(false)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-300 text-zinc-700"
+                  aria-label="إغلاق"
                 >
-                  <div className="relative aspect-[4/3] bg-zinc-100">
-                    <Image
-                      src={prompt.imageUrl}
-                      alt={prompt.questionAr}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 45vw, 220px"
-                    />
-                  </div>
-                  <p className="p-2 text-center text-xs font-semibold text-zinc-800">{prompt.questionAr}</p>
-                </Link>
-              ))}
-            </div>
-          </section>
+                  ×
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {questionPrompts.map((prompt) => (
+                  <Link
+                    key={prompt.slug}
+                    href={`/question/${prompt.slug}`}
+                    onClick={() => setIsQuestionsOpen(false)}
+                    className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
+                  >
+                    <div className="relative aspect-[4/3] bg-zinc-100">
+                      <Image
+                        src={prompt.imageUrl}
+                        alt={prompt.questionAr}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 45vw, 220px"
+                      />
+                    </div>
+                    <p className="p-2 text-center text-xs font-semibold text-zinc-800">{prompt.questionAr}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </div>
         )}
 
         <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
@@ -146,7 +165,7 @@ export default function HomePage() {
         ) : (
           <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {filteredWallpapers.map((wallpaper, index) => (
-              <PublicWallpaperCard key={wallpaper.id ?? index} wallpaper={wallpaper} imageAspectClassName="aspect-[4/5]" />
+              <PublicWallpaperCard key={wallpaper.id ?? index} wallpaper={wallpaper} imageAspectClassName={index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"} />
             ))}
           </section>
         )}

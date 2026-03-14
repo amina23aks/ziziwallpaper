@@ -8,7 +8,7 @@ import type { Wallpaper } from "@/types/wallpaper";
 export function PublicWallpaperCard({
   wallpaper,
   titleClassName = "line-clamp-1 text-sm font-semibold text-zinc-900",
-  imageAspectClassName = "aspect-[4/5]",
+  imageAspectClassName = "aspect-[3/4]",
 }: {
   wallpaper: Wallpaper;
   titleClassName?: string;
@@ -46,7 +46,7 @@ export function PublicWallpaperCard({
             className="absolute left-2 top-1/2 z-10 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-sm font-bold text-white backdrop-blur-sm"
             aria-label="الصورة السابقة"
           >
-            ‹
+            {"<"}
           </button>
         )}
 
@@ -57,7 +57,7 @@ export function PublicWallpaperCard({
             className="absolute right-2 top-1/2 z-10 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-sm font-bold text-white backdrop-blur-sm"
             aria-label="الصورة التالية"
           >
-            ›
+            {">"}
           </button>
         )}
 

@@ -73,17 +73,17 @@ export default function WallpaperDetailsPage() {
             <>
               <button
                 type="button"
-                className="wallpaper-prev absolute left-0 top-1/2 z-10 hidden h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-900 text-white shadow inline-flex"
+                className="wallpaper-prev absolute left-0 top-1/2 z-10 inline-flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-900 text-white shadow"
                 aria-label="السابق"
               >
-                ‹
+                {"<"}
               </button>
               <button
                 type="button"
-                className="wallpaper-next absolute right-0 top-1/2 z-10 hidden h-10 w-10 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-900 text-white shadow inline-flex"
+                className="wallpaper-next absolute right-0 top-1/2 z-10 inline-flex h-10 w-10 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-900 text-white shadow"
                 aria-label="التالي"
               >
-                ›
+                {">"}
               </button>
               <Swiper
                 modules={[Navigation]}
