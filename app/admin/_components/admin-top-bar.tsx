@@ -15,8 +15,8 @@ export function AdminTopBar({
   trailing?: ReactNode;
 }) {
   return (
-    <header className="space-y-2">
-      <div className="flex items-center justify-between">
+    <header className="space-y-2 text-right">
+      <div className="flex items-center justify-between [direction:ltr]">
         <Link
           href={backHref}
           className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-100"
@@ -24,7 +24,7 @@ export function AdminTopBar({
         >
           ←
         </Link>
-        {trailing ? <div>{trailing}</div> : <div className="w-9" />}
+        {trailing ? <div className="[direction:rtl]">{trailing}</div> : <div className="w-9" />}
       </div>
       <div>
         <h1 className="text-xl font-bold text-zinc-100 sm:text-2xl">{title}</h1>

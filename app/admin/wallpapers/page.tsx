@@ -95,17 +95,17 @@ export default function AdminWallpapersPage() {
                   </p>
                 </div>
 
-                <div className="flex gap-2 sm:justify-end">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
                   <Link
                     href={wallpaper.id ? `/admin/wallpapers/${wallpaper.id}/edit` : "#"}
-                    className="inline-flex items-center justify-center rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-800"
+                    className="inline-flex w-full items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-800 sm:w-auto"
                   >
                     تعديل
                   </Link>
                   <button
                     type="button"
                     onClick={() => handleDelete(wallpaper.id)}
-                    className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700"
+                    className="inline-flex w-full items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 sm:w-auto"
                   >
                     حذف
                   </button>

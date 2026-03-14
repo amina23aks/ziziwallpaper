@@ -132,13 +132,13 @@ export default function AdminCategoriesPage() {
                     )}
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:flex">
                     {isEditing ? (
                       <>
                         <button
                           type="button"
                           onClick={handleSaveEdit}
-                          className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white"
+                          className="inline-flex w-full items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-semibold text-white sm:w-auto"
                         >
                           حفظ
                         </button>
@@ -148,7 +148,7 @@ export default function AdminCategoriesPage() {
                             setEditingId(null);
                             setEditingName("");
                           }}
-                          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700"
+                          className="inline-flex w-full items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-700 sm:w-auto"
                         >
                           إلغاء
                         </button>
@@ -157,7 +157,7 @@ export default function AdminCategoriesPage() {
                       <button
                         type="button"
                         onClick={() => handleStartEdit(category)}
-                        className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700"
+                        className="inline-flex w-full items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-700 sm:w-auto"
                       >
                         تعديل
                       </button>
@@ -165,7 +165,7 @@ export default function AdminCategoriesPage() {
                     <button
                       type="button"
                       onClick={() => handleDelete(category.id)}
-                      className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700"
+                      className="inline-flex w-full items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 sm:w-auto"
                     >
                       حذف
                     </button>
