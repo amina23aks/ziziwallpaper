@@ -146,11 +146,7 @@ export default function HomePage() {
         ) : (
           <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {filteredWallpapers.map((wallpaper, index) => (
-              <PublicWallpaperCard
-                key={wallpaper.id ?? index}
-                wallpaper={wallpaper}
-                imageAspectClassName={index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"}
-              />
+              <PublicWallpaperCard key={wallpaper.id ?? index} wallpaper={wallpaper} imageAspectClassName="aspect-[4/5]" />
             ))}
           </section>
         )}
