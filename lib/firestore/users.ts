@@ -10,6 +10,7 @@ function buildUserProfile(user: User): UserProfile {
     email: user.email ?? "",
     photoURL: user.photoURL ?? "",
     role: "user",
+    profileCompleted: Boolean(user.displayName?.trim()),
   };
 }
 
@@ -35,6 +36,7 @@ export async function ensureUserProfileDocument(user: User) {
     displayName: user.displayName ?? existingProfile.displayName ?? "",
     photoURL: user.photoURL ?? existingProfile.photoURL ?? "",
     email: user.email ?? existingProfile.email ?? "",
+    profileCompleted: existingProfile.profileCompleted ?? false,
     updatedAt: serverTimestamp(),
   });
 
@@ -44,6 +46,7 @@ export async function ensureUserProfileDocument(user: User) {
     displayName: user.displayName ?? existingProfile.displayName ?? "",
     photoURL: user.photoURL ?? existingProfile.photoURL ?? "",
     email: user.email ?? existingProfile.email ?? "",
+    profileCompleted: existingProfile.profileCompleted ?? false,
   } satisfies UserProfile;
 }
 
@@ -60,10 +63,10 @@ export async function getUserProfile(uid: string) {
   } satisfies UserProfile;
 }
 
-
 export async function updateUserDisplayName(uid: string, displayName: string) {
   await updateDoc(doc(db, "users", uid), {
     displayName: displayName.trim(),
+    profileCompleted: true,
     updatedAt: serverTimestamp(),
   });
 }

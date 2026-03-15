@@ -31,14 +31,11 @@ export async function signUpWithEmail({
 }: {
   email: string;
   password: string;
-  displayName?: string;
+  displayName: string;
 }): Promise<UserCredential> {
   const result = await createUserWithEmailAndPassword(getClientAuth(), email, password);
 
-  if (displayName?.trim()) {
-    await updateProfile(result.user, { displayName: displayName.trim() });
-  }
-
+  await updateProfile(result.user, { displayName: displayName.trim() });
   await ensureUserProfileDocument(result.user);
 
   return result;

@@ -55,7 +55,7 @@ export default function LoginPage() {
       if (mode === "login") {
         await signInWithEmail(email, password);
       } else {
-        await signUpWithEmail({ email, password, displayName });
+        await signUpWithEmail({ email, password, displayName: displayName.trim() });
       }
 
       router.replace("/");
@@ -75,10 +75,11 @@ export default function LoginPage() {
       const credential = await signInWithGoogle();
       const profile = await getUserProfile(credential.user.uid);
       const hasName = Boolean(profile?.displayName?.trim());
+      const isCompleted = profile?.profileCompleted === true;
 
-      if (!hasName) {
+      if (!hasName || !isCompleted) {
         setPendingGoogleUid(credential.user.uid);
-        setGoogleDisplayName(credential.user.displayName ?? "");
+        setGoogleDisplayName(profile?.displayName || credential.user.displayName || "");
         return;
       }
 
@@ -108,8 +109,8 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md items-center bg-zinc-50 px-4 py-8 pb-24 md:max-w-lg md:py-16">
-      <section className="w-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6 md:p-7">
+    <main className="mx-auto flex min-h-screen w-full max-w-md items-center bg-zinc-50 px-4 py-8 pb-24 md:max-w-3xl md:py-16">
+      <section className="w-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6 md:mx-auto md:max-w-lg md:p-8">
         <div className="mb-6 space-y-2 text-right">
           <p className="text-xs font-semibold text-zinc-500">ZIZI WALLPAPER</p>
           <h1 className="text-2xl font-extrabold text-zinc-900">
@@ -121,7 +122,7 @@ export default function LoginPage() {
           </h1>
           <p className="text-sm text-zinc-600">
             {pendingGoogleUid
-              ? "أضف اسمك مرة واحدة لإكمال تسجيل الدخول عبر Google."
+              ? "أضف اسمك مرة واحدة لإكمال الملف الشخصي."
               : "سجّل الدخول للوصول إلى ميزات الحساب والمفضلة قريباً."}
           </p>
         </div>
@@ -152,7 +153,8 @@ export default function LoginPage() {
                   type="text"
                   value={displayName}
                   onChange={(event) => setDisplayName(event.target.value)}
-                  placeholder="الاسم (اختياري)"
+                  placeholder="الاسم"
+                  required
                   className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-500"
                 />
               )}
@@ -182,7 +184,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || (mode === "signup" && !displayName.trim())}
                 className="inline-flex w-full items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {mode === "login" ? "دخول" : "إنشاء الحساب"}
@@ -216,7 +218,7 @@ export default function LoginPage() {
           </>
         )}
       </section>
-      <MobileBottomNav activeTab="account" />
+      <MobileBottomNav activeTab="account" hideDesktop />
     </main>
   );
 }
