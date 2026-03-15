@@ -7,11 +7,15 @@ import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
+import { useAuth } from "@/app/_providers/auth-provider";
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper } from "@/types/wallpaper";
 
 export default function HomePage() {
+  const { isSignedIn } = useAuth();
+  const accountHref = isSignedIn ? "/profile" : "/login";
+
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [questionPrompts, setQuestionPrompts] = useState<QuestionPrompt[]>([]);
@@ -180,9 +184,9 @@ export default function HomePage() {
         <button type="button" className="text-sm font-semibold text-zinc-600">
           المفضلة
         </button>
-        <button type="button" className="text-sm font-semibold text-zinc-600">
+        <Link href={accountHref} className="text-sm font-semibold text-zinc-600">
           الحساب
-        </button>
+        </Link>
       </nav>
     </main>
   );
