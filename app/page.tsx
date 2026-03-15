@@ -7,15 +7,12 @@ import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
-import { useAuth } from "@/app/_providers/auth-provider";
+import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper } from "@/types/wallpaper";
 
 export default function HomePage() {
-  const { isSignedIn } = useAuth();
-  const accountHref = isSignedIn ? "/profile" : "/login";
-
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [questionPrompts, setQuestionPrompts] = useState<QuestionPrompt[]>([]);
@@ -177,17 +174,7 @@ export default function HomePage() {
         )}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 mx-auto flex w-full max-w-md items-center justify-around border-t border-zinc-200 bg-white px-4 py-3 sm:max-w-2xl lg:max-w-5xl">
-        <button type="button" className="text-sm font-bold text-zinc-900">
-          الرئيسية
-        </button>
-        <button type="button" className="text-sm font-semibold text-zinc-600">
-          المفضلة
-        </button>
-        <Link href={accountHref} className="text-sm font-semibold text-zinc-600">
-          الحساب
-        </Link>
-      </nav>
+<MobileBottomNav activeTab="home" />
     </main>
   );
 }

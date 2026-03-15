@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import type { FirebaseError } from "firebase/app";
 import { signInWithEmail, signInWithGoogle, signUpWithEmail } from "@/lib/auth/auth";
 import { useAuth } from "@/app/_providers/auth-provider";
+import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 
 type AuthMode = "login" | "signup";
 
@@ -79,7 +80,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md items-center bg-zinc-50 px-4 py-8 sm:max-w-lg">
+    <main className="mx-auto flex min-h-screen w-full max-w-md items-center bg-zinc-50 px-4 py-8 pb-24 sm:max-w-lg">
       <section className="w-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="mb-6 space-y-2 text-right">
           <p className="text-xs font-semibold text-zinc-500">ZIZI WALLPAPER</p>
@@ -136,7 +137,7 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleAuth}
           disabled={isSubmitting}
-          className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-zinc-300 px-4 py-2.5 text-sm font-semibold text-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
           المتابعة باستخدام Google
         </button>
@@ -157,6 +158,7 @@ export default function LoginPage() {
           </button>
         </div>
       </section>
+      <MobileBottomNav activeTab="account" />
     </main>
   );
 }
