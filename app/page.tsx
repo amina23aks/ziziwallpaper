@@ -7,6 +7,7 @@ import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
+import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper } from "@/types/wallpaper";
@@ -54,8 +55,8 @@ export default function HomePage() {
   }, [wallpapers, searchQuery, selectedCategory]);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-md bg-zinc-50 pb-24 sm:max-w-2xl lg:max-w-5xl">
-      <div className="space-y-4 px-4 py-5 sm:px-6">
+    <main className="min-h-screen w-full bg-zinc-50 pb-24 pt-16 md:pr-24 md:pt-6">
+      <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:px-6 lg:px-8">
         <header className="flex items-center justify-between">
           <div className="space-y-0.5">
             <p className="text-xs font-semibold text-zinc-600">ZIZI</p>
@@ -163,7 +164,7 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <section className="columns-2 gap-3 sm:columns-3">
+          <section className="columns-2 gap-3 sm:columns-3 lg:columns-4 xl:columns-5">
             {filteredWallpapers.map((wallpaper, index) => (
               <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
                 <PublicWallpaperCard wallpaper={wallpaper} imageAspectClassName={index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"} />
@@ -173,17 +174,7 @@ export default function HomePage() {
         )}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 mx-auto flex w-full max-w-md items-center justify-around border-t border-zinc-200 bg-white px-4 py-3 sm:max-w-2xl lg:max-w-5xl">
-        <button type="button" className="text-sm font-bold text-zinc-900">
-          الرئيسية
-        </button>
-        <button type="button" className="text-sm font-semibold text-zinc-600">
-          المفضلة
-        </button>
-        <button type="button" className="text-sm font-semibold text-zinc-600">
-          الحساب
-        </button>
-      </nav>
+      <MobileBottomNav activeTab="home" />
     </main>
   );
 }

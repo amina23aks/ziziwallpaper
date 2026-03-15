@@ -1,0 +1,178 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/_providers/auth-provider";
+import {
+  addFavorite,
+  getFavoriteDocumentId,
+  listFavoriteWallpaperIdsByUser,
+  removeFavorite,
+} from "@/lib/firestore/favorites";
+import { getWallpaperById } from "@/lib/firestore/wallpapers";
+import type { Wallpaper } from "@/types/wallpaper";
+
+const favoriteIdsCache = new Map<string, Set<string>>();
+const favoriteIdsRequests = new Map<string, Promise<Set<string>>>();
+
+function isWallpaper(item: Wallpaper | null): item is Wallpaper {
+  return item !== null;
+}
+
+async function ensureFavoriteIdsLoaded(userId: string) {
+  const cached = favoriteIdsCache.get(userId);
+  if (cached) {
+    return cached;
+  }
+
+  const existingRequest = favoriteIdsRequests.get(userId);
+  if (existingRequest) {
+    return existingRequest;
+  }
+
+  const request = listFavoriteWallpaperIdsByUser(userId, 300)
+    .then((ids) => {
+      const set = new Set(ids);
+      favoriteIdsCache.set(userId, set);
+      favoriteIdsRequests.delete(userId);
+      return set;
+    })
+    .catch((error) => {
+      favoriteIdsRequests.delete(userId);
+      throw error;
+    });
+
+  favoriteIdsRequests.set(userId, request);
+  return request;
+}
+
+function updateFavoriteIdCache(userId: string, wallpaperId: string, shouldSave: boolean) {
+  const existing = favoriteIdsCache.get(userId) ?? new Set<string>();
+  if (shouldSave) {
+    existing.add(wallpaperId);
+  } else {
+    existing.delete(wallpaperId);
+  }
+  favoriteIdsCache.set(userId, existing);
+}
+
+export function useFavoriteStatus(wallpaperId?: string) {
+  const { user, isSignedIn } = useAuth();
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkStatus() {
+      if (!isSignedIn || !user || !wallpaperId) {
+        if (isMounted) {
+          setIsFavorited(false);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const idsSet = await ensureFavoriteIdsLoaded(user.uid);
+        if (isMounted) {
+          setIsFavorited(idsSet.has(wallpaperId));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    setIsLoading(true);
+    checkStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isSignedIn, user, wallpaperId]);
+
+  return { isFavorited, setIsFavorited, isLoading };
+}
+
+export function useToggleFavorite(wallpaperId?: string) {
+  const router = useRouter();
+  const { user, isSignedIn } = useAuth();
+  const { isFavorited, setIsFavorited, isLoading } = useFavoriteStatus(wallpaperId);
+  const [isToggling, setIsToggling] = useState(false);
+
+  const toggleFavorite = useCallback(async () => {
+    if (!wallpaperId) {
+      return;
+    }
+
+    if (!isSignedIn || !user) {
+      router.push("/login");
+      return;
+    }
+
+    setIsToggling(true);
+
+    try {
+      if (isFavorited) {
+        await removeFavorite(user.uid, wallpaperId);
+        updateFavoriteIdCache(user.uid, wallpaperId, false);
+        setIsFavorited(false);
+      } else {
+        await addFavorite(user.uid, wallpaperId);
+        updateFavoriteIdCache(user.uid, wallpaperId, true);
+        setIsFavorited(true);
+      }
+    } finally {
+      setIsToggling(false);
+    }
+  }, [isFavorited, isSignedIn, router, setIsFavorited, user, wallpaperId]);
+
+  const favoriteDocumentId = useMemo(() => {
+    if (!isSignedIn || !user || !wallpaperId) return null;
+    return getFavoriteDocumentId(user.uid, wallpaperId);
+  }, [isSignedIn, user, wallpaperId]);
+
+  return {
+    isFavorited,
+    isLoading,
+    isToggling,
+    toggleFavorite,
+    favoriteDocumentId,
+  };
+}
+
+export function useCurrentUserFavorites() {
+  const { user, isSignedIn } = useAuth();
+  const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const reload = useCallback(async () => {
+    if (!isSignedIn || !user) {
+      setWallpapers([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const favoriteIds = Array.from(await ensureFavoriteIdsLoaded(user.uid));
+      const results = await Promise.all(favoriteIds.map((id) => getWallpaperById(id)));
+      setWallpapers(results.filter(isWallpaper));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isSignedIn, user]);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  return {
+    wallpapers,
+    isLoading,
+    reload,
+  };
+}

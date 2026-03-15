@@ -6,6 +6,7 @@ import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { House } from "lucide-react";
 import { z } from "zod";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/upload";
 import { createCategory, listCategories } from "@/lib/firestore/categories";
@@ -292,11 +293,22 @@ export function WallpaperForm({
       <AdminTopBar
         title={mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية"}
         subtitle="أدخل بيانات الخلفية"
-        backHref="/admin"
-        trailing={
-          <Link href="/" className="text-xs font-semibold text-zinc-300 hover:underline">
-            عرض الموقع
-          </Link>
+        leading={
+          <div className="flex flex-col items-start gap-2">
+            <Link
+              href="/admin"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-100"
+              aria-label="رجوع"
+            >
+              ←
+            </Link>
+            {mode === "create" ? (
+              <Link href="/" className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-300 hover:underline">
+                <House size={13} />
+                <span>عرض الموقع</span>
+              </Link>
+            ) : null}
+          </div>
         }
       />
 

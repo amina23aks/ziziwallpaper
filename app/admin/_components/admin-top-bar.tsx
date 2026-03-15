@@ -7,17 +7,21 @@ export function AdminTopBar({
   title,
   subtitle,
   backHref,
+  leading,
   trailing,
 }: {
   title: string;
   subtitle?: string;
   backHref?: string;
+  leading?: ReactNode;
   trailing?: ReactNode;
 }) {
   return (
     <header className="space-y-2 text-right">
       <div className="flex items-center justify-between [direction:ltr]">
-        {backHref ? (
+        {leading ? (
+          <div className="[direction:rtl]">{leading}</div>
+        ) : backHref ? (
           <Link
             href={backHref}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-100"
