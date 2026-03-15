@@ -7,6 +7,7 @@ import type { FirebaseError } from "firebase/app";
 import { signInWithEmail, signInWithGoogle, signUpWithEmail } from "@/lib/auth/auth";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
+import { getUserProfile, updateUserDisplayName } from "@/lib/firestore/users";
 
 type AuthMode = "login" | "signup";
 
@@ -32,16 +33,18 @@ export default function LoginPage() {
   const { isSignedIn, isAuthLoading } = useAuth();
   const [mode, setMode] = useState<AuthMode>("login");
   const [displayName, setDisplayName] = useState("");
+  const [googleDisplayName, setGoogleDisplayName] = useState("");
+  const [pendingGoogleUid, setPendingGoogleUid] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isAuthLoading && isSignedIn) {
+    if (!isAuthLoading && isSignedIn && !pendingGoogleUid) {
       router.replace("/");
     }
-  }, [isAuthLoading, isSignedIn, router]);
+  }, [isAuthLoading, isSignedIn, pendingGoogleUid, router]);
 
   const handleEmailAuth = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -69,7 +72,16 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await signInWithGoogle();
+      const credential = await signInWithGoogle();
+      const profile = await getUserProfile(credential.user.uid);
+      const hasName = Boolean(profile?.displayName?.trim());
+
+      if (!hasName) {
+        setPendingGoogleUid(credential.user.uid);
+        setGoogleDisplayName(credential.user.displayName ?? "");
+        return;
+      }
+
       router.replace("/");
     } catch (error) {
       const firebaseError = error as FirebaseError;
@@ -79,84 +91,130 @@ export default function LoginPage() {
     }
   };
 
+  const handleSaveGoogleName = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!pendingGoogleUid || !googleDisplayName.trim()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await updateUserDisplayName(pendingGoogleUid, googleDisplayName);
+      setPendingGoogleUid(null);
+      router.replace("/");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md items-center bg-zinc-50 px-4 py-8 pb-24 sm:max-w-lg">
-      <section className="w-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+    <main className="mx-auto flex min-h-screen w-full max-w-md items-center bg-zinc-50 px-4 py-8 pb-24 md:max-w-lg md:py-16">
+      <section className="w-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6 md:p-7">
         <div className="mb-6 space-y-2 text-right">
           <p className="text-xs font-semibold text-zinc-500">ZIZI WALLPAPER</p>
           <h1 className="text-2xl font-extrabold text-zinc-900">
-            {mode === "login" ? "تسجيل الدخول" : "إنشاء حساب جديد"}
+            {pendingGoogleUid
+              ? "أدخل اسمك"
+              : mode === "login"
+                ? "تسجيل الدخول"
+                : "إنشاء حساب جديد"}
           </h1>
-          <p className="text-sm text-zinc-600">سجّل الدخول للوصول إلى ميزات الحساب والمفضلة قريباً.</p>
+          <p className="text-sm text-zinc-600">
+            {pendingGoogleUid
+              ? "أضف اسمك مرة واحدة لإكمال تسجيل الدخول عبر Google."
+              : "سجّل الدخول للوصول إلى ميزات الحساب والمفضلة قريباً."}
+          </p>
         </div>
 
-        <form className="space-y-3" onSubmit={handleEmailAuth}>
-          {mode === "signup" && (
+        {pendingGoogleUid ? (
+          <form className="space-y-3" onSubmit={handleSaveGoogleName}>
             <input
               type="text"
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
-              placeholder="الاسم (اختياري)"
+              value={googleDisplayName}
+              onChange={(event) => setGoogleDisplayName(event.target.value)}
+              placeholder="الاسم"
+              required
               className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-500"
             />
-          )}
-          <input
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="البريد الإلكتروني"
-            required
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-500"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="كلمة المرور"
-            minLength={6}
-            required
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-500"
-          />
+            <button
+              type="submit"
+              disabled={isSubmitting || !googleDisplayName.trim()}
+              className="inline-flex w-full items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              حفظ
+            </button>
+          </form>
+        ) : (
+          <>
+            <form className="space-y-3" onSubmit={handleEmailAuth}>
+              {mode === "signup" && (
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(event) => setDisplayName(event.target.value)}
+                  placeholder="الاسم (اختياري)"
+                  className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-500"
+                />
+              )}
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="البريد الإلكتروني"
+                required
+                className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-500"
+              />
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="كلمة المرور"
+                minLength={6}
+                required
+                className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-500"
+              />
 
-          {errorMessage && (
-            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
-              {errorMessage}
-            </p>
-          )}
+              {errorMessage && (
+                <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                  {errorMessage}
+                </p>
+              )}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="inline-flex w-full items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {mode === "login" ? "دخول" : "إنشاء الحساب"}
-          </button>
-        </form>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="inline-flex w-full items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {mode === "login" ? "دخول" : "إنشاء الحساب"}
+              </button>
+            </form>
 
-        <button
-          type="button"
-          onClick={handleGoogleAuth}
-          disabled={isSubmitting}
-          className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          المتابعة باستخدام Google
-        </button>
+            <button
+              type="button"
+              onClick={handleGoogleAuth}
+              disabled={isSubmitting}
+              className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              المتابعة باستخدام Google
+            </button>
 
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <Link href="/" className="font-medium text-zinc-500 hover:text-zinc-800">
-            العودة للرئيسية
-          </Link>
-          <button
-            type="button"
-            onClick={() => {
-              setErrorMessage("");
-              setMode(mode === "login" ? "signup" : "login");
-            }}
-            className="font-semibold text-zinc-800 hover:underline"
-          >
-            {mode === "login" ? "ليس لديك حساب؟ أنشئ حساباً" : "لديك حساب بالفعل؟ سجّل الدخول"}
-          </button>
-        </div>
+            <div className="mt-4 flex items-center justify-between text-sm">
+              <Link href="/" className="font-medium text-zinc-500 hover:text-zinc-800">
+                العودة للرئيسية
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setErrorMessage("");
+                  setMode(mode === "login" ? "signup" : "login");
+                }}
+                className="font-semibold text-zinc-800 hover:underline"
+              >
+                {mode === "login" ? "ليس لديك حساب؟ أنشئ حساباً" : "لديك حساب بالفعل؟ سجّل الدخول"}
+              </button>
+            </div>
+          </>
+        )}
       </section>
       <MobileBottomNav activeTab="account" />
     </main>

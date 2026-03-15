@@ -59,3 +59,11 @@ export async function getUserProfile(uid: string) {
     ...(snapshot.data() as Omit<UserProfile, "uid">),
   } satisfies UserProfile;
 }
+
+
+export async function updateUserDisplayName(uid: string, displayName: string) {
+  await updateDoc(doc(db, "users", uid), {
+    displayName: displayName.trim(),
+    updatedAt: serverTimestamp(),
+  });
+}

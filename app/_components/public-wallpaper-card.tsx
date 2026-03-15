@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { MoreHorizontal, Star } from "lucide-react";
 import { type MouseEvent, useState } from "react";
+import { useToggleFavorite } from "@/lib/hooks/use-favorites";
 import type { Wallpaper } from "@/types/wallpaper";
 
 function ChevronLeftIcon() {
@@ -32,7 +34,10 @@ export function PublicWallpaperCard({
 }) {
   const images = wallpaper.images ?? [];
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const hasMultipleImages = images.length > 1;
+  const wallpaperHref = wallpaper.id ? `/wallpaper/${wallpaper.id}` : "#";
+  const { isFavorited, isLoading, isToggling, toggleFavorite } = useToggleFavorite(wallpaper.id);
 
   const currentImage = images[activeImageIndex] ?? images[0];
   const canGoPrev = hasMultipleImages && activeImageIndex > 0;
@@ -52,8 +57,15 @@ export function PublicWallpaperCard({
     setActiveImageIndex((prev) => prev - 1);
   };
 
+  const onToggleFavorite = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsMenuOpen(false);
+    toggleFavorite();
+  };
+
   return (
-    <article className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+    <article className="group overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
       <div className="relative">
         {canGoPrev && (
           <button
@@ -77,7 +89,64 @@ export function PublicWallpaperCard({
           </button>
         )}
 
-        <Link href={wallpaper.id ? `/wallpaper/${wallpaper.id}` : "#"} className="block">
+        <div className="pointer-events-none absolute right-2 top-2 z-20 hidden opacity-0 transition md:block md:group-hover:pointer-events-auto md:group-hover:opacity-100">
+          <button
+            type="button"
+            onClick={onToggleFavorite}
+            disabled={isLoading || isToggling}
+            className="inline-flex items-center gap-1 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Star size={13} className={isFavorited ? "fill-white" : ""} />
+            Save
+          </button>
+        </div>
+
+        <div className="absolute left-2 top-2 z-20">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              setIsMenuOpen((prev) => !prev);
+            }}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white"
+            aria-label="المزيد"
+          >
+            <MoreHorizontal size={15} />
+          </button>
+
+          {isMenuOpen && (
+            <div className="mt-1 w-36 rounded-xl border border-zinc-200 bg-white p-1 text-xs shadow-lg">
+              <button
+                type="button"
+                onClick={onToggleFavorite}
+                className="flex w-full items-center rounded-lg px-2 py-1.5 text-right text-zinc-800 hover:bg-zinc-100"
+              >
+                {isFavorited ? "إلغاء الحفظ" : "Save"}
+              </button>
+              <Link
+                href={wallpaperHref}
+                className="flex w-full items-center rounded-lg px-2 py-1.5 text-zinc-800 hover:bg-zinc-100"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Open wallpaper
+              </Link>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setIsMenuOpen(false);
+                }}
+                className="flex w-full items-center rounded-lg px-2 py-1.5 text-zinc-500 hover:bg-zinc-100"
+              >
+                Share
+              </button>
+            </div>
+          )}
+        </div>
+
+        <Link href={wallpaperHref} className="block">
           <div className={`relative w-full ${imageAspectClassName} bg-zinc-100`}>
             {currentImage?.secureUrl && (
               <Image

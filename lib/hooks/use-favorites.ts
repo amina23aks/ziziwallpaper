@@ -6,15 +6,54 @@ import { useAuth } from "@/app/_providers/auth-provider";
 import {
   addFavorite,
   getFavoriteDocumentId,
-  isWallpaperFavoritedByUser,
   listFavoriteWallpaperIdsByUser,
   removeFavorite,
 } from "@/lib/firestore/favorites";
 import { getWallpaperById } from "@/lib/firestore/wallpapers";
 import type { Wallpaper } from "@/types/wallpaper";
 
+const favoriteIdsCache = new Map<string, Set<string>>();
+const favoriteIdsRequests = new Map<string, Promise<Set<string>>>();
+
 function isWallpaper(item: Wallpaper | null): item is Wallpaper {
   return item !== null;
+}
+
+async function ensureFavoriteIdsLoaded(userId: string) {
+  const cached = favoriteIdsCache.get(userId);
+  if (cached) {
+    return cached;
+  }
+
+  const existingRequest = favoriteIdsRequests.get(userId);
+  if (existingRequest) {
+    return existingRequest;
+  }
+
+  const request = listFavoriteWallpaperIdsByUser(userId, 300)
+    .then((ids) => {
+      const set = new Set(ids);
+      favoriteIdsCache.set(userId, set);
+      favoriteIdsRequests.delete(userId);
+      return set;
+    })
+    .catch((error) => {
+      favoriteIdsRequests.delete(userId);
+      throw error;
+    });
+
+  favoriteIdsRequests.set(userId, request);
+  return request;
+}
+
+function updateFavoriteIdCache(userId: string, wallpaperId: string, shouldSave: boolean) {
+  const existing = favoriteIdsCache.get(userId) ?? new Set<string>();
+  if (shouldSave) {
+    existing.add(wallpaperId);
+  } else {
+    existing.delete(wallpaperId);
+  }
+  favoriteIdsCache.set(userId, existing);
 }
 
 export function useFavoriteStatus(wallpaperId?: string) {
@@ -35,9 +74,9 @@ export function useFavoriteStatus(wallpaperId?: string) {
       }
 
       try {
-        const favorited = await isWallpaperFavoritedByUser(user.uid, wallpaperId);
+        const idsSet = await ensureFavoriteIdsLoaded(user.uid);
         if (isMounted) {
-          setIsFavorited(favorited);
+          setIsFavorited(idsSet.has(wallpaperId));
         }
       } finally {
         if (isMounted) {
@@ -78,9 +117,11 @@ export function useToggleFavorite(wallpaperId?: string) {
     try {
       if (isFavorited) {
         await removeFavorite(user.uid, wallpaperId);
+        updateFavoriteIdCache(user.uid, wallpaperId, false);
         setIsFavorited(false);
       } else {
         await addFavorite(user.uid, wallpaperId);
+        updateFavoriteIdCache(user.uid, wallpaperId, true);
         setIsFavorited(true);
       }
     } finally {
@@ -117,10 +158,9 @@ export function useCurrentUserFavorites() {
     setIsLoading(true);
 
     try {
-      const favoriteIds = await listFavoriteWallpaperIdsByUser(user.uid, 300);
+      const favoriteIds = Array.from(await ensureFavoriteIdsLoaded(user.uid));
       const results = await Promise.all(favoriteIds.map((id) => getWallpaperById(id)));
-      const wallpapersOnly = results.filter(isWallpaper);
-      setWallpapers(wallpapersOnly);
+      setWallpapers(results.filter(isWallpaper));
     } finally {
       setIsLoading(false);
     }

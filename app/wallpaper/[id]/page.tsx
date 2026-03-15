@@ -153,15 +153,13 @@ export default function WallpaperDetailsPage() {
                 type="button"
                 onClick={toggleFavorite}
                 disabled={isFavoriteLoading || isToggling}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                  isFavorited
-                    ? "border-amber-200 bg-amber-50 text-amber-700"
-                    : "border-zinc-300 bg-white text-zinc-700"
-                } disabled:cursor-not-allowed disabled:opacity-60`}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label={isFavorited ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
               >
-                <Star size={14} className={isFavorited ? "fill-current" : ""} />
-                <span>{isFavorited ? "محفوظة" : "حفظ"}</span>
+                <Star
+                  size={16}
+                  className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-zinc-600"}
+                />
               </button>
             </div>
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { signOutUser } from "@/lib/auth/auth";
 
@@ -21,8 +22,8 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-md bg-zinc-50 px-4 py-6">
-      <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+    <main className="mx-auto flex min-h-screen w-full max-w-md items-center bg-zinc-50 px-4 py-6 pb-24 md:max-w-none md:px-6 md:py-16">
+      <section className="w-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm md:mx-auto md:max-w-lg md:p-7">
         <h1 className="text-xl font-bold text-zinc-900">الحساب</h1>
         <p className="mt-2 text-sm text-zinc-600">هذه صفحة تمهيدية وسيتم تطوير ملفك الشخصي لاحقاً.</p>
 
@@ -43,14 +44,12 @@ export default function ProfilePage() {
           >
             تسجيل الخروج
           </button>
-          <Link
-            href="/"
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white"
-          >
+          <Link href="/" className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white">
             الرئيسية
           </Link>
         </div>
       </section>
+      <MobileBottomNav activeTab="account" />
     </main>
   );
 }
