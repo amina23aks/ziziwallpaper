@@ -31,7 +31,7 @@ export default function CompleteProfilePage() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 px-4 py-8 pb-24 md:pt-24">
+    <main className="min-h-screen w-full bg-zinc-50 px-4 py-8 pb-24 pt-16 md:pr-24 md:pt-10">
       <section className="mx-auto w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:max-w-lg md:max-w-xl md:p-8">
         <h1 className="text-2xl font-bold text-zinc-900">أدخل اسمك</h1>
         <p className="mt-2 text-sm text-zinc-600">هذه الخطوة مطلوبة مرة واحدة لإكمال ملفك الشخصي.</p>

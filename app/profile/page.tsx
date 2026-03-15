@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Mail, Shield, UserRound } from "lucide-react";
@@ -23,7 +22,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 px-4 py-6 pb-24 md:pt-24">
+    <main className="min-h-screen w-full bg-zinc-50 px-4 py-6 pb-24 pt-16 md:pr-24 md:pt-10">
       <section className="mx-auto w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:max-w-lg md:max-w-xl md:p-8">
         <h1 className="text-xl font-bold text-zinc-900">الحساب</h1>
         <p className="mt-2 text-sm text-zinc-600">ملفك الشخصي في التطبيق.</p>
@@ -43,7 +42,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="mt-6 flex gap-2">
+        <div className="mt-6 flex justify-start">
           <button
             type="button"
             onClick={async () => {
@@ -54,9 +53,6 @@ export default function ProfilePage() {
           >
             تسجيل الخروج
           </button>
-          <Link href="/" className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white">
-            الرئيسية
-          </Link>
         </div>
       </section>
       <MobileBottomNav activeTab="account" />

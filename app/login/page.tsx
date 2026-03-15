@@ -98,7 +98,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 px-4 py-8 pb-24 md:pt-24">
+    <main className="min-h-screen w-full bg-zinc-50 px-4 py-8 pb-24 pt-16 md:pr-24 md:pt-10">
       <section className="mx-auto w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:max-w-lg sm:p-6 md:max-w-xl md:p-8">
         <div className="mb-6 space-y-2 text-right">
           <p className="text-xs font-semibold text-zinc-500">ZIZI WALLPAPER</p>

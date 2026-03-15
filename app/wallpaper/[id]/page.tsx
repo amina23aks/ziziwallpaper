@@ -7,12 +7,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Star } from "lucide-react";
+import { Download, Star } from "lucide-react";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { ImageLightbox } from "@/app/_components/image-lightbox";
+import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { getWallpaperById } from "@/lib/firestore/wallpapers";
 import { useToggleFavorite } from "@/lib/hooks/use-favorites";
+import { downloadImageFromUrl } from "@/lib/utils/download";
 import type { Wallpaper } from "@/types/wallpaper";
 
 function ArrowLeftIcon() {
@@ -70,14 +72,14 @@ export default function WallpaperDetailsPage() {
   const formattedDescription = wallpaper.description?.trim();
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl bg-zinc-50 px-4 py-6 sm:px-6 lg:py-8">
+    <main className="min-h-screen w-full bg-zinc-50 px-4 py-6 pb-24 pt-16 md:pr-24 md:pt-6">
       <header className="mb-4 flex items-center justify-between">
         <Link href="/" className="text-sm font-semibold text-zinc-800 hover:underline">
           العودة للرئيسية
         </Link>
       </header>
 
-      <article className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 lg:p-5">
+      <article className="mx-auto w-full max-w-6xl rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 lg:p-5">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start lg:[direction:ltr]">
           <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100">
             {hasMultipleImages ? (
@@ -149,18 +151,35 @@ export default function WallpaperDetailsPage() {
           <section className="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5 [direction:rtl]">
             <div className="flex items-center justify-between gap-3">
               <h1 className="text-lg font-bold text-zinc-900">{wallpaper.title}</h1>
-              <button
-                type="button"
-                onClick={toggleFavorite}
-                disabled={isFavoriteLoading || isToggling}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-                aria-label={isFavorited ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
-              >
-                <Star
-                  size={16}
-                  className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-zinc-600"}
-                />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={toggleFavorite}
+                  disabled={isFavoriteLoading || isToggling}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  aria-label={isFavorited ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
+                >
+                  <Star
+                    size={16}
+                    className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-zinc-600"}
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const imageUrl = wallpaper.images?.[activeImageIndex]?.secureUrl || wallpaper.images?.[0]?.secureUrl;
+                    if (!imageUrl) return;
+                    await downloadImageFromUrl({
+                      imageUrl,
+                      filename: `${(wallpaper.title || "wallpaper").replace(/\s+/g, "-")}.jpg`,
+                    });
+                  }}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700"
+                  aria-label="تنزيل الصورة"
+                >
+                  <Download size={16} />
+                </button>
+              </div>
             </div>
 
             {formattedDescription ? (
@@ -177,6 +196,8 @@ export default function WallpaperDetailsPage() {
           </section>
         </div>
       </article>
+
+      <MobileBottomNav activeTab="home" />
 
       {isLightboxOpen && wallpaper.images?.length > 0 && (
         <ImageLightbox

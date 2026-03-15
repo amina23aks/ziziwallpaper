@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import { deleteWallpaper, listWallpapers } from "@/lib/firestore/wallpapers";
 import type { Wallpaper } from "@/types/wallpaper";
@@ -43,14 +44,23 @@ export default function AdminWallpapersPage() {
       <AdminTopBar
         title="الخلفيات"
         subtitle="إدارة الخلفيات"
-        backHref="/admin"
-        trailing={
-          <Link
-            href="/admin/wallpapers/new"
-            className="inline-flex min-h-8 items-center justify-center rounded-lg bg-white px-3 text-xs font-semibold text-zinc-900"
-          >
-            إضافة خلفية
-          </Link>
+        leading={
+          <div className="flex flex-col items-start gap-2">
+            <Link
+              href="/admin"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-100"
+              aria-label="رجوع"
+            >
+              ←
+            </Link>
+            <Link
+              href="/admin/wallpapers/new"
+              className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900"
+            >
+              <Plus size={13} />
+              <span>إضافة خلفية</span>
+            </Link>
+          </div>
         }
       />
 

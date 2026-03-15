@@ -23,7 +23,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 pb-24 md:pt-20">
+    <main className="min-h-screen w-full bg-zinc-50 pb-24 pt-16 md:pr-24 md:pt-6">
       <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:px-6 lg:px-8">
         <header className="space-y-1">
           <p className="text-xs font-semibold text-zinc-600">ZIZI</p>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { MoreHorizontal, Star } from "lucide-react";
+import { Download, Eye, MoreHorizontal, Star } from "lucide-react";
 import { type MouseEvent, useState } from "react";
 import { useToggleFavorite } from "@/lib/hooks/use-favorites";
 import { downloadImageFromUrl } from "@/lib/utils/download";
@@ -96,7 +96,7 @@ export function PublicWallpaperCard({
           onClick={onToggleFavorite}
           disabled={isLoading || isToggling}
           className="pointer-events-none absolute right-2 top-2 z-20 hidden h-8 w-8 items-center justify-center rounded-full bg-white/85 text-zinc-700 opacity-0 shadow transition md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label={isFavorited ? "إلغاء الحفظ" : "حفظ"}
+          aria-label={isFavorited ? "إلغاء المفضلة" : "إضافة للمفضلة"}
         >
           <Star size={15} className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-zinc-700"} />
         </button>
@@ -128,31 +128,33 @@ export function PublicWallpaperCard({
             event.stopPropagation();
             setIsMenuOpen((prev) => !prev);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white"
+          className="inline-flex h-8 w-8 items-center justify-center text-black"
           aria-label="المزيد"
         >
-          <MoreHorizontal size={15} />
+          <MoreHorizontal size={18} />
         </button>
 
         {isMenuOpen && (
-          <div className="absolute bottom-10 left-0 w-36 rounded-xl border border-zinc-200 bg-white p-1 text-xs shadow-lg">
+          <div className="absolute bottom-10 left-0 w-40 rounded-xl border border-zinc-200 bg-white p-1 text-xs shadow-lg">
             <button
               type="button"
               onClick={onToggleFavorite}
-              className="flex w-full items-center rounded-lg px-2 py-1.5 text-right text-zinc-800 hover:bg-zinc-100"
+              className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-zinc-800 hover:bg-zinc-100"
             >
-              {isFavorited ? "إلغاء الحفظ" : "حفظ"}
+              <span>مفضلة</span>
+              <Star size={14} className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-zinc-700"} />
             </button>
             <Link
               href={wallpaperHref}
-              className="flex w-full items-center rounded-lg px-2 py-1.5 text-zinc-800 hover:bg-zinc-100"
+              className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-zinc-800 hover:bg-zinc-100"
               onClick={() => setIsMenuOpen(false)}
             >
-              فتح الخلفية
+              <span>فتح الخلفية</span>
+              <Eye size={14} />
             </Link>
             <button
               type="button"
-              className="flex w-full items-center rounded-lg px-2 py-1.5 text-zinc-800 hover:bg-zinc-100"
+              className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-zinc-800 hover:bg-zinc-100"
               onClick={async (event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -164,7 +166,8 @@ export function PublicWallpaperCard({
                 });
               }}
             >
-              تنزيل الصورة
+              <span>تنزيل الصورة</span>
+              <Download size={14} />
             </button>
           </div>
         )}
