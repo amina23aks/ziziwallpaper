@@ -3,11 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { MasonryGrid } from "@/app/_components/masonry-grid";
+import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
+import { MobileHomeTopBar } from "@/app/_components/mobile-home-top-bar";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
-import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper } from "@/types/wallpaper";
@@ -55,9 +57,15 @@ export default function HomePage() {
   }, [wallpapers, searchQuery, selectedCategory]);
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 pb-24 pt-16 md:pr-24 md:pt-6">
+    <main className="min-h-screen w-full bg-zinc-50 pb-24 pt-20 md:pr-24 md:pt-6">
+      <MobileHomeTopBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onOpenQuestions={() => setIsQuestionsOpen(true)}
+      />
+
       <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between">
+        <header className="hidden items-center justify-between md:flex">
           <div className="space-y-0.5">
             <p className="text-xs font-semibold text-zinc-600">ZIZI</p>
             <h1 className="text-xl font-extrabold text-zinc-900">Wallpapers</h1>
@@ -117,7 +125,7 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
+        <div className="hidden rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm md:block">
           <input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
@@ -164,13 +172,13 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <section className="columns-2 gap-3 sm:columns-3 lg:columns-4 xl:columns-5">
+          <MasonryGrid>
             {filteredWallpapers.map((wallpaper, index) => (
               <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
-                <PublicWallpaperCard wallpaper={wallpaper} imageAspectClassName={index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"} />
+                <PublicWallpaperCard wallpaper={wallpaper} />
               </div>
             ))}
-          </section>
+          </MasonryGrid>
         )}
       </div>
 

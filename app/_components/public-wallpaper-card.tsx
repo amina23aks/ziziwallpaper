@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { Download, Eye, MoreHorizontal, Star } from "lucide-react";
+import { Download, MoreHorizontal, Star } from "lucide-react";
 import { type MouseEvent, useState } from "react";
 import { useToggleFavorite } from "@/lib/hooks/use-favorites";
 import { downloadImageFromUrl } from "@/lib/utils/download";
@@ -27,7 +26,7 @@ function ChevronRightIcon() {
 export function PublicWallpaperCard({
   wallpaper,
   titleClassName = "line-clamp-1 text-sm font-semibold text-zinc-900",
-  imageAspectClassName = "aspect-[3/4]",
+  imageAspectClassName = "",
 }: {
   wallpaper: Wallpaper;
   titleClassName?: string;
@@ -102,15 +101,12 @@ export function PublicWallpaperCard({
         </button>
 
         <Link href={wallpaperHref} className="block">
-          <div className={`relative w-full ${imageAspectClassName} bg-zinc-100`}>
+          <div className={`relative w-full bg-zinc-100 ${imageAspectClassName}`}>
             {currentImage?.secureUrl && (
-              <Image
+              <img
                 src={currentImage.secureUrl}
                 alt={currentImage.alt || wallpaper.title}
-                fill
-                className="object-contain"
-                sizes="(max-width: 768px) 50vw, 25vw"
-                unoptimized
+                className="block h-auto w-full"
               />
             )}
           </div>
@@ -120,7 +116,7 @@ export function PublicWallpaperCard({
         </Link>
       </div>
 
-      <div className="absolute bottom-2 left-2 z-30">
+      <div className="absolute bottom-2 left-1/2 z-30 -translate-x-1/2">
         <button
           type="button"
           onClick={(event) => {
@@ -128,33 +124,25 @@ export function PublicWallpaperCard({
             event.stopPropagation();
             setIsMenuOpen((prev) => !prev);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center text-black"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-zinc-800 shadow-sm"
           aria-label="المزيد"
         >
           <MoreHorizontal size={18} />
         </button>
 
         {isMenuOpen && (
-          <div className="absolute bottom-10 left-0 w-40 rounded-xl border border-zinc-200 bg-white p-1 text-xs shadow-lg">
+          <div className="absolute bottom-10 left-1/2 w-44 -translate-x-1/2 rounded-xl border border-zinc-200 bg-white p-1 text-xs shadow-lg [direction:rtl]">
             <button
               type="button"
               onClick={onToggleFavorite}
-              className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-zinc-800 hover:bg-zinc-100"
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-zinc-800 hover:bg-zinc-100"
             >
-              <span>مفضلة</span>
               <Star size={14} className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-zinc-700"} />
+              <span>مفضلة</span>
             </button>
-            <Link
-              href={wallpaperHref}
-              className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-zinc-800 hover:bg-zinc-100"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <span>فتح الخلفية</span>
-              <Eye size={14} />
-            </Link>
             <button
               type="button"
-              className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-zinc-800 hover:bg-zinc-100"
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-zinc-800 hover:bg-zinc-100"
               onClick={async (event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -166,8 +154,8 @@ export function PublicWallpaperCard({
                 });
               }}
             >
-              <span>تنزيل الصورة</span>
               <Download size={14} />
+              <span>تنزيل الصورة</span>
             </button>
           </div>
         )}

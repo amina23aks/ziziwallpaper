@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Mail, Shield, UserRound } from "lucide-react";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
+import { AdminOnlyProfileEntry } from "@/app/profile/_components/admin-only-profile-entry";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { signOutUser } from "@/lib/auth/auth";
 
@@ -40,6 +41,10 @@ export default function ProfilePage() {
             <Shield size={15} className="text-zinc-500" />
             <span>{userProfile?.role || "user"}</span>
           </div>
+        </div>
+
+        <div className="mt-4">
+          <AdminOnlyProfileEntry isAdmin={userProfile?.role === "admin"} />
         </div>
 
         <div className="mt-6 flex justify-start">

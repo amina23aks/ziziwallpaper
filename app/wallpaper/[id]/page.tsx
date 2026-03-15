@@ -5,11 +5,12 @@ import "swiper/css/navigation";
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { Download, Star } from "lucide-react";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
+import type { Swiper as SwiperType } from "swiper";
 import { ImageLightbox } from "@/app/_components/image-lightbox";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { getWallpaperById } from "@/lib/firestore/wallpapers";
@@ -40,6 +41,7 @@ export default function WallpaperDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const swiperRef = useRef<SwiperType | null>(null);
   const { isFavorited, isLoading: isFavoriteLoading, isToggling, toggleFavorite } = useToggleFavorite(id);
 
   useEffect(() => {
@@ -73,9 +75,13 @@ export default function WallpaperDetailsPage() {
 
   return (
     <main className="min-h-screen w-full bg-zinc-50 px-4 py-6 pb-24 pt-16 md:pr-24 md:pt-6">
-      <header className="mb-4 flex items-center justify-between">
-        <Link href="/" className="text-sm font-semibold text-zinc-800 hover:underline">
-          العودة للرئيسية
+      <header className="mb-4 flex items-center justify-start [direction:ltr]">
+        <Link
+          href="/"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-800"
+          aria-label="رجوع"
+        >
+          ←
         </Link>
       </header>
 
@@ -84,28 +90,31 @@ export default function WallpaperDetailsPage() {
           <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100">
             {hasMultipleImages ? (
               <>
-                {canGoPrev && (<button
+                <button
                   type="button"
-                  className="wallpaper-prev absolute left-3 top-1/2 z-10 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm"
+                  onClick={() => swiperRef.current?.slidePrev()}
+                  disabled={!canGoPrev}
+                  className="absolute left-3 top-1/2 z-20 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-35"
                   aria-label="السابق"
                 >
                   <ArrowLeftIcon />
-                </button>)}
-                {canGoNext && (<button
+                </button>
+                <button
                   type="button"
-                  className="wallpaper-next absolute right-3 top-1/2 z-10 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm"
+                  onClick={() => swiperRef.current?.slideNext()}
+                  disabled={!canGoNext}
+                  className="absolute right-3 top-1/2 z-20 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-35"
                   aria-label="التالي"
                 >
                   <ArrowRightIcon />
-                </button>)}
+                </button>
                 <Swiper
                   modules={[Navigation]}
-                  navigation={{
-                    prevEl: ".wallpaper-prev",
-                    nextEl: ".wallpaper-next",
-                  }}
                   className="overflow-hidden"
                   dir="ltr"
+                  onSwiper={(swiper) => {
+                    swiperRef.current = swiper;
+                  }}
                   onSlideChange={(swiper) => setActiveImageIndex(swiper.activeIndex)}
                 >
                   {wallpaper.images.map((image, index) => (

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { MasonryGrid } from "@/app/_components/masonry-grid";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { useAuth } from "@/app/_providers/auth-provider";
@@ -38,16 +39,13 @@ export default function FavoritesPage() {
             <p className="mt-1 text-xs text-zinc-500">احفظ الخلفيات التي تعجبك لتظهر هنا.</p>
           </section>
         ) : (
-          <section className="columns-2 gap-3 sm:columns-3">
+          <MasonryGrid>
             {wallpapers.map((wallpaper, index) => (
               <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
-                <PublicWallpaperCard
-                  wallpaper={wallpaper}
-                  imageAspectClassName={index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"}
-                />
+                <PublicWallpaperCard wallpaper={wallpaper} />
               </div>
             ))}
-          </section>
+          </MasonryGrid>
         )}
       </div>
 
