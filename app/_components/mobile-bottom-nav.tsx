@@ -19,13 +19,13 @@ export function MobileBottomNav({ activeTab }: { activeTab: "home" | "favorites"
       >
         <Home size={18} />
       </Link>
-      <button
-        type="button"
+      <Link
+        href="/favorites"
         className={`${baseClassName} ${activeTab === "favorites" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
         aria-label="المفضلة"
       >
         <Star size={18} />
-      </button>
+      </Link>
       <Link
         href={accountHref}
         className={`${baseClassName} ${activeTab === "account" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}

@@ -7,10 +7,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { Star } from "lucide-react";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { ImageLightbox } from "@/app/_components/image-lightbox";
 import { getWallpaperById } from "@/lib/firestore/wallpapers";
+import { useToggleFavorite } from "@/lib/hooks/use-favorites";
 import type { Wallpaper } from "@/types/wallpaper";
 
 function ArrowLeftIcon() {
@@ -36,6 +38,7 @@ export default function WallpaperDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const { isFavorited, isLoading: isFavoriteLoading, isToggling, toggleFavorite } = useToggleFavorite(id);
 
   useEffect(() => {
     async function loadData() {
@@ -144,7 +147,23 @@ export default function WallpaperDetailsPage() {
           </div>
 
           <section className="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5 [direction:rtl]">
-            <h1 className="text-lg font-bold text-zinc-900">{wallpaper.title}</h1>
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="text-lg font-bold text-zinc-900">{wallpaper.title}</h1>
+              <button
+                type="button"
+                onClick={toggleFavorite}
+                disabled={isFavoriteLoading || isToggling}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  isFavorited
+                    ? "border-amber-200 bg-amber-50 text-amber-700"
+                    : "border-zinc-300 bg-white text-zinc-700"
+                } disabled:cursor-not-allowed disabled:opacity-60`}
+                aria-label={isFavorited ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
+              >
+                <Star size={14} className={isFavorited ? "fill-current" : ""} />
+                <span>{isFavorited ? "محفوظة" : "حفظ"}</span>
+              </button>
+            </div>
 
             {formattedDescription ? (
               <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">
