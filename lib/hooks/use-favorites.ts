@@ -13,6 +13,10 @@ import {
 import { getWallpaperById } from "@/lib/firestore/wallpapers";
 import type { Wallpaper } from "@/types/wallpaper";
 
+function isWallpaper(item: Wallpaper | null): item is Wallpaper {
+  return item !== null;
+}
+
 export function useFavoriteStatus(wallpaperId?: string) {
   const { user, isSignedIn } = useAuth();
   const [isFavorited, setIsFavorited] = useState(false);
@@ -115,7 +119,8 @@ export function useCurrentUserFavorites() {
     try {
       const favoriteIds = await listFavoriteWallpaperIdsByUser(user.uid, 300);
       const results = await Promise.all(favoriteIds.map((id) => getWallpaperById(id)));
-      setWallpapers(results.filter((item): item is Wallpaper => Boolean(item)));
+      const wallpapersOnly = results.filter(isWallpaper);
+      setWallpapers(wallpapersOnly);
     } finally {
       setIsLoading(false);
     }

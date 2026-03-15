@@ -38,7 +38,7 @@ export async function updateWallpaper(id: string, data: UpdateWallpaperInput) {
   });
 }
 
-export async function getWallpaperById(id: string) {
+export async function getWallpaperById(id: string): Promise<Wallpaper | null> {
   const snapshot = await getDoc(doc(db, "wallpapers", id));
 
   if (!snapshot.exists()) {
