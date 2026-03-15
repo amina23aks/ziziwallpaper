@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { MoreVertical, Star } from "lucide-react";
+import { MoreHorizontal, Star } from "lucide-react";
 import { type MouseEvent, useState } from "react";
 import { useToggleFavorite } from "@/lib/hooks/use-favorites";
+import { downloadImageFromUrl } from "@/lib/utils/download";
 import type { Wallpaper } from "@/types/wallpaper";
 
 function ChevronLeftIcon() {
@@ -37,10 +38,10 @@ export function PublicWallpaperCard({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const hasMultipleImages = images.length > 1;
   const wallpaperHref = wallpaper.id ? `/wallpaper/${wallpaper.id}` : "#";
-  const imageUrl = images[0]?.secureUrl;
   const { isFavorited, isLoading, isToggling, toggleFavorite } = useToggleFavorite(wallpaper.id);
 
   const currentImage = images[activeImageIndex] ?? images[0];
+  const imageUrl = currentImage?.secureUrl || images[0]?.secureUrl;
   const canGoPrev = hasMultipleImages && activeImageIndex > 0;
   const canGoNext = hasMultipleImages && activeImageIndex < images.length - 1;
 
@@ -119,7 +120,7 @@ export function PublicWallpaperCard({
         </Link>
       </div>
 
-      <div className="absolute bottom-2 right-2 z-30">
+      <div className="absolute bottom-2 left-2 z-30">
         <button
           type="button"
           onClick={(event) => {
@@ -130,11 +131,11 @@ export function PublicWallpaperCard({
           className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white"
           aria-label="المزيد"
         >
-          <MoreVertical size={15} />
+          <MoreHorizontal size={15} />
         </button>
 
         {isMenuOpen && (
-          <div className="absolute bottom-10 right-0 w-36 rounded-xl border border-zinc-200 bg-white p-1 text-xs shadow-lg">
+          <div className="absolute bottom-10 left-0 w-36 rounded-xl border border-zinc-200 bg-white p-1 text-xs shadow-lg">
             <button
               type="button"
               onClick={onToggleFavorite}
@@ -149,16 +150,22 @@ export function PublicWallpaperCard({
             >
               فتح الخلفية
             </Link>
-            <a
-              href={imageUrl || wallpaperHref}
-              download
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
               className="flex w-full items-center rounded-lg px-2 py-1.5 text-zinc-800 hover:bg-zinc-100"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setIsMenuOpen(false);
+                if (!imageUrl) return;
+                await downloadImageFromUrl({
+                  imageUrl,
+                  filename: `${(wallpaper.title || "wallpaper").replace(/\s+/g, "-")}.jpg`,
+                });
+              }}
             >
               تنزيل الصورة
-            </a>
+            </button>
           </div>
         )}
       </div>

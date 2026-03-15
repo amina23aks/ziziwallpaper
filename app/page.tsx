@@ -55,8 +55,8 @@ export default function HomePage() {
   }, [wallpapers, searchQuery, selectedCategory]);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-md bg-zinc-50 pb-24 sm:max-w-2xl lg:max-w-5xl">
-      <div className="space-y-4 px-4 py-5 sm:px-6">
+    <main className="min-h-screen w-full bg-zinc-50 pb-24 md:pt-20">
+      <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:px-6 lg:px-8">
         <header className="flex items-center justify-between">
           <div className="space-y-0.5">
             <p className="text-xs font-semibold text-zinc-600">ZIZI</p>
@@ -164,9 +164,9 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <section className="columns-2 gap-2 sm:columns-3 lg:columns-4">
+          <section className="columns-2 gap-3 sm:columns-3 lg:columns-4 xl:columns-5">
             {filteredWallpapers.map((wallpaper, index) => (
-              <div key={wallpaper.id ?? index} className="mb-2 break-inside-avoid">
+              <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
                 <PublicWallpaperCard wallpaper={wallpaper} imageAspectClassName={index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"} />
               </div>
             ))}

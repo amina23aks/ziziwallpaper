@@ -29,7 +29,7 @@ export default function AdminDashboardPage() {
       <AdminTopBar
         title="لوحة الإدارة"
         subtitle="إدارة المحتوى"
-        trailing={
+        leading={
           <Link href="/" className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-300 hover:underline">
             <span>⌂</span>
             <span>Home</span>
