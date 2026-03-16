@@ -243,7 +243,7 @@ export function WallpaperForm({
 
     const values = parsed.data;
     const payload = {
-      title: values.title?.trim() || "بدون عنوان",
+      title: values.title?.trim() ?? "",
       description: values.description?.trim() ?? "",
       categorySlugs: selectedCategorySlugs,
       questionPromptSlugs: selectedQuestionPromptSlugs,
@@ -251,7 +251,7 @@ export function WallpaperForm({
       moodTags: splitCommaSeparated(values.moodTags),
       images: uploadedImages.map((image) => ({
         secureUrl: image.secureUrl,
-        alt: values.title?.trim() || "Wallpaper",
+        alt: values.title?.trim() || "",
       })),
       isPublished: true,
     };

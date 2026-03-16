@@ -6,12 +6,16 @@ export function DeleteConfirmDialog({
   description,
   onConfirm,
   onCancel,
+  confirmText = "حذف",
+  cancelText = "إلغاء",
 }: {
   isOpen: boolean;
   title: string;
   description: string;
   onConfirm: () => void;
   onCancel: () => void;
+  confirmText?: string;
+  cancelText?: string;
 }) {
   if (!isOpen) return null;
 
@@ -29,14 +33,14 @@ export function DeleteConfirmDialog({
             onClick={onCancel}
             className="inline-flex min-w-20 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-sm font-semibold text-zinc-700"
           >
-            إلغاء
+            {cancelText}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             className="inline-flex min-w-20 items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700"
           >
-            حذف
+            {confirmText}
           </button>
         </div>
       </section>

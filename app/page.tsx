@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { CircleHelp } from "lucide-react";
 import { MasonryGrid } from "@/app/_components/masonry-grid";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { MobileHomeTopBar } from "@/app/_components/mobile-home-top-bar";
@@ -61,7 +62,6 @@ export default function HomePage() {
       <MobileHomeTopBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        onOpenQuestions={() => setIsQuestionsOpen(true)}
       />
 
       <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:px-6 lg:px-8">
@@ -70,14 +70,7 @@ export default function HomePage() {
             <p className="text-xs font-semibold text-zinc-600">ZIZI</p>
             <h1 className="text-xl font-extrabold text-zinc-900">Wallpapers</h1>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsQuestionsOpen(true)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-lg font-bold text-white shadow-sm"
-            aria-label="اقتراحات الأسئلة"
-          >
-            ؟
-          </button>
+          <div />
         </header>
 
         {isQuestionsOpen && (
@@ -181,6 +174,15 @@ export default function HomePage() {
           </MasonryGrid>
         )}
       </div>
+
+      <button
+        type="button"
+        onClick={() => setIsQuestionsOpen(true)}
+        className="fixed bottom-24 right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-zinc-900 text-white shadow-lg md:bottom-6 md:right-20"
+        aria-label="اقتراحات الأسئلة"
+      >
+        <CircleHelp size={18} />
+      </button>
 
       <MobileBottomNav activeTab="home" />
     </main>

@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Mail, Shield, UserRound } from "lucide-react";
+import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { AdminOnlyProfileEntry } from "@/app/profile/_components/admin-only-profile-entry";
 import { useAuth } from "@/app/_providers/auth-provider";
@@ -11,6 +12,7 @@ import { signOutUser } from "@/lib/auth/auth";
 export default function ProfilePage() {
   const router = useRouter();
   const { userProfile, isSignedIn, isAuthLoading } = useAuth();
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthLoading && !isSignedIn) {
@@ -50,10 +52,7 @@ export default function ProfilePage() {
         <div className="mt-6 flex justify-start">
           <button
             type="button"
-            onClick={async () => {
-              await signOutUser();
-              router.replace("/");
-            }}
+            onClick={() => setIsLogoutDialogOpen(true)}
             className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-700"
           >
             تسجيل الخروج
@@ -61,6 +60,18 @@ export default function ProfilePage() {
         </div>
       </section>
       <MobileBottomNav activeTab="account" />
+
+      <DeleteConfirmDialog
+        isOpen={isLogoutDialogOpen}
+        title="تأكيد تسجيل الخروج"
+        description="هل أنت متأكد من تسجيل الخروج؟"
+        confirmText="تسجيل الخروج"
+        onConfirm={async () => {
+          await signOutUser();
+          router.replace("/");
+        }}
+        onCancel={() => setIsLogoutDialogOpen(false)}
+      />
     </main>
   );
 }

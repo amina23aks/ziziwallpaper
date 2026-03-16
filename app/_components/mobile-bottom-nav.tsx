@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CircleHelp, Home, Star, User } from "lucide-react";
+import { Home, LayoutDashboard, Star, User } from "lucide-react";
 import { useAuth } from "@/app/_providers/auth-provider";
 
 export function MobileBottomNav({
@@ -9,8 +9,9 @@ export function MobileBottomNav({
 }: {
   activeTab: "home" | "favorites" | "account";
 }) {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, userProfile } = useAuth();
   const accountHref = isSignedIn ? "/profile" : "/login";
+  const isAdmin = userProfile?.role === "admin";
 
   const itemClass = "inline-flex h-10 w-10 items-center justify-center rounded-xl transition-colors";
 
@@ -45,10 +46,24 @@ export function MobileBottomNav({
         >
           <User size={18} />
         </Link>
-        <Link href="/" className={`${itemClass} text-zinc-600`} aria-label="الأسئلة">
-          <CircleHelp size={18} />
-        </Link>
+        {isAdmin ? (
+          <Link href="/admin" className={`${itemClass} text-zinc-600`} aria-label="لوحة الإدارة">
+            <LayoutDashboard size={18} />
+          </Link>
+        ) : null}
       </aside>
+
+      {isAdmin ? (
+        <div className="fixed bottom-20 right-4 z-40 md:hidden">
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-800 shadow-sm"
+          >
+            <LayoutDashboard size={14} />
+            <span>لوحة الإدارة</span>
+          </Link>
+        </div>
+      ) : null}
 
       <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-md items-center justify-around border-t border-zinc-200 bg-white px-4 py-3 md:hidden sm:max-w-2xl lg:max-w-5xl">
         <Link
