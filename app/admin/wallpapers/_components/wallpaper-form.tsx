@@ -1,12 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { House } from "lucide-react";
 import { z } from "zod";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/upload";
 import { createCategory, listCategories } from "@/lib/firestore/categories";
@@ -17,7 +15,7 @@ import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper, WallpaperImage } from "@/types/wallpaper";
 
 const wallpaperSchema = z.object({
-  title: z.string().trim().min(1, "يرجى إدخال عنوان الخلفية"),
+  title: z.string().optional(),
   description: z.string().optional(),
   searchKeywords: z.string().optional(),
   moodTags: z.string().optional(),
@@ -94,7 +92,7 @@ export function WallpaperForm({
     },
   });
 
-  const title = watch("title");
+  const title = watch("title") ?? "";
 
   useEffect(() => {
     async function loadPageData() {
@@ -146,22 +144,21 @@ export function WallpaperForm({
   };
 
   const handleFileSelect = async (file: File | null) => {
-    setStatusMessage(null);
-
     if (!file) return;
 
     setIsUploading(true);
+    setStatusMessage(null);
 
     try {
-      const uploadedImage = await uploadImageToCloudinary(file);
+      const uploaded = await uploadImageToCloudinary(file);
       setUploadedImages((prev) => [
         ...prev,
         {
-          secureUrl: uploadedImage.secureUrl,
-          alt: title.trim() || "Wallpaper image",
-          publicId: uploadedImage.publicId,
-          width: uploadedImage.width,
-          height: uploadedImage.height,
+          secureUrl: uploaded.secureUrl,
+          alt: title.trim() || file.name,
+          publicId: uploaded.publicId,
+          width: uploaded.width,
+          height: uploaded.height,
         },
       ]);
       setFileInputKey((prev) => prev + 1);
@@ -239,11 +236,6 @@ export function WallpaperForm({
       return;
     }
 
-    if (selectedCategorySlugs.length === 0) {
-      setStatusMessage({ type: "error", message: "اختر تصنيفاً واحداً على الأقل." });
-      return;
-    }
-
     if (uploadedImages.length === 0) {
       setStatusMessage({ type: "error", message: "أضف صورة واحدة على الأقل." });
       return;
@@ -251,7 +243,7 @@ export function WallpaperForm({
 
     const values = parsed.data;
     const payload = {
-      title: values.title.trim(),
+      title: values.title?.trim() ?? "",
       description: values.description?.trim() ?? "",
       categorySlugs: selectedCategorySlugs,
       questionPromptSlugs: selectedQuestionPromptSlugs,
@@ -259,7 +251,7 @@ export function WallpaperForm({
       moodTags: splitCommaSeparated(values.moodTags),
       images: uploadedImages.map((image) => ({
         secureUrl: image.secureUrl,
-        alt: values.title.trim(),
+        alt: values.title?.trim() || "",
       })),
       isPublished: true,
     };
@@ -272,7 +264,7 @@ export function WallpaperForm({
         setStatusMessage({ type: "success", message: "تم تحديث الخلفية بنجاح." });
       } else {
         await createWallpaper(payload);
-        setStatusMessage({ type: "success", message: "تم حفظ الخلفية." });
+        setStatusMessage({ type: "success", message: "تم نشر الخلفية." });
         reset({ title: "", description: "", searchKeywords: "", moodTags: "" });
         setSelectedCategorySlugs([]);
         setSelectedQuestionPromptSlugs([]);
@@ -293,33 +285,16 @@ export function WallpaperForm({
       <AdminTopBar
         title={mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية"}
         subtitle="أدخل بيانات الخلفية"
-        leading={
-          <div className="flex flex-col items-start gap-2">
-            <Link
-              href="/admin"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-100"
-              aria-label="رجوع"
-            >
-              ←
-            </Link>
-            {mode === "create" ? (
-              <Link href="/" className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-300 hover:underline">
-                <House size={13} />
-                <span>عرض الموقع</span>
-              </Link>
-            ) : null}
-          </div>
-        }
+        backHref="/admin"
       />
 
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6"
       >
-
         <div className="space-y-2">
           <label htmlFor="title" className="block text-sm font-semibold text-zinc-900">
-            عنوان الخلفية
+            عنوان الخلفية (اختياري)
           </label>
           <input
             id="title"
@@ -333,7 +308,7 @@ export function WallpaperForm({
 
         <div className="space-y-2">
           <label htmlFor="description" className="block text-sm font-semibold text-zinc-900">
-            وصف مختصر
+            وصف
           </label>
           <textarea
             id="description"
@@ -352,7 +327,7 @@ export function WallpaperForm({
               onClick={() => setShowInlineCategoryForm((prev) => !prev)}
               className="text-xs font-semibold text-zinc-800"
             >
-              ➕ إضافة تصنيف سريع
+              ➕ إضافة تصنيف
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -510,10 +485,10 @@ export function WallpaperForm({
           {isSaving
             ? mode === "edit"
               ? "جاري حفظ التعديلات..."
-              : "جاري حفظ الخلفية..."
+              : "جاري نشر الخلفية..."
             : mode === "edit"
               ? "💾 حفظ التعديلات"
-              : "💾 حفظ الخلفية"}
+              : "نشر الخلفية"}
         </button>
       </form>
     </main>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { MasonryGrid } from "@/app/_components/masonry-grid";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapersByQuestionPrompt } from "@/lib/firestore/wallpapers";
@@ -67,13 +68,13 @@ export default function QuestionResultsPage() {
           لا توجد خلفيات مرتبطة بهذا السؤال حالياً.
         </div>
       ) : (
-        <section className="columns-2 gap-3 sm:columns-3 lg:columns-4">
+        <MasonryGrid>
           {wallpapers.map((wallpaper, index) => (
             <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
               <PublicWallpaperCard wallpaper={wallpaper} />
             </div>
           ))}
-        </section>
+        </MasonryGrid>
       )}
     </main>
   );

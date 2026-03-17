@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
+import { MobileHomeTopBar } from "@/app/_components/mobile-home-top-bar";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
-import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper } from "@/types/wallpaper";
@@ -20,6 +21,8 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDesktopSearchVisible, setIsDesktopSearchVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     async function loadData() {
@@ -40,6 +43,26 @@ export default function HomePage() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    const onScroll = () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollY.current;
+
+      if (currentY <= 10) {
+        setIsDesktopSearchVisible(true);
+      } else if (delta > 10) {
+        setIsDesktopSearchVisible(false);
+      } else if (delta < -6) {
+        setIsDesktopSearchVisible(true);
+      }
+
+      lastScrollY.current = currentY;
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const filteredWallpapers = useMemo(() => {
     return wallpapers.filter((wallpaper) => {
       const query = searchQuery.trim().toLowerCase();
@@ -55,21 +78,19 @@ export default function HomePage() {
   }, [wallpapers, searchQuery, selectedCategory]);
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 pb-24 pt-16 md:pr-24 md:pt-6">
+    <main className="min-h-screen w-full bg-zinc-50 pb-24 pt-20 md:pr-24 md:pt-6">
+      <MobileHomeTopBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onOpenQuestions={() => setIsQuestionsOpen(true)}
+      />
+
       <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between">
+        <header className="hidden items-center justify-between md:flex">
           <div className="space-y-0.5">
             <p className="text-xs font-semibold text-zinc-600">ZIZI</p>
             <h1 className="text-xl font-extrabold text-zinc-900">Wallpapers</h1>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsQuestionsOpen(true)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-lg font-bold text-white shadow-sm"
-            aria-label="اقتراحات الأسئلة"
-          >
-            ؟
-          </button>
         </header>
 
         {isQuestionsOpen && (
@@ -117,13 +138,21 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
-          <input
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="ابحث بالعنوان أو كلمات البحث"
-            className="w-full bg-transparent text-sm font-medium text-zinc-900 placeholder:text-zinc-500 outline-none"
-          />
+        <div className="hidden md:block">
+          <div
+            className={`mx-auto w-full max-w-3xl rounded-full border border-zinc-200 bg-white px-4 py-3 shadow-sm transition-all duration-200 ${
+              isDesktopSearchVisible
+                ? "pointer-events-auto translate-y-0 opacity-100"
+                : "pointer-events-none -translate-y-2 opacity-0"
+            }`}
+          >
+            <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="ابحث بالعنوان أو كلمات البحث"
+              className="w-full bg-transparent text-sm font-medium text-zinc-900 placeholder:text-zinc-500 outline-none"
+            />
+          </div>
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-1">
@@ -164,17 +193,17 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <section className="columns-2 gap-3 sm:columns-3 lg:columns-4 xl:columns-5">
+          <section className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
             {filteredWallpapers.map((wallpaper, index) => (
-              <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
-                <PublicWallpaperCard wallpaper={wallpaper} imageAspectClassName={index % 3 === 0 ? "aspect-[3/5]" : "aspect-[3/4]"} />
+              <div key={wallpaper.id ?? index}>
+                <PublicWallpaperCard wallpaper={wallpaper} />
               </div>
             ))}
           </section>
         )}
       </div>
 
-      <MobileBottomNav activeTab="home" />
+      <MobileBottomNav activeTab="home" onHelpClick={() => setIsQuestionsOpen(true)} />
     </main>
   );
 }

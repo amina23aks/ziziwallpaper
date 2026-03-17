@@ -96,7 +96,7 @@ export function useFavoriteStatus(wallpaperId?: string) {
   return { isFavorited, setIsFavorited, isLoading };
 }
 
-export function useToggleFavorite(wallpaperId?: string) {
+export function useToggleFavorite(wallpaperId?: string, options?: { onAuthRequired?: () => void }) {
   const router = useRouter();
   const { user, isSignedIn } = useAuth();
   const { isFavorited, setIsFavorited, isLoading } = useFavoriteStatus(wallpaperId);
@@ -104,12 +104,16 @@ export function useToggleFavorite(wallpaperId?: string) {
 
   const toggleFavorite = useCallback(async () => {
     if (!wallpaperId) {
-      return;
+      return "noop" as const;
     }
 
     if (!isSignedIn || !user) {
-      router.push("/login");
-      return;
+      if (options?.onAuthRequired) {
+        options.onAuthRequired();
+      } else {
+        router.push("/login");
+      }
+      return "auth_required" as const;
     }
 
     setIsToggling(true);
@@ -124,10 +128,11 @@ export function useToggleFavorite(wallpaperId?: string) {
         updateFavoriteIdCache(user.uid, wallpaperId, true);
         setIsFavorited(true);
       }
+      return "ok" as const;
     } finally {
       setIsToggling(false);
     }
-  }, [isFavorited, isSignedIn, router, setIsFavorited, user, wallpaperId]);
+  }, [isFavorited, isSignedIn, options, router, setIsFavorited, user, wallpaperId]);
 
   const favoriteDocumentId = useMemo(() => {
     if (!isSignedIn || !user || !wallpaperId) return null;

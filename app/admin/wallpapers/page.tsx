@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
+import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import { deleteWallpaper, listWallpapers } from "@/lib/firestore/wallpapers";
 import type { Wallpaper } from "@/types/wallpaper";
@@ -12,6 +13,7 @@ export default function AdminWallpapersPage() {
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState<string>("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function loadWallpapers() {
     setIsLoading(true);
@@ -27,42 +29,33 @@ export default function AdminWallpapersPage() {
     loadWallpapers();
   }, []);
 
-  const handleDelete = async (id?: string) => {
-    if (!id) return;
+  const handleDelete = async () => {
+    if (!deletingId) return;
 
     try {
-      await deleteWallpaper(id);
-      setWallpapers((prev) => prev.filter((item) => item.id !== id));
+      await deleteWallpaper(deletingId);
+      setWallpapers((prev) => prev.filter((item) => item.id !== deletingId));
       setStatusMessage("تم حذف الخلفية بنجاح.");
     } catch {
       setStatusMessage("تعذر حذف الخلفية حالياً.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-5 bg-zinc-950 px-4 py-6 sm:px-6 lg:px-8">
-      <AdminTopBar
-        title="الخلفيات"
-        subtitle="إدارة الخلفيات"
-        leading={
-          <div className="flex flex-col items-start gap-2">
-            <Link
-              href="/admin"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-100"
-              aria-label="رجوع"
-            >
-              ←
-            </Link>
-            <Link
-              href="/admin/wallpapers/new"
-              className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900"
-            >
-              <Plus size={13} />
-              <span>إضافة خلفية</span>
-            </Link>
-          </div>
-        }
-      />
+      <AdminTopBar title="الخلفيات" subtitle="إدارة الخلفيات" backHref="/admin" />
+
+      <section className="flex items-center justify-start [direction:ltr]">
+        <Link
+          href="/admin/wallpapers/new"
+          className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900"
+        >
+          <Plus size={13} />
+          <span>إضافة خلفية +</span>
+        </Link>
+      </section>
 
       {statusMessage && (
         <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800">
@@ -114,7 +107,7 @@ export default function AdminWallpapersPage() {
                   </Link>
                   <button
                     type="button"
-                    onClick={() => handleDelete(wallpaper.id)}
+                    onClick={() => setDeletingId(wallpaper.id ?? null)}
                     className="inline-flex flex-1 items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 sm:flex-none"
                   >
                     حذف
@@ -125,6 +118,14 @@ export default function AdminWallpapersPage() {
           </div>
         )}
       </section>
+
+      <DeleteConfirmDialog
+        isOpen={Boolean(deletingId)}
+        title="تأكيد حذف الخلفية"
+        description="هل أنت متأكد من حذف هذه الخلفية؟ لا يمكن التراجع عن هذا الإجراء."
+        onConfirm={handleDelete}
+        onCancel={() => setDeletingId(null)}
+      />
     </main>
   );
 }
