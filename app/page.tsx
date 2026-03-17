@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MasonryGrid } from "@/app/_components/masonry-grid";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { MobileHomeTopBar } from "@/app/_components/mobile-home-top-bar";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
@@ -194,13 +193,13 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <MasonryGrid>
+          <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredWallpapers.map((wallpaper, index) => (
-              <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
+              <div key={wallpaper.id ?? index}>
                 <PublicWallpaperCard wallpaper={wallpaper} />
               </div>
             ))}
-          </MasonryGrid>
+          </section>
         )}
       </div>
 
