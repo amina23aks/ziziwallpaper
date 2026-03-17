@@ -2,8 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { CircleHelp } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MasonryGrid } from "@/app/_components/masonry-grid";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { MobileHomeTopBar } from "@/app/_components/mobile-home-top-bar";
@@ -23,6 +22,8 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDesktopSearchVisible, setIsDesktopSearchVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     async function loadData() {
@@ -41,6 +42,26 @@ export default function HomePage() {
     }
 
     loadData();
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollY.current;
+
+      if (currentY <= 10) {
+        setIsDesktopSearchVisible(true);
+      } else if (delta > 10) {
+        setIsDesktopSearchVisible(false);
+      } else if (delta < -6) {
+        setIsDesktopSearchVisible(true);
+      }
+
+      lastScrollY.current = currentY;
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const filteredWallpapers = useMemo(() => {
@@ -62,6 +83,7 @@ export default function HomePage() {
       <MobileHomeTopBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onOpenQuestions={() => setIsQuestionsOpen(true)}
       />
 
       <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:px-6 lg:px-8">
@@ -70,7 +92,6 @@ export default function HomePage() {
             <p className="text-xs font-semibold text-zinc-600">ZIZI</p>
             <h1 className="text-xl font-extrabold text-zinc-900">Wallpapers</h1>
           </div>
-          <div />
         </header>
 
         {isQuestionsOpen && (
@@ -118,13 +139,21 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="hidden rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm md:block">
-          <input
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="ابحث بالعنوان أو كلمات البحث"
-            className="w-full bg-transparent text-sm font-medium text-zinc-900 placeholder:text-zinc-500 outline-none"
-          />
+        <div className="hidden md:block">
+          <div
+            className={`rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm transition-all duration-200 ${
+              isDesktopSearchVisible
+                ? "pointer-events-auto translate-y-0 opacity-100"
+                : "pointer-events-none -translate-y-2 opacity-0"
+            }`}
+          >
+            <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="ابحث بالعنوان أو كلمات البحث"
+              className="w-full bg-transparent text-sm font-medium text-zinc-900 placeholder:text-zinc-500 outline-none"
+            />
+          </div>
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-1">
@@ -175,16 +204,7 @@ export default function HomePage() {
         )}
       </div>
 
-      <button
-        type="button"
-        onClick={() => setIsQuestionsOpen(true)}
-        className="fixed bottom-24 right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-zinc-900 text-white shadow-lg md:bottom-6 md:right-20"
-        aria-label="اقتراحات الأسئلة"
-      >
-        <CircleHelp size={18} />
-      </button>
-
-      <MobileBottomNav activeTab="home" />
+      <MobileBottomNav activeTab="home" onHelpClick={() => setIsQuestionsOpen(true)} />
     </main>
   );
 }

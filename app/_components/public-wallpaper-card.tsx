@@ -88,8 +88,9 @@ export function PublicWallpaperCard({
   }, [images, imageAspectClassName]);
 
   const mediaStyle = useMemo(() => {
-    if (imageAspectClassName || !stableRatio) return undefined;
-    return { aspectRatio: `${1 / stableRatio}` };
+    if (imageAspectClassName) return undefined;
+    const ratio = stableRatio ?? 1.2;
+    return { aspectRatio: `${1 / ratio}` };
   }, [imageAspectClassName, stableRatio]);
 
   const goNext = (event: MouseEvent<HTMLButtonElement>) => {
@@ -151,13 +152,13 @@ export function PublicWallpaperCard({
         </button>
 
         <Link href={wallpaperHref} className="block">
-          <div className={`relative w-full overflow-hidden bg-zinc-100 ${imageAspectClassName}`} style={mediaStyle}>
+          <div className={`relative w-full overflow-hidden bg-zinc-100/80 ${imageAspectClassName}`} style={mediaStyle}>
             {currentImage?.secureUrl && (
               <Image
                 src={currentImage.secureUrl}
                 alt={currentImage.alt || wallpaper.title || ""}
                 fill
-                className="object-cover"
+                className="object-contain"
                 sizes="(max-width: 768px) 50vw, 25vw"
                 unoptimized
               />

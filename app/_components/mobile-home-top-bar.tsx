@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { CircleHelp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export function MobileHomeTopBar({
   searchQuery,
   onSearchChange,
+  onOpenQuestions,
 }: {
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  onOpenQuestions: () => void;
 }) {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -40,7 +43,14 @@ export function MobileHomeTopBar({
       }`}
     >
       <div className="mx-auto flex w-full max-w-md items-center gap-2 [direction:ltr]">
-        <div className="h-10 w-10 shrink-0" />
+        <button
+          type="button"
+          onClick={onOpenQuestions}
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-white"
+          aria-label="اقتراحات الأسئلة"
+        >
+          <CircleHelp size={16} />
+        </button>
 
         <div className="min-w-0 flex-1 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2.5">
           <input
