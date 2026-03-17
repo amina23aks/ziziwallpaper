@@ -29,12 +29,6 @@ export default function AdminDashboardPage() {
       <AdminTopBar
         title="لوحة الإدارة"
         subtitle="إدارة المحتوى"
-        leading={
-          <Link href="/" className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-300 hover:underline">
-            <span>⌂</span>
-            <span>Home</span>
-          </Link>
-        }
       />
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">

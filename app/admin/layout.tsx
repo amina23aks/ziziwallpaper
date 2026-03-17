@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -31,5 +32,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <MobileBottomNav activeTab="admin" />
+    </>
+  );
 }

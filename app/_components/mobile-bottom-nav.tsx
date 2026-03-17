@@ -8,7 +8,7 @@ export function MobileBottomNav({
   activeTab,
   onHelpClick,
 }: {
-  activeTab: "home" | "favorites" | "account";
+  activeTab: "home" | "favorites" | "account" | "admin";
   onHelpClick?: () => void;
 }) {
   const { isSignedIn, userProfile } = useAuth();
@@ -63,7 +63,11 @@ export function MobileBottomNav({
           </Link>
         )}
         {isAdmin ? (
-          <Link href="/admin" className={`${itemClass} text-zinc-600`} aria-label="لوحة الإدارة">
+          <Link
+            href="/admin"
+            className={`${itemClass} ${activeTab === "admin" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+            aria-label="لوحة الإدارة"
+          >
             <LayoutDashboard size={18} />
           </Link>
         ) : null}
@@ -92,7 +96,11 @@ export function MobileBottomNav({
           <User size={18} />
         </Link>
         {isAdmin ? (
-          <Link href="/admin" className={`${itemClass} text-zinc-600`} aria-label="لوحة الإدارة">
+          <Link
+            href="/admin"
+            className={`${itemClass} ${activeTab === "admin" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+            aria-label="لوحة الإدارة"
+          >
             <LayoutDashboard size={18} />
           </Link>
         ) : null}
