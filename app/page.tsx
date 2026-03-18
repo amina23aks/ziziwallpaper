@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FixedFeedHeader } from "@/app/_components/fixed-feed-header";
+import { MasonryGrid } from "@/app/_components/masonry-grid";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listActiveCategories } from "@/lib/firestore/categories";
@@ -122,17 +123,17 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <section className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-3 xl:grid-cols-4">
+          <MasonryGrid>
             {filteredWallpapers.map((wallpaper, index) => (
-              <div key={wallpaper.id ?? index}>
+              <div key={wallpaper.id ?? index} className="mb-2 inline-block w-full break-inside-avoid align-top sm:mb-3">
                 <PublicWallpaperCard wallpaper={wallpaper} />
               </div>
             ))}
-          </section>
+          </MasonryGrid>
         )}
       </div>
 
-      <MobileBottomNav activeTab="home" onHelpClick={() => setIsQuestionsOpen(true)} />
+      <MobileBottomNav activeTab="home" />
     </main>
   );
 }

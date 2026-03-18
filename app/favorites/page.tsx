@@ -41,7 +41,7 @@ export default function FavoritesPage() {
         ) : (
           <MasonryGrid>
             {wallpapers.map((wallpaper, index) => (
-              <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
+              <div key={wallpaper.id ?? index} className="mb-2 inline-block w-full break-inside-avoid align-top sm:mb-3">
                 <PublicWallpaperCard wallpaper={wallpaper} />
               </div>
             ))}

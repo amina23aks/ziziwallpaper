@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Mail, Shield, UserRound } from "lucide-react";
+import { Mail, Shield } from "lucide-react";
 import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { ProfileNameEditor } from "@/app/_components/profile-name-editor";
@@ -39,27 +39,22 @@ export default function ProfilePage() {
         <p className="mt-2 text-sm text-zinc-600">ملفك الشخصي في التطبيق.</p>
 
         <div className="mt-5 space-y-3">
-          <div className="rounded-xl border border-zinc-200 bg-white p-1">
-            <div className="mb-2 flex items-center gap-2 px-2 pt-2 text-sm text-zinc-700">
-              <UserRound size={15} className="text-zinc-500" />
-              <span>الاسم الظاهر</span>
-            </div>
-            <ProfileNameEditor
-              value={displayName}
-              isSaving={isSavingName}
-              onSave={async (nextValue) => {
-                if (!user || !nextValue.trim()) return;
-                setIsSavingName(true);
-                try {
-                  await updateUserDisplayName(user.uid, nextValue);
-                  setDisplayName(nextValue);
-                  await refreshUserProfile();
-                } finally {
-                  setIsSavingName(false);
-                }
-              }}
-            />
-          </div>
+          <ProfileNameEditor
+            value={displayName}
+            isSaving={isSavingName}
+            label="الاسم"
+            onSave={async (nextValue) => {
+              if (!user || !nextValue.trim()) return;
+              setIsSavingName(true);
+              try {
+                await updateUserDisplayName(user.uid, nextValue);
+                setDisplayName(nextValue);
+                await refreshUserProfile();
+              } finally {
+                setIsSavingName(false);
+              }
+            }}
+          />
           <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
             <Mail size={15} className="text-zinc-500" />
             <span>{userProfile?.email || "-"}</span>
