@@ -44,7 +44,7 @@ export function FixedFeedHeader({
 
           <Link
             href="/"
-            className="hidden h-10 min-w-16 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white px-4 text-xs font-extrabold text-zinc-800 shadow-sm md:inline-flex"
+            className="inline-flex h-10 min-w-14 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white px-3 text-xs font-extrabold text-zinc-800 shadow-sm md:min-w-16 md:px-4"
           >
             ZIZI
           </Link>

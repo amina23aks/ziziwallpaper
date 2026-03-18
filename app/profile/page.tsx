@@ -42,7 +42,7 @@ export default function ProfilePage() {
           <ProfileNameEditor
             value={displayName}
             isSaving={isSavingName}
-            label="الاسم"
+            label="اسم الملف الشخصي"
             onSave={async (nextValue) => {
               if (!user || !nextValue.trim()) return;
               setIsSavingName(true);
