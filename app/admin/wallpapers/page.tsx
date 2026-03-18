@@ -53,7 +53,7 @@ export default function AdminWallpapersPage() {
           className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900"
         >
           <Plus size={13} />
-          <span>إضافة خلفية +</span>
+          <span>إضافة خلفية</span>
         </Link>
       </section>
 

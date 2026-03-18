@@ -222,7 +222,7 @@ export function PublicWallpaperCard({
             <Link
               href={`${wallpaperHref}#comments`}
               className="inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-700"
-              aria-label="التعليقات"
+              aria-label="الآراء"
             >
               <MessageCircle size={17} />
             </Link>

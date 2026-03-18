@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { CircleHelp, Home, LayoutDashboard, Star, User } from "lucide-react";
+import { Home, LayoutDashboard, Star, User } from "lucide-react";
 import { useAuth } from "@/app/_providers/auth-provider";
 
 export function MobileBottomNav({
   activeTab,
-  onHelpClick,
 }: {
   activeTab: "home" | "favorites" | "account" | "admin";
-  onHelpClick?: () => void;
 }) {
   const { isSignedIn, userProfile } = useAuth();
   const accountHref = isSignedIn ? "/profile" : "/login";
@@ -19,14 +17,7 @@ export function MobileBottomNav({
 
   return (
     <>
-      <aside className="fixed right-4 top-4 z-40 hidden w-14 rounded-2xl border border-zinc-200 bg-white/95 py-3 shadow-sm backdrop-blur md:flex md:flex-col md:items-center md:gap-2">
-        <Link
-          href="/"
-          className="mb-1 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-[11px] font-extrabold text-zinc-800"
-          aria-label="ZIZI"
-        >
-          ZI
-        </Link>
+      <aside className="fixed right-4 top-24 z-40 hidden w-14 rounded-2xl border border-zinc-200 bg-white/95 py-3 shadow-sm backdrop-blur md:flex md:flex-col md:items-center md:gap-2 lg:top-28">
         <Link
           href="/"
           className={`${itemClass} ${activeTab === "home" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
@@ -48,20 +39,6 @@ export function MobileBottomNav({
         >
           <User size={18} />
         </Link>
-        {onHelpClick ? (
-          <button
-            type="button"
-            onClick={onHelpClick}
-            className={`${itemClass} text-zinc-600`}
-            aria-label="اقتراحات الأسئلة"
-          >
-            <CircleHelp size={18} />
-          </button>
-        ) : (
-          <Link href="/" className={`${itemClass} text-zinc-600`} aria-label="اقتراحات الأسئلة">
-            <CircleHelp size={18} />
-          </Link>
-        )}
         {isAdmin ? (
           <Link
             href="/admin"

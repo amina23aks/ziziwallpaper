@@ -1,6 +1,6 @@
-import type { User } from "firebase/auth";
+import { updateProfile, type User } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
+import { db, getClientAuth } from "@/lib/firebase/client";
 import type { UserProfile } from "@/types/user-profile";
 
 function buildUserProfile(user: User): UserProfile {
@@ -64,9 +64,16 @@ export async function getUserProfile(uid: string) {
 }
 
 export async function updateUserDisplayName(uid: string, displayName: string) {
+  const nextDisplayName = displayName.trim();
+
   await updateDoc(doc(db, "users", uid), {
-    displayName: displayName.trim(),
+    displayName: nextDisplayName,
     profileCompleted: true,
     updatedAt: serverTimestamp(),
   });
+
+  const currentUser = getClientAuth().currentUser;
+  if (currentUser && currentUser.uid === uid) {
+    await updateProfile(currentUser, { displayName: nextDisplayName });
+  }
 }
