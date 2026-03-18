@@ -5,14 +5,15 @@ import "swiper/css/navigation";
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Download, MessageCircle, Send, Star } from "lucide-react";
+import { Download, MessageCircle, Star } from "lucide-react";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { ImageLightbox } from "@/app/_components/image-lightbox";
+import { FeedbackSection } from "@/app/_components/feedback-section";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { createWallpaperComment, listWallpaperComments } from "@/lib/firestore/comments";
@@ -48,8 +49,6 @@ export default function WallpaperDetailsPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [comments, setComments] = useState<WallpaperComment[]>([]);
-  const [commentText, setCommentText] = useState("");
-  const [replyByParent, setReplyByParent] = useState<Record<string, string>>({});
   const [isCommentSaving, setIsCommentSaving] = useState(false);
   const [isFavoriteLoginDialogOpen, setIsFavoriteLoginDialogOpen] = useState(false);
   const swiperRef = useRef<SwiperType | null>(null);
@@ -79,19 +78,6 @@ export default function WallpaperDetailsPage() {
     }
   }, [id, loadComments]);
 
-  const rootComments = useMemo(() => comments.filter((item) => !item.parentId), [comments]);
-  const repliesByParent = useMemo(() => {
-    const map = new Map<string, WallpaperComment[]>();
-    comments
-      .filter((item) => Boolean(item.parentId))
-      .forEach((item) => {
-        const key = item.parentId as string;
-        const existing = map.get(key) ?? [];
-        existing.push(item);
-        map.set(key, existing);
-      });
-    return map;
-  }, [comments]);
 
   if (isLoading) {
     return <main className="px-4 py-8 text-sm text-zinc-600">جاري تحميل الخلفية...</main>;
@@ -210,7 +196,7 @@ export default function WallpaperDetailsPage() {
                 <a
                   href="#comments"
                   className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700"
-                  aria-label="التعليقات"
+                  aria-label="الآراء"
                 >
                   <MessageCircle size={16} />
                 </a>
@@ -239,121 +225,48 @@ export default function WallpaperDetailsPage() {
             ) : (
               <p className="text-sm text-zinc-500">لا يوجد وصف لهذه الخلفية.</p>
             )}
-          </section>
-        </div>
 
-        <section id="comments" className="mt-5 space-y-4 rounded-2xl border border-zinc-200 bg-white p-4 [direction:rtl]">
-          <h2 className="text-base font-bold text-zinc-900">التعليقات</h2>
-
-          {isSignedIn ? (
-            <form
-              className="space-y-2"
-              onSubmit={async (event) => {
-                event.preventDefault();
-                if (!user || !id || !commentText.trim()) return;
+            <FeedbackSection
+              comments={comments}
+              isSignedIn={isSignedIn}
+              currentUserName={userProfile?.displayName?.trim() || "مستخدم"}
+              onLogin={() => router.push("/login")}
+              isSaving={isCommentSaving}
+              onSubmitFeedback={async (value) => {
+                if (!user || !id || !value.trim()) return;
                 setIsCommentSaving(true);
                 try {
                   await createWallpaperComment({
                     wallpaperId: id,
                     userId: user.uid,
                     userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
-                    content: commentText,
+                    content: value,
                   });
-                  setCommentText("");
                   await loadComments();
                 } finally {
                   setIsCommentSaving(false);
                 }
               }}
-            >
-              <textarea
-                rows={3}
-                value={commentText}
-                onChange={(event) => setCommentText(event.target.value)}
-                placeholder="اكتب تعليقك هنا..."
-                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
-              />
-              <button
-                type="submit"
-                disabled={isCommentSaving || !commentText.trim()}
-                className="inline-flex items-center gap-1 rounded-lg bg-zinc-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
-              >
-                <Send size={14} />
-                إرسال التعليق
-              </button>
-            </form>
-          ) : (
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-700">
-              <p>يرجى تسجيل الدخول لإضافة تعليق.</p>
-              <button
-                type="button"
-                onClick={() => router.push("/login")}
-                className="mt-2 rounded-lg border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white"
-              >
-                تسجيل الدخول
-              </button>
-            </div>
-          )}
-
-          {rootComments.length === 0 ? (
-            <p className="text-sm text-zinc-500">لا توجد تعليقات حتى الآن.</p>
-          ) : (
-            <div className="space-y-3">
-              {rootComments.map((comment) => (
-                <article key={comment.id} className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
-                  <p className="text-xs font-bold text-zinc-900">{comment.userDisplayName}</p>
-                  <p className="text-sm text-zinc-700">{comment.content}</p>
-
-                  {(repliesByParent.get(comment.id ?? "") ?? []).map((reply) => (
-                    <div key={reply.id} className="mr-4 rounded-lg border border-zinc-200 bg-white p-2">
-                      <p className="text-xs font-bold text-zinc-900">
-                        {reply.userDisplayName} {reply.isAdminReply ? "• الإدارة" : ""}
-                      </p>
-                      <p className="text-sm text-zinc-700">{reply.content}</p>
-                    </div>
-                  ))}
-
-                  {userProfile?.role === "admin" ? (
-                    <form
-                      className="mr-4 flex items-center gap-2"
-                      onSubmit={async (event) => {
-                        event.preventDefault();
-                        if (!user || !id || !comment.id) return;
-                        const value = (replyByParent[comment.id] ?? "").trim();
-                        if (!value) return;
-                        await createWallpaperComment({
-                          wallpaperId: id,
-                          userId: user.uid,
-                          userDisplayName: userProfile?.displayName?.trim() || "الإدارة",
-                          content: value,
-                          parentId: comment.id,
-                          isAdminReply: true,
-                        });
-                        setReplyByParent((prev) => ({ ...prev, [comment.id as string]: "" }));
-                        await loadComments();
-                      }}
-                    >
-                      <input
-                        value={replyByParent[comment.id ?? ""] ?? ""}
-                        onChange={(event) =>
-                          setReplyByParent((prev) => ({ ...prev, [comment.id as string]: event.target.value }))
-                        }
-                        placeholder="رد الإدارة"
-                        className="flex-1 rounded-lg border border-zinc-300 px-2 py-1.5 text-xs"
-                      />
-                      <button
-                        type="submit"
-                        className="rounded-lg border border-zinc-900 bg-zinc-900 px-2 py-1.5 text-xs font-semibold text-white"
-                      >
-                        رد
-                      </button>
-                    </form>
-                  ) : null}
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+              onSubmitReply={async (parentId, value) => {
+                if (!user || !id || !value.trim()) return;
+                setIsCommentSaving(true);
+                try {
+                  await createWallpaperComment({
+                    wallpaperId: id,
+                    userId: user.uid,
+                    userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
+                    content: value,
+                    parentId,
+                    isAdminReply: userProfile?.role === "admin",
+                  });
+                  await loadComments();
+                } finally {
+                  setIsCommentSaving(false);
+                }
+              }}
+            />
+          </section>
+        </div>
       </article>
 
       <MobileBottomNav activeTab="home" />

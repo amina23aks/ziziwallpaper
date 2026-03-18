@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { FixedFeedHeader } from "@/app/_components/fixed-feed-header";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
-import { MobileHomeTopBar } from "@/app/_components/mobile-home-top-bar";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
@@ -21,8 +21,6 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDesktopSearchVisible, setIsDesktopSearchVisible] = useState(true);
-  const lastScrollY = useRef(0);
 
   useEffect(() => {
     async function loadData() {
@@ -43,25 +41,6 @@ export default function HomePage() {
     loadData();
   }, []);
 
-  useEffect(() => {
-    const onScroll = () => {
-      const currentY = window.scrollY;
-      const delta = currentY - lastScrollY.current;
-
-      if (currentY <= 10) {
-        setIsDesktopSearchVisible(true);
-      } else if (delta > 10) {
-        setIsDesktopSearchVisible(false);
-      } else if (delta < -6) {
-        setIsDesktopSearchVisible(true);
-      }
-
-      lastScrollY.current = currentY;
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const filteredWallpapers = useMemo(() => {
     return wallpapers.filter((wallpaper) => {
@@ -78,20 +57,17 @@ export default function HomePage() {
   }, [wallpapers, searchQuery, selectedCategory]);
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 pb-24 pt-20 md:pr-24 md:pt-6">
-      <MobileHomeTopBar
+    <main className="min-h-screen w-full bg-zinc-50 pb-24 pt-[124px] md:pr-24 md:pt-[126px]">
+      <FixedFeedHeader
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+        categories={categories}
         onOpenQuestions={() => setIsQuestionsOpen(true)}
       />
 
       <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:px-6 lg:px-8">
-        <header className="hidden items-center justify-between md:flex">
-          <div className="space-y-0.5">
-            <p className="text-xs font-semibold text-zinc-600">ZIZI</p>
-            <h1 className="text-xl font-extrabold text-zinc-900">Wallpapers</h1>
-          </div>
-        </header>
 
         {isQuestionsOpen && (
           <div
@@ -138,53 +114,6 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="hidden md:block">
-          <div
-            className={`mx-auto w-full max-w-3xl rounded-full border border-zinc-200 bg-white px-4 py-3 shadow-sm transition-all duration-200 ${
-              isDesktopSearchVisible
-                ? "pointer-events-auto translate-y-0 opacity-100"
-                : "pointer-events-none -translate-y-2 opacity-0"
-            }`}
-          >
-            <input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="ابحث بالعنوان أو كلمات البحث"
-              className="w-full bg-transparent text-sm font-medium text-zinc-900 placeholder:text-zinc-500 outline-none"
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          <button
-            type="button"
-            onClick={() => setSelectedCategory("all")}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold ${
-              selectedCategory === "all"
-                ? "bg-zinc-900 text-white"
-                : "border border-zinc-300 bg-white text-zinc-800"
-            }`}
-          >
-            الكل
-          </button>
-          {categories.map((category) => {
-            const active = selectedCategory === category.slug;
-            return (
-              <button
-                key={category.id}
-                type="button"
-                onClick={() => setSelectedCategory(category.slug)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold ${
-                  active
-                    ? "bg-zinc-900 text-white"
-                    : "border border-zinc-300 bg-white text-zinc-800"
-                }`}
-              >
-                {category.nameAr}
-              </button>
-            );
-          })}
-        </div>
 
         {isLoading ? (
           <p className="text-sm text-zinc-600">جاري تحميل الخلفيات...</p>
@@ -193,7 +122,7 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <section className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
+          <section className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-3 xl:grid-cols-4">
             {filteredWallpapers.map((wallpaper, index) => (
               <div key={wallpaper.id ?? index}>
                 <PublicWallpaperCard wallpaper={wallpaper} />

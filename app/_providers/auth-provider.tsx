@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -18,6 +19,7 @@ type AuthContextValue = {
   userProfile: UserProfile | null;
   isSignedIn: boolean;
   isAuthLoading: boolean;
+  refreshUserProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -26,6 +28,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  const refreshUserProfile = useCallback(async () => {
+    const currentUser = getClientAuth().currentUser;
+
+    if (!currentUser) {
+      setUserProfile(null);
+      return;
+    }
+
+    await ensureUserProfileDocument(currentUser);
+    const profile = await getUserProfile(currentUser.uid);
+    setUserProfile(profile);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getClientAuth(), async (nextUser) => {
@@ -38,16 +53,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        await ensureUserProfileDocument(nextUser);
-        const profile = await getUserProfile(nextUser.uid);
-        setUserProfile(profile);
+        await refreshUserProfile();
       } finally {
         setIsAuthLoading(false);
       }
     });
 
     return unsubscribe;
-  }, []);
+  }, [refreshUserProfile]);
 
   const value = useMemo(
     () => ({
@@ -55,8 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       userProfile,
       isSignedIn: Boolean(user),
       isAuthLoading,
+      refreshUserProfile,
     }),
-    [user, userProfile, isAuthLoading]
+    [user, userProfile, isAuthLoading, refreshUserProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
