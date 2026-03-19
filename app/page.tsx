@@ -58,7 +58,7 @@ export default function HomePage() {
   }, [wallpapers, searchQuery, selectedCategory]);
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 pb-24 pt-[124px] md:pr-24 md:pt-[126px]">
+    <main className="min-h-screen w-full overflow-x-hidden bg-zinc-50 pb-24 pt-[124px] md:pr-20 md:pt-[126px]">
       <FixedFeedHeader
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -68,7 +68,7 @@ export default function HomePage() {
         onOpenQuestions={() => setIsQuestionsOpen(true)}
       />
 
-      <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[92rem] space-y-4 px-4 py-5 sm:px-6 lg:px-8">
 
         {isQuestionsOpen && (
           <div

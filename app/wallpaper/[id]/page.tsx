@@ -80,11 +80,11 @@ export default function WallpaperDetailsPage() {
 
 
   if (isLoading) {
-    return <main className="px-4 py-8 text-sm text-zinc-600">جاري تحميل الخلفية...</main>;
+    return <main className="overflow-x-hidden px-4 py-8 text-sm text-zinc-600">جاري تحميل الخلفية...</main>;
   }
 
   if (!wallpaper) {
-    return <main className="px-4 py-8 text-sm text-zinc-600">لم يتم العثور على الخلفية المطلوبة.</main>;
+    return <main className="overflow-x-hidden px-4 py-8 text-sm text-zinc-600">لم يتم العثور على الخلفية المطلوبة.</main>;
   }
 
   const hasMultipleImages = (wallpaper.images?.length ?? 0) > 1;
@@ -94,7 +94,7 @@ export default function WallpaperDetailsPage() {
   const formattedDescription = wallpaper.description?.trim();
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 px-4 py-6 pb-24 pt-16 md:pr-24 md:pt-6">
+    <main className="min-h-screen w-full overflow-x-hidden bg-zinc-50 px-4 py-6 pb-24 pt-16 md:pr-20 md:pt-6">
       <header className="mb-4 flex items-center justify-start [direction:ltr]">
         <Link
           href="/"
@@ -105,7 +105,7 @@ export default function WallpaperDetailsPage() {
         </Link>
       </header>
 
-      <article className="mx-auto w-full max-w-6xl rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 lg:p-5">
+      <article className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 lg:max-w-[88rem] lg:p-5">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start lg:[direction:ltr]">
           <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100">
             {hasMultipleImages ? (
@@ -178,9 +178,9 @@ export default function WallpaperDetailsPage() {
           </div>
 
           <section className="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5 [direction:rtl]">
-            <div className="flex items-center justify-between gap-3">
-              <h1 className="text-lg font-bold text-zinc-900">{wallpaper.title}</h1>
-              <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center justify-between gap-3">
+              <h1 className="min-w-0 flex-1 break-words text-lg font-bold text-zinc-900">{wallpaper.title}</h1>
+              <div className="flex shrink-0 items-center gap-2">
                 <button
                   type="button"
                   onClick={toggleFavorite}
@@ -232,7 +232,7 @@ export default function WallpaperDetailsPage() {
               currentUserName={userProfile?.displayName?.trim() || "مستخدم"}
               onLogin={() => router.push("/login")}
               isSaving={isCommentSaving}
-              onSubmitFeedback={async (value) => {
+              onSubmitFeedback={async (value, identityMode) => {
                 if (!user || !id || !value.trim()) return;
                 setIsCommentSaving(true);
                 try {
@@ -240,6 +240,7 @@ export default function WallpaperDetailsPage() {
                     wallpaperId: id,
                     userId: user.uid,
                     userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
+                    displayIdentityMode: identityMode,
                     content: value,
                   });
                   await loadComments();
@@ -247,7 +248,7 @@ export default function WallpaperDetailsPage() {
                   setIsCommentSaving(false);
                 }
               }}
-              onSubmitReply={async (parentId, value) => {
+              onSubmitReply={async (parentId, value, identityMode) => {
                 if (!user || !id || !value.trim()) return;
                 setIsCommentSaving(true);
                 try {
@@ -255,6 +256,7 @@ export default function WallpaperDetailsPage() {
                     wallpaperId: id,
                     userId: user.uid,
                     userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
+                    displayIdentityMode: identityMode,
                     content: value,
                     parentId,
                     isAdminReply: userProfile?.role === "admin",

@@ -9,7 +9,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
-import type { WallpaperComment } from "@/types/comment";
+import type { CommentDisplayIdentityMode, WallpaperComment } from "@/types/comment";
 
 const commentsCollection = collection(db, "comments");
 
@@ -44,14 +44,19 @@ export async function createWallpaperComment(input: {
   wallpaperId: string;
   userId: string;
   userDisplayName: string;
+  displayIdentityMode?: CommentDisplayIdentityMode;
   content: string;
   parentId?: string | null;
   isAdminReply?: boolean;
 }) {
+  const identityMode = input.displayIdentityMode ?? "real";
+
   const docRef = await addDoc(commentsCollection, {
     wallpaperId: input.wallpaperId,
     userId: input.userId,
     userDisplayName: input.userDisplayName,
+    displayIdentityMode: identityMode,
+    isAnonymous: identityMode !== "real",
     content: input.content.trim(),
     parentId: input.parentId ?? null,
     isAdminReply: Boolean(input.isAdminReply),
