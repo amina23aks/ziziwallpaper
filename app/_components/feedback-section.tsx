@@ -59,6 +59,10 @@ function wasEdited(comment: Pick<WallpaperComment, "createdAt" | "updatedAt">) {
   return updatedSeconds > createdSeconds;
 }
 
+function isAdminAuthor(comment: Pick<WallpaperComment, "isAdminAuthor" | "isAdminReply">) {
+  return Boolean(comment.isAdminAuthor ?? comment.isAdminReply);
+}
+
 function AvatarBadge({
   name,
   subtle = false,
@@ -72,7 +76,7 @@ function AvatarBadge({
     <div
       className={[
         "flex items-center justify-center rounded-full text-xs font-bold",
-        subtle ? "bg-zinc-100 text-zinc-600" : "bg-zinc-900/90 text-white",
+        subtle ? "bg-zinc-100 text-zinc-700" : "bg-zinc-900/90 text-white",
         subtle ? "h-7 w-7" : "h-9 w-9",
         className,
       ].join(" ")}
@@ -82,14 +86,22 @@ function AvatarBadge({
   );
 }
 
-function useOutsideClose<T extends HTMLElement>(open: boolean, onClose: () => void) {
+function useOutsideClose<T extends HTMLElement>(
+  open: boolean,
+  onClose: () => void,
+  extraRefs: Array<React.RefObject<HTMLElement | null>> = []
+) {
   const ref = useRef<T | null>(null);
 
   useEffect(() => {
     if (!open) return;
 
     function handlePointerDown(event: MouseEvent | TouchEvent) {
-      if (!ref.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isInsidePrimary = ref.current?.contains(target);
+      const isInsideExtra = extraRefs.some((extraRef) => extraRef.current?.contains(target));
+
+      if (!isInsidePrimary && !isInsideExtra) {
         onClose();
       }
     }
@@ -101,7 +113,7 @@ function useOutsideClose<T extends HTMLElement>(open: boolean, onClose: () => vo
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, extraRefs]);
 
   return ref;
 }
@@ -121,7 +133,8 @@ function IdentitySelectorSheet({
   realName: string;
   align?: "right" | "left";
 }) {
-  const desktopRef = useOutsideClose<HTMLDivElement>(open, onClose);
+  const mobileRef = useRef<HTMLDivElement | null>(null);
+  const desktopRef = useOutsideClose<HTMLDivElement>(open, onClose, [mobileRef]);
 
   if (!open) return null;
 
@@ -137,7 +150,7 @@ function IdentitySelectorSheet({
       >
         <div className="px-2 pb-2 pt-1 text-right">
           <p className="text-sm font-semibold text-zinc-900">اختر هوية النشر</p>
-          <p className="text-xs text-zinc-500">سيظهر التعليق أو الرد بالهوية المحددة.</p>
+          <p className="text-xs text-zinc-600">سيظهر التعليق أو الرد بالهوية المحددة.</p>
         </div>
         <div className="space-y-1">
           {DISPLAY_IDENTITY_OPTIONS.map((option) => {
@@ -154,12 +167,12 @@ function IdentitySelectorSheet({
                 }}
                 className={[
                   "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-right transition",
-                  selected ? "bg-zinc-900 text-white" : "hover:bg-zinc-50",
+                  selected ? "bg-zinc-900 text-white" : "text-zinc-900 hover:bg-zinc-50",
                 ].join(" ")}
               >
                 <AvatarBadge name={optionName} subtle={!selected} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-semibold">{optionName}</div>
+                  <div className={selected ? "truncate text-sm font-semibold text-white" : "truncate text-sm font-semibold text-zinc-900"}>{optionName}</div>
                   <div className={selected ? "text-xs text-white/80" : "text-xs text-zinc-700"}>{option.subtitle}</div>
                 </div>
                 {selected ? <Check size={16} className="shrink-0" /> : null}
@@ -169,11 +182,14 @@ function IdentitySelectorSheet({
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-[28px] bg-white p-4 shadow-[0_-10px_35px_rgba(0,0,0,0.18)] md:hidden">
+      <div
+        ref={mobileRef}
+        className="fixed inset-x-0 bottom-0 z-50 rounded-t-[28px] bg-white p-4 shadow-[0_-10px_35px_rgba(0,0,0,0.18)] md:hidden"
+      >
         <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-zinc-200" />
         <div className="mb-3 text-right">
           <p className="text-sm font-semibold text-zinc-900">اختر هوية النشر</p>
-          <p className="text-xs text-zinc-500">سيظهر التعليق أو الرد بالهوية المحددة.</p>
+          <p className="text-xs text-zinc-600">سيظهر التعليق أو الرد بالهوية المحددة.</p>
         </div>
         <div className="space-y-2">
           {DISPLAY_IDENTITY_OPTIONS.map((option) => {
@@ -190,12 +206,12 @@ function IdentitySelectorSheet({
                 }}
                 className={[
                   "flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-right transition",
-                  selected ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white",
+                  selected ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-900",
                 ].join(" ")}
               >
                 <AvatarBadge name={optionName} subtle={!selected} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-semibold">{optionName}</div>
+                  <div className={selected ? "truncate text-sm font-semibold text-white" : "truncate text-sm font-semibold text-zinc-900"}>{optionName}</div>
                   <div className={selected ? "text-xs text-white/80" : "text-xs text-zinc-700"}>{option.subtitle}</div>
                 </div>
                 {selected ? <Check size={16} className="shrink-0" /> : null}
@@ -203,7 +219,7 @@ function IdentitySelectorSheet({
             );
           })}
         </div>
-        <button type="button" onClick={onClose} className="mt-3 w-full rounded-2xl bg-zinc-100 px-4 py-3 text-sm font-medium text-zinc-700">
+        <button type="button" onClick={onClose} className="mt-3 w-full rounded-2xl bg-zinc-100 px-4 py-3 text-sm font-medium text-zinc-800">
           إغلاق
         </button>
       </div>
@@ -229,7 +245,7 @@ function IdentityTrigger({
       type="button"
       onClick={onClick}
       className={[
-        "inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-100/90 pr-1 pl-2 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-100",
+        "inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-100/90 pr-1 pl-2 text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100",
         small ? "h-8" : "h-10",
       ].join(" ")}
       aria-label="تحديد هوية النشر"
@@ -409,7 +425,7 @@ function ReplyComposer({
       >
         <Send size={13} />
       </button>
-      <button type="button" onClick={onCancel} className="text-xs font-medium text-zinc-500">
+      <button type="button" onClick={onCancel} className="text-xs font-medium text-zinc-600">
         إلغاء
       </button>
     </div>
@@ -499,7 +515,7 @@ function CommentBody({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
             <span className={isReply ? "font-semibold text-zinc-800" : "font-semibold text-zinc-900"}>{visibleName}</span>
-            {item.isAdminReply ? <span className="rounded-full bg-zinc-900 px-2 py-0.5 text-[10px] text-white">Admin</span> : null}
+            {isAdminAuthor(item) ? <span className="rounded-full bg-zinc-900 px-2 py-0.5 text-[10px] text-white">Admin</span> : null}
             {formatTimestamp(item.createdAt) ? <span>{formatTimestamp(item.createdAt)}</span> : null}
             {wasEdited(item) ? <span>· تم التعديل</span> : null}
           </div>
@@ -549,10 +565,14 @@ function CommentBody({
               </div>
             </div>
           ) : (
-            <p className={[
-              "mt-1 whitespace-pre-line break-words leading-6 text-zinc-700",
-              isReply ? "text-[13px]" : "text-sm",
-            ].join(" ")}>{item.content}</p>
+            <p
+              className={[
+                "mt-1 whitespace-pre-line break-words leading-6 text-zinc-700",
+                isReply ? "text-[13px]" : "text-sm",
+              ].join(" ")}
+            >
+              {item.content}
+            </p>
           )}
 
           {!isEditing ? (
@@ -566,7 +586,7 @@ function CommentBody({
           ) : null}
         </div>
 
-        {(canEdit || canDelete) ? (
+        {canEdit || canDelete ? (
           <div className="relative shrink-0">
             <button
               type="button"
@@ -614,26 +634,11 @@ function CommentBody({
   );
 }
 
-function FeedbackItem({
-  item,
-  replies,
-  activeReplyId,
-  activeReplyText,
-  activeReplyIdentityMode,
-  currentUserId,
-  currentUserName,
-  isAdmin,
-  isSaving,
-  canReply,
-  onReplyToggle,
-  onReplyTextChange,
-  onReplyIdentityModeChange,
-  onReplySubmit,
-  onEditComment,
-  onDeleteComment,
-}: {
+type CommentNodeProps = {
   item: WallpaperComment;
-  replies: WallpaperComment[];
+  repliesByParent: Map<string, WallpaperComment[]>;
+  descendantIdsByParent: Map<string, string[]>;
+  depth?: number;
   activeReplyId: string | null;
   activeReplyText: string;
   activeReplyIdentityMode: CommentDisplayIdentityMode;
@@ -648,63 +653,90 @@ function FeedbackItem({
   onReplySubmit: (parentId: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
   onEditComment: (comment: WallpaperComment, content: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
   onDeleteComment: (comment: WallpaperComment, replyIds?: string[]) => Promise<void>;
-}) {
+};
+
+function CommentThreadNode({
+  item,
+  repliesByParent,
+  descendantIdsByParent,
+  depth = 0,
+  activeReplyId,
+  activeReplyText,
+  activeReplyIdentityMode,
+  currentUserId,
+  currentUserName,
+  isAdmin,
+  isSaving,
+  canReply,
+  onReplyToggle,
+  onReplyTextChange,
+  onReplyIdentityModeChange,
+  onReplySubmit,
+  onEditComment,
+  onDeleteComment,
+}: CommentNodeProps) {
   const visibleName = getVisibleName(item);
+  const itemId = item.id;
   const canEdit = currentUserId === item.userId;
   const canDelete = canEdit || isAdmin;
-  const isReplying = activeReplyId === item.id;
+  const isReplying = activeReplyId === itemId;
+  const childReplies = repliesByParent.get(itemId ?? "") ?? [];
+  const isReply = depth > 0;
 
   return (
-    <article className="py-2.5">
+    <article className={depth === 0 ? "py-2.5" : "py-2"}>
       <div className="flex items-start gap-2.5">
-        <AvatarBadge name={visibleName} className="mt-0.5" />
+        <AvatarBadge
+          name={visibleName}
+          subtle={isReply}
+          className={isReply ? "mt-0.5 h-7 w-7 text-[10px]" : "mt-0.5"}
+        />
         <div className="min-w-0 flex-1 space-y-2">
           <CommentBody
             item={item}
             visibleName={visibleName}
             canEdit={canEdit}
             canDelete={canDelete}
-            isReply={false}
+            isReply={isReply}
             currentUserName={currentUserName}
-            onReply={canReply && item.id ? () => onReplyToggle(item.id as string) : undefined}
+            onReply={canReply && itemId ? () => onReplyToggle(itemId) : undefined}
             isReplying={isReplying}
             replyValue={activeReplyText}
             replyIdentityMode={activeReplyIdentityMode}
             onReplyValueChange={onReplyTextChange}
             onReplyIdentityModeChange={onReplyIdentityModeChange}
-            onReplySubmit={item.id ? () => onReplySubmit(item.id as string, activeReplyIdentityMode) : undefined}
-            onReplyCancel={item.id ? () => onReplyToggle(item.id as string) : undefined}
+            onReplySubmit={itemId ? () => onReplySubmit(itemId, activeReplyIdentityMode) : undefined}
+            onReplyCancel={itemId ? () => onReplyToggle(itemId) : undefined}
             onEditSubmit={(content, identityMode) => onEditComment(item, content, identityMode)}
-            onDelete={() => onDeleteComment(item, replies.map((reply) => reply.id).filter(Boolean) as string[])}
+            onDelete={() => onDeleteComment(item, descendantIdsByParent.get(itemId ?? "") ?? [])}
             isSaving={isSaving}
           />
 
-          {replies.length > 0 ? (
+          {childReplies.length > 0 ? (
             <div className="space-y-2 border-r border-zinc-200 pr-3">
-              {replies.map((reply) => {
-                const replyVisibleName = getVisibleName(reply);
-                const canEditReply = currentUserId === reply.userId;
-                const canDeleteReply = canEditReply || isAdmin;
-
-                return (
-                  <div key={reply.id} className="flex items-start gap-2.5">
-                    <AvatarBadge name={replyVisibleName} subtle className="mt-0.5 h-7 w-7 text-[10px]" />
-                    <div className="min-w-0 flex-1">
-                      <CommentBody
-                        item={reply}
-                        visibleName={replyVisibleName}
-                        canEdit={canEditReply}
-                        canDelete={canDeleteReply}
-                        isReply
-                        currentUserName={currentUserName}
-                        onEditSubmit={(content, identityMode) => onEditComment(reply, content, identityMode)}
-                        onDelete={() => onDeleteComment(reply)}
-                        isSaving={isSaving}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+              {childReplies.map((reply) => (
+                <CommentThreadNode
+                  key={reply.id}
+                  item={reply}
+                  repliesByParent={repliesByParent}
+                  descendantIdsByParent={descendantIdsByParent}
+                  depth={depth + 1}
+                  activeReplyId={activeReplyId}
+                  activeReplyText={activeReplyText}
+                  activeReplyIdentityMode={activeReplyIdentityMode}
+                  currentUserId={currentUserId}
+                  currentUserName={currentUserName}
+                  isAdmin={isAdmin}
+                  isSaving={isSaving}
+                  canReply={canReply}
+                  onReplyToggle={onReplyToggle}
+                  onReplyTextChange={onReplyTextChange}
+                  onReplyIdentityModeChange={onReplyIdentityModeChange}
+                  onReplySubmit={onReplySubmit}
+                  onEditComment={onEditComment}
+                  onDeleteComment={onDeleteComment}
+                />
+              ))}
             </div>
           ) : null}
         </div>
@@ -755,6 +787,28 @@ export function FeedbackSection({
       });
     return map;
   }, [comments]);
+  const descendantIdsByParent = useMemo(() => {
+    const map = new Map<string, string[]>();
+
+    const collect = (parentId: string): string[] => {
+      const children = repliesByParent.get(parentId) ?? [];
+      const descendants = children.flatMap((child) => {
+        const childId = child.id ? [child.id] : [];
+        const nestedIds = child.id ? collect(child.id) : [];
+        return [...childId, ...nestedIds];
+      });
+      map.set(parentId, descendants);
+      return descendants;
+    };
+
+    rootComments.forEach((comment) => {
+      if (comment.id) {
+        collect(comment.id);
+      }
+    });
+
+    return map;
+  }, [repliesByParent, rootComments]);
 
   return (
     <section id="comments" className="space-y-3.5 [direction:rtl]">
@@ -797,13 +851,16 @@ export function FeedbackSection({
 
       <div className="space-y-0.5">
         {rootComments.length === 0 ? (
-          <div className="rounded-[26px] bg-white px-4 py-6 text-center text-sm text-zinc-500 shadow-sm">لا توجد آراء حتى الآن.</div>
+          <div className="rounded-[26px] border border-dashed border-zinc-200 bg-white px-4 py-6 text-center text-sm text-zinc-600 shadow-sm">
+            لا توجد تعليقات حتى الآن.
+          </div>
         ) : (
           rootComments.map((comment) => (
-            <FeedbackItem
+            <CommentThreadNode
               key={comment.id}
               item={comment}
-              replies={repliesByParent.get(comment.id ?? "") ?? []}
+              repliesByParent={repliesByParent}
+              descendantIdsByParent={descendantIdsByParent}
               activeReplyId={activeReplyId}
               activeReplyText={activeReplyText}
               activeReplyIdentityMode={replyIdentityMode}

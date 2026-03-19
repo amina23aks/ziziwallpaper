@@ -260,6 +260,7 @@ export default function WallpaperDetailsPage() {
                     userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
                     displayIdentityMode: identityMode,
                     content: value,
+                    isAdminAuthor: userProfile?.role === "admin",
                   });
                   await loadComments();
                 } finally {
@@ -278,6 +279,7 @@ export default function WallpaperDetailsPage() {
                     content: value,
                     parentId,
                     isAdminReply: userProfile?.role === "admin",
+                    isAdminAuthor: userProfile?.role === "admin",
                   });
                   await loadComments();
                 } finally {
