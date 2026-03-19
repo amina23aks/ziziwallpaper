@@ -232,7 +232,7 @@ export default function WallpaperDetailsPage() {
               currentUserName={userProfile?.displayName?.trim() || "مستخدم"}
               onLogin={() => router.push("/login")}
               isSaving={isCommentSaving}
-              onSubmitFeedback={async (value) => {
+              onSubmitFeedback={async (value, isAnonymous) => {
                 if (!user || !id || !value.trim()) return;
                 setIsCommentSaving(true);
                 try {
@@ -240,6 +240,7 @@ export default function WallpaperDetailsPage() {
                     wallpaperId: id,
                     userId: user.uid,
                     userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
+                    isAnonymous,
                     content: value,
                   });
                   await loadComments();
@@ -247,7 +248,7 @@ export default function WallpaperDetailsPage() {
                   setIsCommentSaving(false);
                 }
               }}
-              onSubmitReply={async (parentId, value) => {
+              onSubmitReply={async (parentId, value, isAnonymous) => {
                 if (!user || !id || !value.trim()) return;
                 setIsCommentSaving(true);
                 try {
@@ -255,6 +256,7 @@ export default function WallpaperDetailsPage() {
                     wallpaperId: id,
                     userId: user.uid,
                     userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
+                    isAnonymous,
                     content: value,
                     parentId,
                     isAdminReply: userProfile?.role === "admin",

@@ -6,6 +6,7 @@ export type WallpaperComment = {
   parentId?: string | null;
   userId: string;
   userDisplayName: string;
+  isAnonymous?: boolean;
   content: string;
   isAdminReply?: boolean;
   createdAt?: Timestamp | FieldValue | null;

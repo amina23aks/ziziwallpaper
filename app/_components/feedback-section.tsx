@@ -4,6 +4,8 @@ import { MessageCircleMore, Send } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { WallpaperComment } from "@/types/comment";
 
+const ANONYMOUS_NAME = "بلوزة";
+
 function formatTimestamp(value?: WallpaperComment["createdAt"]) {
   const seconds = (value as { seconds?: number } | null | undefined)?.seconds;
   if (!seconds) return "";
@@ -16,8 +18,49 @@ function formatTimestamp(value?: WallpaperComment["createdAt"]) {
   }).format(new Date(seconds * 1000));
 }
 
+function getVisibleName(comment: Pick<WallpaperComment, "userDisplayName" | "isAnonymous">) {
+  return comment.isAnonymous ? ANONYMOUS_NAME : comment.userDisplayName;
+}
+
 function avatarLabel(name: string) {
   return name.trim().charAt(0).toUpperCase() || "؟";
+}
+
+function PublishModeToggle({
+  isAnonymous,
+  onChange,
+}: {
+  isAnonymous: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-600">
+      <button
+        type="button"
+        onClick={() => onChange(false)}
+        aria-pressed={!isAnonymous}
+        className={`rounded-full border px-3 py-1.5 transition ${
+          !isAnonymous
+            ? "border-zinc-900 bg-zinc-900 text-white"
+            : "border-zinc-200 bg-white text-zinc-700"
+        }`}
+      >
+        النشر باسمي
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange(true)}
+        aria-pressed={isAnonymous}
+        className={`rounded-full border px-3 py-1.5 transition ${
+          isAnonymous
+            ? "border-zinc-900 bg-zinc-900 text-white"
+            : "border-zinc-200 bg-white text-zinc-700"
+        }`}
+      >
+        النشر كمجهول
+      </button>
+    </div>
+  );
 }
 
 function InlineReplyInput({
@@ -26,16 +69,21 @@ function InlineReplyInput({
   onSubmit,
   onCancel,
   isSaving,
+  isAnonymous,
+  onAnonymousChange,
 }: {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => Promise<void>;
   onCancel: () => void;
   isSaving: boolean;
+  isAnonymous: boolean;
+  onAnonymousChange: (value: boolean) => void;
 }) {
   return (
     <div className="mt-3 rounded-2xl border border-zinc-200 bg-white px-3 py-2.5">
-      <div className="flex items-center gap-2 [direction:ltr]">
+      <PublishModeToggle isAnonymous={isAnonymous} onChange={onAnonymousChange} />
+      <div className="mt-2 flex items-center gap-2 [direction:ltr]">
         <input
           value={value}
           onChange={(event) => onChange(event.target.value)}
@@ -68,8 +116,10 @@ function FeedbackItem({
   replies,
   activeReplyId,
   activeReplyText,
+  activeReplyIsAnonymous,
   onReplyToggle,
   onReplyTextChange,
+  onReplyAnonymousChange,
   onReplySubmit,
   canReply,
   isSaving,
@@ -78,23 +128,26 @@ function FeedbackItem({
   replies: WallpaperComment[];
   activeReplyId: string | null;
   activeReplyText: string;
+  activeReplyIsAnonymous: boolean;
   onReplyToggle: (id: string) => void;
   onReplyTextChange: (value: string) => void;
-  onReplySubmit: (parentId: string) => Promise<void>;
+  onReplyAnonymousChange: (value: boolean) => void;
+  onReplySubmit: (parentId: string, isAnonymous: boolean) => Promise<void>;
   canReply: boolean;
   isSaving: boolean;
 }) {
   const isReplying = activeReplyId === item.id;
+  const visibleName = getVisibleName(item);
 
   return (
     <article className="border-b border-zinc-100 py-3 last:border-b-0">
       <div className="flex items-start gap-3">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xs font-bold text-zinc-700">
-          {avatarLabel(item.userDisplayName)}
+          {avatarLabel(visibleName)}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 text-xs text-zinc-500">
-            <span className="font-semibold text-zinc-900">{item.userDisplayName}</span>
+            <span className="font-semibold text-zinc-900">{visibleName}</span>
             {formatTimestamp(item.createdAt) ? <span>{formatTimestamp(item.createdAt)}</span> : null}
           </div>
           <p className="mt-1 whitespace-pre-line text-sm leading-6 text-zinc-700">{item.content}</p>
@@ -112,28 +165,34 @@ function FeedbackItem({
             <InlineReplyInput
               value={activeReplyText}
               onChange={onReplyTextChange}
-              onSubmit={() => onReplySubmit(item.id as string)}
+              onSubmit={() => onReplySubmit(item.id as string, activeReplyIsAnonymous)}
               onCancel={() => onReplyToggle(item.id as string)}
               isSaving={isSaving}
+              isAnonymous={activeReplyIsAnonymous}
+              onAnonymousChange={onReplyAnonymousChange}
             />
           ) : null}
 
           {replies.length > 0 ? (
             <div className="mt-3 space-y-3 border-r border-zinc-200 pr-4">
-              {replies.map((reply) => (
-                <div key={reply.id} className="flex items-start gap-3">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-[11px] font-bold text-zinc-600">
-                    {avatarLabel(reply.userDisplayName)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
-                      <span className="font-semibold text-zinc-900">{reply.userDisplayName}</span>
-                      {formatTimestamp(reply.createdAt) ? <span>{formatTimestamp(reply.createdAt)}</span> : null}
+              {replies.map((reply) => {
+                const replyVisibleName = getVisibleName(reply);
+
+                return (
+                  <div key={reply.id} className="flex items-start gap-3">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-[11px] font-bold text-zinc-600">
+                      {avatarLabel(replyVisibleName)}
                     </div>
-                    <p className="mt-1 whitespace-pre-line text-sm leading-6 text-zinc-700">{reply.content}</p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 text-xs text-zinc-500">
+                        <span className="font-semibold text-zinc-900">{replyVisibleName}</span>
+                        {formatTimestamp(reply.createdAt) ? <span>{formatTimestamp(reply.createdAt)}</span> : null}
+                      </div>
+                      <p className="mt-1 whitespace-pre-line text-sm leading-6 text-zinc-700">{reply.content}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : null}
         </div>
@@ -155,13 +214,15 @@ export function FeedbackSection({
   isSignedIn: boolean;
   currentUserName: string;
   onLogin: () => void;
-  onSubmitFeedback: (value: string) => Promise<void>;
-  onSubmitReply: (parentId: string, value: string) => Promise<void>;
+  onSubmitFeedback: (value: string, isAnonymous: boolean) => Promise<void>;
+  onSubmitReply: (parentId: string, value: string, isAnonymous: boolean) => Promise<void>;
   isSaving: boolean;
 }) {
   const [feedbackText, setFeedbackText] = useState("");
+  const [isFeedbackAnonymous, setIsFeedbackAnonymous] = useState(false);
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
   const [activeReplyText, setActiveReplyText] = useState("");
+  const [isReplyAnonymous, setIsReplyAnonymous] = useState(false);
 
   const rootComments = useMemo(() => comments.filter((item) => !item.parentId), [comments]);
   const repliesByParent = useMemo(() => {
@@ -191,21 +252,26 @@ export function FeedbackSection({
               replies={repliesByParent.get(comment.id ?? "") ?? []}
               activeReplyId={activeReplyId}
               activeReplyText={activeReplyText}
+              activeReplyIsAnonymous={isReplyAnonymous}
               onReplyToggle={(id) => {
                 if (activeReplyId === id) {
                   setActiveReplyId(null);
                   setActiveReplyText("");
+                  setIsReplyAnonymous(false);
                   return;
                 }
                 setActiveReplyId(id);
                 setActiveReplyText("");
+                setIsReplyAnonymous(false);
               }}
               onReplyTextChange={setActiveReplyText}
-              onReplySubmit={async (parentId) => {
+              onReplyAnonymousChange={setIsReplyAnonymous}
+              onReplySubmit={async (parentId, isAnonymous) => {
                 if (!activeReplyText.trim()) return;
-                await onSubmitReply(parentId, activeReplyText);
+                await onSubmitReply(parentId, activeReplyText, isAnonymous);
                 setActiveReplyText("");
                 setActiveReplyId(null);
+                setIsReplyAnonymous(false);
               }}
               canReply={isSignedIn}
               isSaving={isSaving}
@@ -220,15 +286,17 @@ export function FeedbackSection({
           onSubmit={async (event) => {
             event.preventDefault();
             if (!feedbackText.trim()) return;
-            await onSubmitFeedback(feedbackText);
+            await onSubmitFeedback(feedbackText, isFeedbackAnonymous);
             setFeedbackText("");
+            setIsFeedbackAnonymous(false);
           }}
         >
           <div className="mb-2 flex items-center gap-2 text-xs text-zinc-500">
             <span className="font-semibold text-zinc-800">{currentUserName}</span>
             <span>أضف رأيك</span>
           </div>
-          <div className="flex items-center gap-2 [direction:ltr]">
+          <PublishModeToggle isAnonymous={isFeedbackAnonymous} onChange={setIsFeedbackAnonymous} />
+          <div className="mt-2 flex items-center gap-2 [direction:ltr]">
             <input
               value={feedbackText}
               onChange={(event) => setFeedbackText(event.target.value)}

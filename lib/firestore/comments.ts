@@ -44,6 +44,7 @@ export async function createWallpaperComment(input: {
   wallpaperId: string;
   userId: string;
   userDisplayName: string;
+  isAnonymous?: boolean;
   content: string;
   parentId?: string | null;
   isAdminReply?: boolean;
@@ -52,6 +53,7 @@ export async function createWallpaperComment(input: {
     wallpaperId: input.wallpaperId,
     userId: input.userId,
     userDisplayName: input.userDisplayName,
+    isAnonymous: Boolean(input.isAnonymous),
     content: input.content.trim(),
     parentId: input.parentId ?? null,
     isAdminReply: Boolean(input.isAdminReply),
