@@ -14,6 +14,7 @@ import type { Swiper as SwiperType } from "swiper";
 import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { ImageLightbox } from "@/app/_components/image-lightbox";
 import { FeedbackSection } from "@/app/_components/feedback-section";
+import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
 import {
@@ -22,7 +23,10 @@ import {
   listWallpaperComments,
   updateWallpaperComment,
 } from "@/lib/firestore/comments";
-import { getWallpaperById } from "@/lib/firestore/wallpapers";
+import {
+  getWallpaperById,
+  listPublishedWallpapersByCategory,
+} from "@/lib/firestore/wallpapers";
 import { useToggleFavorite } from "@/lib/hooks/use-favorites";
 import { downloadImageFromUrl } from "@/lib/utils/download";
 import type { WallpaperComment } from "@/types/comment";
@@ -54,6 +58,7 @@ export default function WallpaperDetailsPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [comments, setComments] = useState<WallpaperComment[]>([]);
+  const [suggestedWallpapers, setSuggestedWallpapers] = useState<Wallpaper[]>([]);
   const [isCommentSaving, setIsCommentSaving] = useState(false);
   const [isFavoriteLoginDialogOpen, setIsFavoriteLoginDialogOpen] = useState(false);
   const swiperRef = useRef<SwiperType | null>(null);
@@ -72,6 +77,14 @@ export default function WallpaperDetailsPage() {
       try {
         const wallpaperData = await getWallpaperById(id);
         setWallpaper(wallpaperData);
+
+        if (wallpaperData?.categorySlugs?.[0]) {
+          const related = await listPublishedWallpapersByCategory(wallpaperData.categorySlugs[0], 8);
+          setSuggestedWallpapers(related.filter((item) => item.id !== wallpaperData.id).slice(0, 4));
+        } else {
+          setSuggestedWallpapers([]);
+        }
+
         await loadComments();
       } finally {
         setIsLoading(false);
@@ -309,6 +322,22 @@ export default function WallpaperDetailsPage() {
           </section>
         </div>
       </article>
+
+
+      {suggestedWallpapers.length > 0 ? (
+        <section className="mx-auto mt-5 w-full max-w-6xl space-y-3 lg:max-w-[88rem]">
+          <div className="flex items-center justify-between [direction:rtl]">
+            <h2 className="text-base font-bold text-zinc-900">خلفيات مشابهة</h2>
+            <span className="text-xs text-zinc-500">من نفس التصنيف</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+            {suggestedWallpapers.map((suggested) => (
+              <PublicWallpaperCard key={suggested.id} wallpaper={suggested} titleClassName="line-clamp-2 text-sm font-semibold text-zinc-900" />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <MobileBottomNav activeTab="home" />
 

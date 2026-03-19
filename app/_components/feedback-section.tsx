@@ -15,12 +15,11 @@ import type { CommentDisplayIdentityMode, WallpaperComment } from "@/types/comme
 
 const DISPLAY_IDENTITY_OPTIONS: Array<{
   value: CommentDisplayIdentityMode;
-  label: string;
   subtitle: string;
 }> = [
-  { value: "real", label: "الاسم الحقيقي", subtitle: "النشر باسم ملفك الشخصي" },
-  { value: "anonymous", label: "Anonymous", subtitle: "إخفاء اسمك الحقيقي" },
-  { value: "blouza", label: "بلوزة", subtitle: "النشر باسم بلوزة" },
+  { value: "real", subtitle: "النشر باسم ملفك الشخصي" },
+  { value: "anonymous", subtitle: "إخفاء اسمك الحقيقي" },
+  { value: "blouza", subtitle: "النشر باسم بلوزة" },
 ];
 
 function formatTimestamp(value?: WallpaperComment["createdAt"]) {
@@ -60,12 +59,22 @@ function wasEdited(comment: Pick<WallpaperComment, "createdAt" | "updatedAt">) {
   return updatedSeconds > createdSeconds;
 }
 
-function AvatarBadge({ name, subtle = false }: { name: string; subtle?: boolean }) {
+function AvatarBadge({
+  name,
+  subtle = false,
+  className = "",
+}: {
+  name: string;
+  subtle?: boolean;
+  className?: string;
+}) {
   return (
     <div
       className={[
         "flex items-center justify-center rounded-full text-xs font-bold",
-        subtle ? "h-8 w-8 bg-zinc-100 text-zinc-600" : "h-10 w-10 bg-zinc-900/90 text-white",
+        subtle ? "bg-zinc-100 text-zinc-600" : "bg-zinc-900/90 text-white",
+        subtle ? "h-7 w-7" : "h-9 w-9",
+        className,
       ].join(" ")}
     >
       {avatarLabel(name)}
@@ -148,7 +157,7 @@ function IdentitySelectorSheet({
                   selected ? "bg-zinc-900 text-white" : "hover:bg-zinc-50",
                 ].join(" ")}
               >
-                <AvatarBadge name={optionName} subtle={!selected} />
+                <AvatarBadge name={optionName} subtle={!selected} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-semibold">{optionName}</div>
                   <div className={selected ? "text-xs text-white/75" : "text-xs text-zinc-500"}>{option.subtitle}</div>
@@ -164,7 +173,7 @@ function IdentitySelectorSheet({
         <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-zinc-200" />
         <div className="mb-3 text-right">
           <p className="text-sm font-semibold text-zinc-900">اختر هوية النشر</p>
-          <p className="text-xs text-zinc-500">بنفس أسلوب تطبيقات التواصل الاجتماعي.</p>
+          <p className="text-xs text-zinc-500">سيظهر التعليق أو الرد بالهوية المحددة.</p>
         </div>
         <div className="space-y-2">
           {DISPLAY_IDENTITY_OPTIONS.map((option) => {
@@ -184,7 +193,7 @@ function IdentitySelectorSheet({
                   selected ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white",
                 ].join(" ")}
               >
-                <AvatarBadge name={optionName} subtle={!selected} />
+                <AvatarBadge name={optionName} subtle={!selected} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-semibold">{optionName}</div>
                   <div className={selected ? "text-xs text-white/75" : "text-xs text-zinc-500"}>{option.subtitle}</div>
@@ -206,10 +215,12 @@ function IdentityTrigger({
   value,
   realName,
   onClick,
+  small = false,
 }: {
   value: CommentDisplayIdentityMode;
   realName: string;
   onClick: () => void;
+  small?: boolean;
 }) {
   const label = getIdentityLabel(value, realName);
 
@@ -217,15 +228,14 @@ function IdentityTrigger({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-2 py-1 text-right shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
+      className={[
+        "inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-100/90 pr-1 pl-2 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-100",
+        small ? "h-8" : "h-10",
+      ].join(" ")}
       aria-label="تحديد هوية النشر"
     >
-      <AvatarBadge name={label} subtle />
-      <div className="max-w-28 min-w-0 text-right">
-        <div className="truncate text-xs font-semibold text-zinc-900">{label}</div>
-        <div className="text-[11px] text-zinc-500">الهوية الظاهرة</div>
-      </div>
-      <ChevronDown size={14} className="shrink-0 text-zinc-500" />
+      <AvatarBadge name={label} subtle className={small ? "h-6 w-6 text-[10px]" : "h-7 w-7"} />
+      <ChevronDown size={small ? 12 : 14} className="shrink-0" />
     </button>
   );
 }
@@ -251,14 +261,14 @@ function FeedbackComposer({
 
   return (
     <form
-      className="rounded-3xl border border-zinc-200/90 bg-white px-3 py-3 shadow-sm"
+      className="rounded-[26px] border border-zinc-200/90 bg-white px-2.5 py-2 shadow-sm"
       onSubmit={async (event) => {
         event.preventDefault();
         if (!value.trim()) return;
         await onSubmit();
       }}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         <div className="relative shrink-0">
           <IdentityTrigger value={identityMode} realName={currentUserName} onClick={() => setIsIdentityOpen((prev) => !prev)} />
           <IdentitySelectorSheet
@@ -269,7 +279,7 @@ function FeedbackComposer({
             realName={currentUserName}
           />
         </div>
-        <label className="flex min-h-11 flex-1 items-center rounded-full bg-zinc-100 px-4 text-sm text-zinc-500">
+        <label className="flex h-10 flex-1 items-center rounded-full bg-zinc-100 px-4 text-sm text-zinc-500">
           <input
             value={value}
             onChange={(event) => onChange(event.target.value)}
@@ -280,7 +290,7 @@ function FeedbackComposer({
         <button
           type="submit"
           disabled={isSaving || !value.trim()}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-white shadow-sm disabled:opacity-50"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-white shadow-sm disabled:opacity-50"
           aria-label="إرسال الرأي"
         >
           <Send size={15} />
@@ -366,9 +376,14 @@ function ReplyComposer({
   const [isIdentityOpen, setIsIdentityOpen] = useState(false);
 
   return (
-    <div className="mt-3 rounded-2xl bg-zinc-50 px-3 py-3">
-      <div className="relative mb-2 inline-flex">
-        <IdentityTrigger value={identityMode} realName={currentUserName} onClick={() => setIsIdentityOpen((prev) => !prev)} />
+    <div className="mt-2 flex items-center gap-2">
+      <div className="relative shrink-0">
+        <IdentityTrigger
+          value={identityMode}
+          realName={currentUserName}
+          small
+          onClick={() => setIsIdentityOpen((prev) => !prev)}
+        />
         <IdentitySelectorSheet
           open={isIdentityOpen}
           onClose={() => setIsIdentityOpen(false)}
@@ -377,26 +392,24 @@ function ReplyComposer({
           realName={currentUserName}
         />
       </div>
-      <div className="flex items-center gap-2">
-        <label className="flex min-h-10 flex-1 items-center rounded-full bg-white px-4 text-sm text-zinc-500 shadow-sm">
-          <input
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
-            placeholder="اكتب ردك"
-            className="w-full bg-transparent text-right text-sm text-zinc-900 placeholder:text-zinc-500 outline-none"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={async () => onSubmit()}
-          disabled={isSaving || !value.trim()}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-zinc-900 text-white disabled:opacity-50"
-          aria-label="إرسال الرد"
-        >
-          <Send size={14} />
-        </button>
-      </div>
-      <button type="button" onClick={onCancel} className="mt-2 text-xs font-medium text-zinc-500">
+      <label className="flex h-9 flex-1 items-center rounded-full bg-zinc-100 px-3 text-sm text-zinc-500">
+        <input
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="اكتب ردك"
+          className="w-full bg-transparent text-right text-sm text-zinc-900 placeholder:text-zinc-500 outline-none"
+        />
+      </label>
+      <button
+        type="button"
+        onClick={async () => onSubmit()}
+        disabled={isSaving || !value.trim()}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-white disabled:opacity-50"
+        aria-label="إرسال الرد"
+      >
+        <Send size={13} />
+      </button>
+      <button type="button" onClick={onCancel} className="text-xs font-medium text-zinc-500">
         إلغاء
       </button>
     </div>
@@ -418,7 +431,6 @@ function CommentBody({
   onReplyIdentityModeChange,
   onReplySubmit,
   onReplyCancel,
-  onEditStart,
   onEditSubmit,
   onDelete,
   isSaving,
@@ -437,7 +449,6 @@ function CommentBody({
   onReplyIdentityModeChange?: (value: CommentDisplayIdentityMode) => void;
   onReplySubmit?: () => Promise<void>;
   onReplyCancel?: () => void;
-  onEditStart: () => void;
   onEditSubmit: (content: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
   onDelete: () => Promise<void>;
   isSaving: boolean;
@@ -449,10 +460,15 @@ function CommentBody({
   const [isIdentityOpen, setIsIdentityOpen] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-
   const openActions = () => {
     if (!canEdit && !canDelete) return;
     setIsMenuOpen(true);
+  };
+
+  const beginEditing = () => {
+    setEditText(item.content);
+    setEditIdentityMode(item.displayIdentityMode ?? "real");
+    setIsEditing(true);
   };
 
   const startLongPress = () => {
@@ -471,10 +487,7 @@ function CommentBody({
 
   return (
     <div
-      className={[
-        "group relative rounded-3xl px-3 py-2.5 transition",
-        isReply ? "bg-zinc-50" : "bg-zinc-100/80",
-      ].join(" ")}
+      className="group relative py-0.5"
       onTouchStart={startLongPress}
       onTouchEnd={clearLongPress}
       onTouchCancel={clearLongPress}
@@ -485,16 +498,16 @@ function CommentBody({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
-            <span className="font-semibold text-zinc-900">{visibleName}</span>
+            <span className={isReply ? "font-semibold text-zinc-800" : "font-semibold text-zinc-900"}>{visibleName}</span>
             {item.isAdminReply ? <span className="rounded-full bg-zinc-900 px-2 py-0.5 text-[10px] text-white">Admin</span> : null}
             {formatTimestamp(item.createdAt) ? <span>{formatTimestamp(item.createdAt)}</span> : null}
             {wasEdited(item) ? <span>· تم التعديل</span> : null}
           </div>
 
           {isEditing ? (
-            <div className="mt-2">
-              <div className="relative mb-2 inline-flex">
-                <IdentityTrigger value={editIdentityMode} realName={currentUserName} onClick={() => setIsIdentityOpen((prev) => !prev)} />
+            <div className="mt-2 space-y-2">
+              <div className="relative inline-flex">
+                <IdentityTrigger value={editIdentityMode} realName={currentUserName} small onClick={() => setIsIdentityOpen((prev) => !prev)} />
                 <IdentitySelectorSheet
                   open={isIdentityOpen}
                   onClose={() => setIsIdentityOpen(false)}
@@ -507,9 +520,9 @@ function CommentBody({
                 value={editText}
                 onChange={(event) => setEditText(event.target.value)}
                 rows={3}
-                className="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none"
+                className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none"
               />
-              <div className="mt-2 flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-xs">
                 <button
                   type="button"
                   onClick={async () => {
@@ -529,43 +542,33 @@ function CommentBody({
                     setEditText(item.content);
                     setEditIdentityMode(item.displayIdentityMode ?? "real");
                   }}
-                  className="rounded-full bg-zinc-200 px-3 py-1.5 font-semibold text-zinc-700"
+                  className="rounded-full bg-zinc-100 px-3 py-1.5 font-semibold text-zinc-700"
                 >
                   إلغاء
                 </button>
               </div>
             </div>
           ) : (
-            <p className="mt-1 whitespace-pre-line break-words text-sm leading-6 text-zinc-700">{item.content}</p>
+            <p className={[
+              "mt-1 whitespace-pre-line break-words leading-6 text-zinc-700",
+              isReply ? "text-[13px]" : "text-sm",
+            ].join(" ")}>{item.content}</p>
           )}
 
           {!isEditing ? (
-            <div className="mt-2 flex items-center gap-4 text-xs font-medium text-zinc-500">
+            <div className="mt-1.5 flex items-center gap-4 text-[11px] font-medium text-zinc-500">
               {onReply ? (
                 <button type="button" onClick={onReply} className="hover:text-zinc-900">
                   رد
                 </button>
               ) : null}
               {canEdit ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onEditStart();
-                    setEditText(item.content);
-                    setEditIdentityMode(item.displayIdentityMode ?? "real");
-                    setIsEditing(true);
-                  }}
-                  className="md:hidden"
-                >
+                <button type="button" onClick={beginEditing} className="md:hidden">
                   تعديل
                 </button>
               ) : null}
               {canDelete ? (
-                <button
-                  type="button"
-                  onClick={async () => onDelete()}
-                  className="text-red-500 md:hidden"
-                >
+                <button type="button" onClick={async () => onDelete()} className="text-red-500 md:hidden">
                   حذف
                 </button>
               ) : null}
@@ -578,30 +581,25 @@ function CommentBody({
             <button
               type="button"
               onClick={openActions}
-              className="hidden h-8 w-8 items-center justify-center rounded-full text-zinc-500 transition hover:bg-white hover:text-zinc-900 md:inline-flex"
+              className="hidden h-7 w-7 items-center justify-center rounded-full text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-900 md:inline-flex"
               aria-label="إجراءات التعليق"
             >
-              <MoreHorizontal size={16} />
+              <MoreHorizontal size={15} />
             </button>
             <button
               type="button"
               onClick={openActions}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 md:hidden"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full text-zinc-400 md:hidden"
               aria-label="إجراءات التعليق"
             >
-              <MoreHorizontal size={16} />
+              <MoreHorizontal size={15} />
             </button>
             <CommentActionsMenu
               open={isMenuOpen}
               onClose={() => setIsMenuOpen(false)}
               canEdit={canEdit}
               canDelete={canDelete}
-              onEdit={() => {
-                onEditStart();
-                setEditText(item.content);
-                setEditIdentityMode(item.displayIdentityMode ?? "real");
-                setIsEditing(true);
-              }}
+              onEdit={beginEditing}
               onDelete={() => {
                 void onDelete();
               }}
@@ -667,10 +665,10 @@ function FeedbackItem({
   const isReplying = activeReplyId === item.id;
 
   return (
-    <article className="py-3">
-      <div className="flex items-start gap-3">
-        <AvatarBadge name={visibleName} />
-        <div className="min-w-0 flex-1 space-y-3">
+    <article className="py-2.5">
+      <div className="flex items-start gap-2.5">
+        <AvatarBadge name={visibleName} className="mt-0.5" />
+        <div className="min-w-0 flex-1 space-y-2">
           <CommentBody
             item={item}
             visibleName={visibleName}
@@ -686,22 +684,21 @@ function FeedbackItem({
             onReplyIdentityModeChange={onReplyIdentityModeChange}
             onReplySubmit={item.id ? () => onReplySubmit(item.id as string, activeReplyIdentityMode) : undefined}
             onReplyCancel={item.id ? () => onReplyToggle(item.id as string) : undefined}
-            onEditStart={() => undefined}
             onEditSubmit={(content, identityMode) => onEditComment(item, content, identityMode)}
             onDelete={() => onDeleteComment(item, replies.map((reply) => reply.id).filter(Boolean) as string[])}
             isSaving={isSaving}
           />
 
           {replies.length > 0 ? (
-            <div className="space-y-2 border-r border-zinc-200/80 pr-4">
+            <div className="space-y-2 border-r border-zinc-200 pr-3">
               {replies.map((reply) => {
                 const replyVisibleName = getVisibleName(reply);
                 const canEditReply = currentUserId === reply.userId;
                 const canDeleteReply = canEditReply || isAdmin;
 
                 return (
-                  <div key={reply.id} className="flex items-start gap-3">
-                    <AvatarBadge name={replyVisibleName} subtle />
+                  <div key={reply.id} className="flex items-start gap-2.5">
+                    <AvatarBadge name={replyVisibleName} subtle className="mt-0.5 h-7 w-7 text-[10px]" />
                     <div className="min-w-0 flex-1">
                       <CommentBody
                         item={reply}
@@ -710,7 +707,6 @@ function FeedbackItem({
                         canDelete={canDeleteReply}
                         isReply
                         currentUserName={currentUserName}
-                        onEditStart={() => undefined}
                         onEditSubmit={(content, identityMode) => onEditComment(reply, content, identityMode)}
                         onDelete={() => onDeleteComment(reply)}
                         isSaving={isSaving}
@@ -771,7 +767,7 @@ export function FeedbackSection({
   }, [comments]);
 
   return (
-    <section id="comments" className="space-y-4 [direction:rtl]">
+    <section id="comments" className="space-y-3.5 [direction:rtl]">
       <div className="flex items-center gap-2 text-zinc-900">
         <MessageCircleMore size={18} className="text-zinc-500" />
         <h2 className="text-base font-bold">الآراء</h2>
@@ -792,9 +788,9 @@ export function FeedbackSection({
           onIdentityModeChange={setFeedbackIdentityMode}
         />
       ) : (
-        <div className="rounded-3xl border border-zinc-200 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-[26px] border border-zinc-200 bg-white px-4 py-3 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-500">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-500">
               <UserRound size={18} />
             </div>
             <div className="flex-1 text-sm text-zinc-700">سجّل الدخول لإضافة رأيك أو الرد على الآخرين.</div>
@@ -809,9 +805,9 @@ export function FeedbackSection({
         </div>
       )}
 
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {rootComments.length === 0 ? (
-          <div className="rounded-3xl bg-white px-4 py-6 text-center text-sm text-zinc-500 shadow-sm">لا توجد آراء حتى الآن.</div>
+          <div className="rounded-[26px] bg-white px-4 py-6 text-center text-sm text-zinc-500 shadow-sm">لا توجد آراء حتى الآن.</div>
         ) : (
           rootComments.map((comment) => (
             <FeedbackItem
