@@ -160,7 +160,7 @@ function IdentitySelectorSheet({
                 <AvatarBadge name={optionName} subtle={!selected} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-semibold">{optionName}</div>
-                  <div className={selected ? "text-xs text-white/75" : "text-xs text-zinc-500"}>{option.subtitle}</div>
+                  <div className={selected ? "text-xs text-white/80" : "text-xs text-zinc-700"}>{option.subtitle}</div>
                 </div>
                 {selected ? <Check size={16} className="shrink-0" /> : null}
               </button>
@@ -196,7 +196,7 @@ function IdentitySelectorSheet({
                 <AvatarBadge name={optionName} subtle={!selected} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-semibold">{optionName}</div>
-                  <div className={selected ? "text-xs text-white/75" : "text-xs text-zinc-500"}>{option.subtitle}</div>
+                  <div className={selected ? "text-xs text-white/80" : "text-xs text-zinc-700"}>{option.subtitle}</div>
                 </div>
                 {selected ? <Check size={16} className="shrink-0" /> : null}
               </button>
@@ -283,7 +283,7 @@ function FeedbackComposer({
           <input
             value={value}
             onChange={(event) => onChange(event.target.value)}
-            placeholder="أضف رأيك"
+            placeholder="أضف تعليق أو فيدباك"
             className="w-full bg-transparent text-right text-sm text-zinc-900 placeholder:text-zinc-500 outline-none"
           />
         </label>
@@ -562,16 +562,6 @@ function CommentBody({
                   رد
                 </button>
               ) : null}
-              {canEdit ? (
-                <button type="button" onClick={beginEditing} className="md:hidden">
-                  تعديل
-                </button>
-              ) : null}
-              {canDelete ? (
-                <button type="button" onClick={async () => onDelete()} className="text-red-500 md:hidden">
-                  حذف
-                </button>
-              ) : null}
             </div>
           ) : null}
         </div>
@@ -770,7 +760,7 @@ export function FeedbackSection({
     <section id="comments" className="space-y-3.5 [direction:rtl]">
       <div className="flex items-center gap-2 text-zinc-900">
         <MessageCircleMore size={18} className="text-zinc-500" />
-        <h2 className="text-base font-bold">الآراء</h2>
+        <h2 className="text-base font-bold">تعليقات</h2>
       </div>
 
       {isSignedIn ? (

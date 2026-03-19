@@ -240,9 +240,7 @@ export default function WallpaperDetailsPage() {
               <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">
                 {formattedDescription}
               </p>
-            ) : (
-              <p className="text-sm text-zinc-500">لا يوجد وصف لهذه الخلفية.</p>
-            )}
+            ) : null}
 
             <FeedbackSection
               comments={comments}
@@ -326,9 +324,8 @@ export default function WallpaperDetailsPage() {
 
       {suggestedWallpapers.length > 0 ? (
         <section className="mx-auto mt-5 w-full max-w-6xl space-y-3 lg:max-w-[88rem]">
-          <div className="flex items-center justify-between [direction:rtl]">
-            <h2 className="text-base font-bold text-zinc-900">خلفيات مشابهة</h2>
-            <span className="text-xs text-zinc-500">من نفس التصنيف</span>
+          <div className="[direction:rtl]">
+            <h2 className="text-base font-bold text-zinc-900">اقتراح خلفيات من نفس الصنف</h2>
           </div>
 
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
