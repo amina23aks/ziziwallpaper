@@ -12,8 +12,8 @@ export default function FavoritesPage() {
   const { wallpapers, isLoading } = useCurrentUserFavorites();
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 pb-24 pt-16 md:pr-24 md:pt-6">
-      <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-7xl flex-col px-4 py-5 sm:px-6 lg:px-8">
+    <main className="min-h-screen w-full overflow-x-hidden bg-zinc-50 pb-24 pt-16 md:pr-20 md:pt-6">
+      <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-[92rem] flex-col px-4 py-5 sm:px-6 lg:px-8">
         <header className="space-y-1">
           <p className="text-xs font-semibold text-zinc-600">ZIZI</p>
           <h1 className="text-xl font-extrabold text-zinc-900">المفضلة</h1>

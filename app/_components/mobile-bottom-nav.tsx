@@ -50,7 +50,7 @@ export function MobileBottomNav({
         ) : null}
       </aside>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-md items-center justify-around border-t border-zinc-200 bg-white px-4 py-3 md:hidden sm:max-w-2xl lg:max-w-5xl">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex w-full items-center justify-around border-t border-zinc-200 bg-white/98 px-4 py-3 shadow-[0_-1px_8px_rgba(0,0,0,0.04)] backdrop-blur md:hidden">
         <Link
           href="/"
           className={`${itemClass} ${activeTab === "home" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}

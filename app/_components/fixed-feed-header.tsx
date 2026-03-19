@@ -21,7 +21,7 @@ export function FixedFeedHeader({
 }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-zinc-200/80 bg-white/95 backdrop-blur-md">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[92rem] flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 md:gap-3 [direction:ltr]">
           <button
             type="button"
@@ -50,7 +50,7 @@ export function FixedFeedHeader({
           </Link>
         </div>
 
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-hide [direction:rtl]">
+        <div className="flex w-full gap-2 overflow-x-auto pb-1 pr-1 scrollbar-hide [direction:rtl]">
           <button
             type="button"
             onClick={() => onSelectCategory("all")}
