@@ -12,6 +12,7 @@ export type WallpaperComment = {
   isAnonymous?: boolean;
   content: string;
   isAdminReply?: boolean;
+  isAdminAuthor?: boolean;
   createdAt?: Timestamp | FieldValue | null;
   updatedAt?: Timestamp | FieldValue | null;
 };

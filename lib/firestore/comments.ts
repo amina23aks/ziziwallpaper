@@ -52,6 +52,7 @@ export async function createWallpaperComment(input: {
   content: string;
   parentId?: string | null;
   isAdminReply?: boolean;
+  isAdminAuthor?: boolean;
 }) {
   const identityMode = input.displayIdentityMode ?? "real";
 
@@ -64,6 +65,7 @@ export async function createWallpaperComment(input: {
     content: input.content.trim(),
     parentId: input.parentId ?? null,
     isAdminReply: Boolean(input.isAdminReply),
+    isAdminAuthor: Boolean(input.isAdminAuthor ?? input.isAdminReply),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
