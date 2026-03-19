@@ -16,7 +16,12 @@ import { ImageLightbox } from "@/app/_components/image-lightbox";
 import { FeedbackSection } from "@/app/_components/feedback-section";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
-import { createWallpaperComment, listWallpaperComments } from "@/lib/firestore/comments";
+import {
+  createWallpaperComment,
+  deleteWallpaperComment,
+  listWallpaperComments,
+  updateWallpaperComment,
+} from "@/lib/firestore/comments";
 import { getWallpaperById } from "@/lib/firestore/wallpapers";
 import { useToggleFavorite } from "@/lib/hooks/use-favorites";
 import { downloadImageFromUrl } from "@/lib/utils/download";
@@ -229,7 +234,9 @@ export default function WallpaperDetailsPage() {
             <FeedbackSection
               comments={comments}
               isSignedIn={isSignedIn}
+              currentUserId={user?.uid}
               currentUserName={userProfile?.displayName?.trim() || "مستخدم"}
+              isAdmin={userProfile?.role === "admin"}
               onLogin={() => router.push("/login")}
               isSaving={isCommentSaving}
               onSubmitFeedback={async (value, identityMode) => {
@@ -260,6 +267,38 @@ export default function WallpaperDetailsPage() {
                     content: value,
                     parentId,
                     isAdminReply: userProfile?.role === "admin",
+                  });
+                  await loadComments();
+                } finally {
+                  setIsCommentSaving(false);
+                }
+              }}
+              onEditComment={async (comment, value, identityMode) => {
+                if (!user || !comment.id || !value.trim()) return;
+                const isOwner = comment.userId === user.uid;
+                if (!isOwner) return;
+                setIsCommentSaving(true);
+                try {
+                  await updateWallpaperComment({
+                    commentId: comment.id,
+                    content: value,
+                    displayIdentityMode: identityMode,
+                  });
+                  await loadComments();
+                } finally {
+                  setIsCommentSaving(false);
+                }
+              }}
+              onDeleteComment={async (comment, replyIds) => {
+                if (!user || !comment.id) return;
+                const isOwner = comment.userId === user.uid;
+                const isAdmin = userProfile?.role === "admin";
+                if (!isOwner && !isAdmin) return;
+                setIsCommentSaving(true);
+                try {
+                  await deleteWallpaperComment({
+                    commentId: comment.id,
+                    replyIds,
                   });
                   await loadComments();
                 } finally {

@@ -1,13 +1,26 @@
 "use client";
 
-import { MessageCircleMore, Send } from "lucide-react";
-import { useMemo, useState } from "react";
+import {
+  Check,
+  ChevronDown,
+  MessageCircleMore,
+  MoreHorizontal,
+  Pencil,
+  Send,
+  Trash2,
+  UserRound,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CommentDisplayIdentityMode, WallpaperComment } from "@/types/comment";
 
-const DISPLAY_IDENTITY_OPTIONS: Array<{ value: CommentDisplayIdentityMode; label: string }> = [
-  { value: "real", label: "use real profile name" },
-  { value: "anonymous", label: "Anonymous" },
-  { value: "blouza", label: "بلوزة" },
+const DISPLAY_IDENTITY_OPTIONS: Array<{
+  value: CommentDisplayIdentityMode;
+  label: string;
+  subtitle: string;
+}> = [
+  { value: "real", label: "الاسم الحقيقي", subtitle: "النشر باسم ملفك الشخصي" },
+  { value: "anonymous", label: "Anonymous", subtitle: "إخفاء اسمك الحقيقي" },
+  { value: "blouza", label: "بلوزة", subtitle: "النشر باسم بلوزة" },
 ];
 
 function formatTimestamp(value?: WallpaperComment["createdAt"]) {
@@ -29,43 +42,309 @@ function getVisibleName(comment: Pick<WallpaperComment, "userDisplayName" | "dis
   return comment.userDisplayName;
 }
 
+function getIdentityLabel(mode: CommentDisplayIdentityMode, realName: string) {
+  if (mode === "real") return realName;
+  if (mode === "anonymous") return "Anonymous";
+  return "بلوزة";
+}
+
 function avatarLabel(name: string) {
   return name.trim().charAt(0).toUpperCase() || "؟";
 }
 
-function IdentitySelect({
-  value,
-  onChange,
-  selectId,
-}: {
-  value: CommentDisplayIdentityMode;
-  onChange: (value: CommentDisplayIdentityMode) => void;
-  selectId: string;
-}) {
+function wasEdited(comment: Pick<WallpaperComment, "createdAt" | "updatedAt">) {
+  const createdSeconds = (comment.createdAt as { seconds?: number } | null | undefined)?.seconds;
+  const updatedSeconds = (comment.updatedAt as { seconds?: number } | null | undefined)?.seconds;
+
+  if (!createdSeconds || !updatedSeconds) return false;
+  return updatedSeconds > createdSeconds;
+}
+
+function AvatarBadge({ name, subtle = false }: { name: string; subtle?: boolean }) {
   return (
-    <div className="flex items-center gap-2 text-xs text-zinc-600">
-      <label htmlFor={selectId} className="shrink-0 font-medium text-zinc-500">
-        الاسم الظاهر
-      </label>
-      <div className="min-w-0 flex-1">
-        <select
-          id={selectId}
-          value={value}
-          onChange={(event) => onChange(event.target.value as CommentDisplayIdentityMode)}
-          className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-right text-xs text-zinc-700 outline-none"
-        >
-          {DISPLAY_IDENTITY_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
+    <div
+      className={[
+        "flex items-center justify-center rounded-full text-xs font-bold",
+        subtle ? "h-8 w-8 bg-zinc-100 text-zinc-600" : "h-10 w-10 bg-zinc-900/90 text-white",
+      ].join(" ")}
+    >
+      {avatarLabel(name)}
     </div>
   );
 }
 
-function InlineReplyInput({
+function useOutsideClose<T extends HTMLElement>(open: boolean, onClose: () => void) {
+  const ref = useRef<T | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handlePointerDown(event: MouseEvent | TouchEvent) {
+      if (!ref.current?.contains(event.target as Node)) {
+        onClose();
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, [open, onClose]);
+
+  return ref;
+}
+
+function IdentitySelectorSheet({
+  open,
+  onClose,
+  value,
+  onChange,
+  realName,
+  align = "right",
+}: {
+  open: boolean;
+  onClose: () => void;
+  value: CommentDisplayIdentityMode;
+  onChange: (value: CommentDisplayIdentityMode) => void;
+  realName: string;
+  align?: "right" | "left";
+}) {
+  const desktopRef = useOutsideClose<HTMLDivElement>(open, onClose);
+
+  if (!open) return null;
+
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/20 md:hidden" onClick={onClose} aria-hidden="true" />
+      <div
+        ref={desktopRef}
+        className={[
+          "absolute top-full z-50 mt-2 hidden w-72 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-2 shadow-[0_18px_50px_rgba(0,0,0,0.15)] md:block",
+          align === "left" ? "left-0" : "right-0",
+        ].join(" ")}
+      >
+        <div className="px-2 pb-2 pt-1 text-right">
+          <p className="text-sm font-semibold text-zinc-900">اختر هوية النشر</p>
+          <p className="text-xs text-zinc-500">سيظهر التعليق أو الرد بالهوية المحددة.</p>
+        </div>
+        <div className="space-y-1">
+          {DISPLAY_IDENTITY_OPTIONS.map((option) => {
+            const optionName = getIdentityLabel(option.value, realName);
+            const selected = option.value === value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value);
+                  onClose();
+                }}
+                className={[
+                  "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-right transition",
+                  selected ? "bg-zinc-900 text-white" : "hover:bg-zinc-50",
+                ].join(" ")}
+              >
+                <AvatarBadge name={optionName} subtle={!selected} />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold">{optionName}</div>
+                  <div className={selected ? "text-xs text-white/75" : "text-xs text-zinc-500"}>{option.subtitle}</div>
+                </div>
+                {selected ? <Check size={16} className="shrink-0" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-[28px] bg-white p-4 shadow-[0_-10px_35px_rgba(0,0,0,0.18)] md:hidden">
+        <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-zinc-200" />
+        <div className="mb-3 text-right">
+          <p className="text-sm font-semibold text-zinc-900">اختر هوية النشر</p>
+          <p className="text-xs text-zinc-500">بنفس أسلوب تطبيقات التواصل الاجتماعي.</p>
+        </div>
+        <div className="space-y-2">
+          {DISPLAY_IDENTITY_OPTIONS.map((option) => {
+            const optionName = getIdentityLabel(option.value, realName);
+            const selected = option.value === value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value);
+                  onClose();
+                }}
+                className={[
+                  "flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-right transition",
+                  selected ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white",
+                ].join(" ")}
+              >
+                <AvatarBadge name={optionName} subtle={!selected} />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold">{optionName}</div>
+                  <div className={selected ? "text-xs text-white/75" : "text-xs text-zinc-500"}>{option.subtitle}</div>
+                </div>
+                {selected ? <Check size={16} className="shrink-0" /> : null}
+              </button>
+            );
+          })}
+        </div>
+        <button type="button" onClick={onClose} className="mt-3 w-full rounded-2xl bg-zinc-100 px-4 py-3 text-sm font-medium text-zinc-700">
+          إغلاق
+        </button>
+      </div>
+    </>
+  );
+}
+
+function IdentityTrigger({
+  value,
+  realName,
+  onClick,
+}: {
+  value: CommentDisplayIdentityMode;
+  realName: string;
+  onClick: () => void;
+}) {
+  const label = getIdentityLabel(value, realName);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-2 py-1 text-right shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
+      aria-label="تحديد هوية النشر"
+    >
+      <AvatarBadge name={label} subtle />
+      <div className="max-w-28 min-w-0 text-right">
+        <div className="truncate text-xs font-semibold text-zinc-900">{label}</div>
+        <div className="text-[11px] text-zinc-500">الهوية الظاهرة</div>
+      </div>
+      <ChevronDown size={14} className="shrink-0 text-zinc-500" />
+    </button>
+  );
+}
+
+function FeedbackComposer({
+  value,
+  onChange,
+  onSubmit,
+  isSaving,
+  currentUserName,
+  identityMode,
+  onIdentityModeChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: () => Promise<void>;
+  isSaving: boolean;
+  currentUserName: string;
+  identityMode: CommentDisplayIdentityMode;
+  onIdentityModeChange: (value: CommentDisplayIdentityMode) => void;
+}) {
+  const [isIdentityOpen, setIsIdentityOpen] = useState(false);
+
+  return (
+    <form
+      className="rounded-3xl border border-zinc-200/90 bg-white px-3 py-3 shadow-sm"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        if (!value.trim()) return;
+        await onSubmit();
+      }}
+    >
+      <div className="flex items-center gap-3">
+        <div className="relative shrink-0">
+          <IdentityTrigger value={identityMode} realName={currentUserName} onClick={() => setIsIdentityOpen((prev) => !prev)} />
+          <IdentitySelectorSheet
+            open={isIdentityOpen}
+            onClose={() => setIsIdentityOpen(false)}
+            value={identityMode}
+            onChange={onIdentityModeChange}
+            realName={currentUserName}
+          />
+        </div>
+        <label className="flex min-h-11 flex-1 items-center rounded-full bg-zinc-100 px-4 text-sm text-zinc-500">
+          <input
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder="أضف رأيك"
+            className="w-full bg-transparent text-right text-sm text-zinc-900 placeholder:text-zinc-500 outline-none"
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={isSaving || !value.trim()}
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-white shadow-sm disabled:opacity-50"
+          aria-label="إرسال الرأي"
+        >
+          <Send size={15} />
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function CommentActionsMenu({
+  open,
+  onClose,
+  canEdit,
+  canDelete,
+  onEdit,
+  onDelete,
+}: {
+  open: boolean;
+  onClose: () => void;
+  canEdit: boolean;
+  canDelete: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const ref = useOutsideClose<HTMLDivElement>(open, onClose);
+
+  if (!open || (!canEdit && !canDelete)) return null;
+
+  return (
+    <div
+      ref={ref}
+      className="absolute left-0 top-full z-40 mt-2 min-w-32 rounded-2xl border border-zinc-200 bg-white p-1.5 shadow-[0_14px_40px_rgba(0,0,0,0.14)]"
+    >
+      {canEdit ? (
+        <button
+          type="button"
+          onClick={() => {
+            onEdit();
+            onClose();
+          }}
+          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+        >
+          <Pencil size={14} />
+          <span>تعديل</span>
+        </button>
+      ) : null}
+      {canDelete ? (
+        <button
+          type="button"
+          onClick={() => {
+            onDelete();
+            onClose();
+          }}
+          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+        >
+          <Trash2 size={14} />
+          <span>حذف</span>
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function ReplyComposer({
   value,
   onChange,
   onSubmit,
@@ -73,6 +352,7 @@ function InlineReplyInput({
   isSaving,
   identityMode,
   onIdentityModeChange,
+  currentUserName,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -81,34 +361,267 @@ function InlineReplyInput({
   isSaving: boolean;
   identityMode: CommentDisplayIdentityMode;
   onIdentityModeChange: (value: CommentDisplayIdentityMode) => void;
+  currentUserName: string;
 }) {
+  const [isIdentityOpen, setIsIdentityOpen] = useState(false);
+
   return (
-    <div className="mt-3 rounded-2xl border border-zinc-200 bg-white px-3 py-2.5">
-      <IdentitySelect value={identityMode} onChange={onIdentityModeChange} selectId="reply-identity-mode" />
-      <div className="mt-2 flex items-center gap-2 [direction:ltr]">
-        <input
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder="اكتب ردك..."
-          className="w-full min-w-0 bg-transparent text-right text-sm text-zinc-900 placeholder:text-zinc-400 outline-none"
+    <div className="mt-3 rounded-2xl bg-zinc-50 px-3 py-3">
+      <div className="relative mb-2 inline-flex">
+        <IdentityTrigger value={identityMode} realName={currentUserName} onClick={() => setIsIdentityOpen((prev) => !prev)} />
+        <IdentitySelectorSheet
+          open={isIdentityOpen}
+          onClose={() => setIsIdentityOpen(false)}
+          value={identityMode}
+          onChange={onIdentityModeChange}
+          realName={currentUserName}
         />
+      </div>
+      <div className="flex items-center gap-2">
+        <label className="flex min-h-10 flex-1 items-center rounded-full bg-white px-4 text-sm text-zinc-500 shadow-sm">
+          <input
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder="اكتب ردك"
+            className="w-full bg-transparent text-right text-sm text-zinc-900 placeholder:text-zinc-500 outline-none"
+          />
+        </label>
         <button
           type="button"
           onClick={async () => onSubmit()}
           disabled={isSaving || !value.trim()}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-white disabled:opacity-50"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-zinc-900 text-white disabled:opacity-50"
           aria-label="إرسال الرد"
         >
           <Send size={14} />
         </button>
       </div>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="mt-2 text-xs font-medium text-zinc-500"
-      >
+      <button type="button" onClick={onCancel} className="mt-2 text-xs font-medium text-zinc-500">
         إلغاء
       </button>
+    </div>
+  );
+}
+
+function CommentBody({
+  item,
+  visibleName,
+  canEdit,
+  canDelete,
+  isReply,
+  currentUserName,
+  onReply,
+  isReplying,
+  replyValue,
+  replyIdentityMode,
+  onReplyValueChange,
+  onReplyIdentityModeChange,
+  onReplySubmit,
+  onReplyCancel,
+  onEditStart,
+  onEditSubmit,
+  onDelete,
+  isSaving,
+}: {
+  item: WallpaperComment;
+  visibleName: string;
+  canEdit: boolean;
+  canDelete: boolean;
+  isReply: boolean;
+  currentUserName: string;
+  onReply?: () => void;
+  isReplying?: boolean;
+  replyValue?: string;
+  replyIdentityMode?: CommentDisplayIdentityMode;
+  onReplyValueChange?: (value: string) => void;
+  onReplyIdentityModeChange?: (value: CommentDisplayIdentityMode) => void;
+  onReplySubmit?: () => Promise<void>;
+  onReplyCancel?: () => void;
+  onEditStart: () => void;
+  onEditSubmit: (content: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
+  onDelete: () => Promise<void>;
+  isSaving: boolean;
+}) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(item.content);
+  const [editIdentityMode, setEditIdentityMode] = useState<CommentDisplayIdentityMode>(item.displayIdentityMode ?? "real");
+  const [isIdentityOpen, setIsIdentityOpen] = useState(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+
+  const openActions = () => {
+    if (!canEdit && !canDelete) return;
+    setIsMenuOpen(true);
+  };
+
+  const startLongPress = () => {
+    if (typeof window === "undefined" || window.innerWidth >= 768 || (!canEdit && !canDelete)) return;
+    longPressTimer.current = setTimeout(() => {
+      setIsMenuOpen(true);
+    }, 450);
+  };
+
+  const clearLongPress = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  return (
+    <div
+      className={[
+        "group relative rounded-3xl px-3 py-2.5 transition",
+        isReply ? "bg-zinc-50" : "bg-zinc-100/80",
+      ].join(" ")}
+      onTouchStart={startLongPress}
+      onTouchEnd={clearLongPress}
+      onTouchCancel={clearLongPress}
+      onMouseDown={startLongPress}
+      onMouseUp={clearLongPress}
+      onMouseLeave={clearLongPress}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
+            <span className="font-semibold text-zinc-900">{visibleName}</span>
+            {item.isAdminReply ? <span className="rounded-full bg-zinc-900 px-2 py-0.5 text-[10px] text-white">Admin</span> : null}
+            {formatTimestamp(item.createdAt) ? <span>{formatTimestamp(item.createdAt)}</span> : null}
+            {wasEdited(item) ? <span>· تم التعديل</span> : null}
+          </div>
+
+          {isEditing ? (
+            <div className="mt-2">
+              <div className="relative mb-2 inline-flex">
+                <IdentityTrigger value={editIdentityMode} realName={currentUserName} onClick={() => setIsIdentityOpen((prev) => !prev)} />
+                <IdentitySelectorSheet
+                  open={isIdentityOpen}
+                  onClose={() => setIsIdentityOpen(false)}
+                  value={editIdentityMode}
+                  onChange={setEditIdentityMode}
+                  realName={currentUserName}
+                />
+              </div>
+              <textarea
+                value={editText}
+                onChange={(event) => setEditText(event.target.value)}
+                rows={3}
+                className="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none"
+              />
+              <div className="mt-2 flex items-center gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!editText.trim()) return;
+                    await onEditSubmit(editText, editIdentityMode);
+                    setIsEditing(false);
+                  }}
+                  disabled={isSaving || !editText.trim()}
+                  className="rounded-full bg-zinc-900 px-3 py-1.5 font-semibold text-white disabled:opacity-50"
+                >
+                  حفظ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditText(item.content);
+                    setEditIdentityMode(item.displayIdentityMode ?? "real");
+                  }}
+                  className="rounded-full bg-zinc-200 px-3 py-1.5 font-semibold text-zinc-700"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-1 whitespace-pre-line break-words text-sm leading-6 text-zinc-700">{item.content}</p>
+          )}
+
+          {!isEditing ? (
+            <div className="mt-2 flex items-center gap-4 text-xs font-medium text-zinc-500">
+              {onReply ? (
+                <button type="button" onClick={onReply} className="hover:text-zinc-900">
+                  رد
+                </button>
+              ) : null}
+              {canEdit ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onEditStart();
+                    setEditText(item.content);
+                    setEditIdentityMode(item.displayIdentityMode ?? "real");
+                    setIsEditing(true);
+                  }}
+                  className="md:hidden"
+                >
+                  تعديل
+                </button>
+              ) : null}
+              {canDelete ? (
+                <button
+                  type="button"
+                  onClick={async () => onDelete()}
+                  className="text-red-500 md:hidden"
+                >
+                  حذف
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        {(canEdit || canDelete) ? (
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              onClick={openActions}
+              className="hidden h-8 w-8 items-center justify-center rounded-full text-zinc-500 transition hover:bg-white hover:text-zinc-900 md:inline-flex"
+              aria-label="إجراءات التعليق"
+            >
+              <MoreHorizontal size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={openActions}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 md:hidden"
+              aria-label="إجراءات التعليق"
+            >
+              <MoreHorizontal size={16} />
+            </button>
+            <CommentActionsMenu
+              open={isMenuOpen}
+              onClose={() => setIsMenuOpen(false)}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              onEdit={() => {
+                onEditStart();
+                setEditText(item.content);
+                setEditIdentityMode(item.displayIdentityMode ?? "real");
+                setIsEditing(true);
+              }}
+              onDelete={() => {
+                void onDelete();
+              }}
+            />
+          </div>
+        ) : null}
+      </div>
+
+      {isReplying && replyValue !== undefined && replyIdentityMode && onReplyValueChange && onReplyIdentityModeChange && onReplySubmit && onReplyCancel ? (
+        <ReplyComposer
+          value={replyValue}
+          onChange={onReplyValueChange}
+          onSubmit={onReplySubmit}
+          onCancel={onReplyCancel}
+          isSaving={isSaving}
+          identityMode={replyIdentityMode}
+          onIdentityModeChange={onReplyIdentityModeChange}
+          currentUserName={currentUserName}
+        />
+      ) : null}
     </div>
   );
 }
@@ -119,78 +632,89 @@ function FeedbackItem({
   activeReplyId,
   activeReplyText,
   activeReplyIdentityMode,
+  currentUserId,
+  currentUserName,
+  isAdmin,
+  isSaving,
+  canReply,
   onReplyToggle,
   onReplyTextChange,
   onReplyIdentityModeChange,
   onReplySubmit,
-  canReply,
-  isSaving,
+  onEditComment,
+  onDeleteComment,
 }: {
   item: WallpaperComment;
   replies: WallpaperComment[];
   activeReplyId: string | null;
   activeReplyText: string;
   activeReplyIdentityMode: CommentDisplayIdentityMode;
+  currentUserId?: string;
+  currentUserName: string;
+  isAdmin: boolean;
+  isSaving: boolean;
+  canReply: boolean;
   onReplyToggle: (id: string) => void;
   onReplyTextChange: (value: string) => void;
   onReplyIdentityModeChange: (value: CommentDisplayIdentityMode) => void;
   onReplySubmit: (parentId: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
-  canReply: boolean;
-  isSaving: boolean;
+  onEditComment: (comment: WallpaperComment, content: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
+  onDeleteComment: (comment: WallpaperComment, replyIds?: string[]) => Promise<void>;
 }) {
-  const isReplying = activeReplyId === item.id;
   const visibleName = getVisibleName(item);
+  const canEdit = currentUserId === item.userId;
+  const canDelete = canEdit || isAdmin;
+  const isReplying = activeReplyId === item.id;
 
   return (
-    <article className="border-b border-zinc-100 py-3 last:border-b-0">
-      <div className="flex items-start gap-3 overflow-hidden">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xs font-bold text-zinc-700">
-          {avatarLabel(visibleName)}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-center gap-2 text-xs text-zinc-500">
-            <span className="truncate font-semibold text-zinc-900">{visibleName}</span>
-            {formatTimestamp(item.createdAt) ? <span className="shrink-0">{formatTimestamp(item.createdAt)}</span> : null}
-          </div>
-          <p className="mt-1 whitespace-pre-line break-words text-sm leading-6 text-zinc-700">{item.content}</p>
-          {canReply && item.id ? (
-            <button
-              type="button"
-              onClick={() => onReplyToggle(item.id as string)}
-              className="mt-2 text-xs font-medium text-zinc-500 hover:text-zinc-800"
-            >
-              رد
-            </button>
-          ) : null}
-
-          {isReplying && item.id ? (
-            <InlineReplyInput
-              value={activeReplyText}
-              onChange={onReplyTextChange}
-              onSubmit={() => onReplySubmit(item.id as string, activeReplyIdentityMode)}
-              onCancel={() => onReplyToggle(item.id as string)}
-              isSaving={isSaving}
-              identityMode={activeReplyIdentityMode}
-              onIdentityModeChange={onReplyIdentityModeChange}
-            />
-          ) : null}
+    <article className="py-3">
+      <div className="flex items-start gap-3">
+        <AvatarBadge name={visibleName} />
+        <div className="min-w-0 flex-1 space-y-3">
+          <CommentBody
+            item={item}
+            visibleName={visibleName}
+            canEdit={canEdit}
+            canDelete={canDelete}
+            isReply={false}
+            currentUserName={currentUserName}
+            onReply={canReply && item.id ? () => onReplyToggle(item.id as string) : undefined}
+            isReplying={isReplying}
+            replyValue={activeReplyText}
+            replyIdentityMode={activeReplyIdentityMode}
+            onReplyValueChange={onReplyTextChange}
+            onReplyIdentityModeChange={onReplyIdentityModeChange}
+            onReplySubmit={item.id ? () => onReplySubmit(item.id as string, activeReplyIdentityMode) : undefined}
+            onReplyCancel={item.id ? () => onReplyToggle(item.id as string) : undefined}
+            onEditStart={() => undefined}
+            onEditSubmit={(content, identityMode) => onEditComment(item, content, identityMode)}
+            onDelete={() => onDeleteComment(item, replies.map((reply) => reply.id).filter(Boolean) as string[])}
+            isSaving={isSaving}
+          />
 
           {replies.length > 0 ? (
-            <div className="mt-3 space-y-3 border-r border-zinc-200 pr-4">
+            <div className="space-y-2 border-r border-zinc-200/80 pr-4">
               {replies.map((reply) => {
                 const replyVisibleName = getVisibleName(reply);
+                const canEditReply = currentUserId === reply.userId;
+                const canDeleteReply = canEditReply || isAdmin;
 
                 return (
-                  <div key={reply.id} className="flex items-start gap-3 overflow-hidden">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-[11px] font-bold text-zinc-600">
-                      {avatarLabel(replyVisibleName)}
-                    </div>
+                  <div key={reply.id} className="flex items-start gap-3">
+                    <AvatarBadge name={replyVisibleName} subtle />
                     <div className="min-w-0 flex-1">
-                      <div className="flex min-w-0 items-center gap-2 text-xs text-zinc-500">
-                        <span className="truncate font-semibold text-zinc-900">{replyVisibleName}</span>
-                        {formatTimestamp(reply.createdAt) ? <span className="shrink-0">{formatTimestamp(reply.createdAt)}</span> : null}
-                      </div>
-                      <p className="mt-1 whitespace-pre-line break-words text-sm leading-6 text-zinc-700">{reply.content}</p>
+                      <CommentBody
+                        item={reply}
+                        visibleName={replyVisibleName}
+                        canEdit={canEditReply}
+                        canDelete={canDeleteReply}
+                        isReply
+                        currentUserName={currentUserName}
+                        onEditStart={() => undefined}
+                        onEditSubmit={(content, identityMode) => onEditComment(reply, content, identityMode)}
+                        onDelete={() => onDeleteComment(reply)}
+                        isSaving={isSaving}
+                      />
                     </div>
                   </div>
                 );
@@ -206,18 +730,26 @@ function FeedbackItem({
 export function FeedbackSection({
   comments,
   isSignedIn,
+  currentUserId,
   currentUserName,
+  isAdmin,
   onLogin,
   onSubmitFeedback,
   onSubmitReply,
+  onEditComment,
+  onDeleteComment,
   isSaving,
 }: {
   comments: WallpaperComment[];
   isSignedIn: boolean;
+  currentUserId?: string;
   currentUserName: string;
+  isAdmin: boolean;
   onLogin: () => void;
   onSubmitFeedback: (value: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
   onSubmitReply: (parentId: string, value: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
+  onEditComment: (comment: WallpaperComment, value: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
+  onDeleteComment: (comment: WallpaperComment, replyIds?: string[]) => Promise<void>;
   isSaving: boolean;
 }) {
   const [feedbackText, setFeedbackText] = useState("");
@@ -229,25 +761,59 @@ export function FeedbackSection({
   const rootComments = useMemo(() => comments.filter((item) => !item.parentId), [comments]);
   const repliesByParent = useMemo(() => {
     const map = new Map<string, WallpaperComment[]>();
-    comments.filter((item) => item.parentId).forEach((item) => {
-      const key = item.parentId as string;
-      map.set(key, [...(map.get(key) ?? []), item]);
-    });
+    comments
+      .filter((item) => item.parentId)
+      .forEach((item) => {
+        const key = item.parentId as string;
+        map.set(key, [...(map.get(key) ?? []), item]);
+      });
     return map;
   }, [comments]);
 
   return (
-    <section id="comments" className="space-y-3 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white px-4 py-4 shadow-sm [direction:rtl]">
-      <div className="flex items-center gap-2">
+    <section id="comments" className="space-y-4 [direction:rtl]">
+      <div className="flex items-center gap-2 text-zinc-900">
         <MessageCircleMore size={18} className="text-zinc-500" />
-        <h2 className="text-base font-bold text-zinc-900">الآراء</h2>
+        <h2 className="text-base font-bold">الآراء</h2>
       </div>
 
-      {rootComments.length === 0 ? (
-        <p className="text-sm text-zinc-500">لا توجد آراء حتى الآن.</p>
+      {isSignedIn ? (
+        <FeedbackComposer
+          value={feedbackText}
+          onChange={setFeedbackText}
+          onSubmit={async () => {
+            await onSubmitFeedback(feedbackText, feedbackIdentityMode);
+            setFeedbackText("");
+            setFeedbackIdentityMode("real");
+          }}
+          isSaving={isSaving}
+          currentUserName={currentUserName}
+          identityMode={feedbackIdentityMode}
+          onIdentityModeChange={setFeedbackIdentityMode}
+        />
       ) : (
-        <div className="max-h-[360px] overflow-y-auto pr-1">
-          {rootComments.map((comment) => (
+        <div className="rounded-3xl border border-zinc-200 bg-white px-4 py-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-500">
+              <UserRound size={18} />
+            </div>
+            <div className="flex-1 text-sm text-zinc-700">سجّل الدخول لإضافة رأيك أو الرد على الآخرين.</div>
+            <button
+              type="button"
+              onClick={onLogin}
+              className="rounded-full bg-zinc-900 px-4 py-2 text-xs font-semibold text-white"
+            >
+              تسجيل الدخول
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-1">
+        {rootComments.length === 0 ? (
+          <div className="rounded-3xl bg-white px-4 py-6 text-center text-sm text-zinc-500 shadow-sm">لا توجد آراء حتى الآن.</div>
+        ) : (
+          rootComments.map((comment) => (
             <FeedbackItem
               key={comment.id}
               item={comment}
@@ -255,6 +821,11 @@ export function FeedbackSection({
               activeReplyId={activeReplyId}
               activeReplyText={activeReplyText}
               activeReplyIdentityMode={replyIdentityMode}
+              currentUserId={currentUserId}
+              currentUserName={currentUserName}
+              isAdmin={isAdmin}
+              isSaving={isSaving}
+              canReply={isSignedIn}
               onReplyToggle={(id) => {
                 if (activeReplyId === id) {
                   setActiveReplyId(null);
@@ -275,58 +846,12 @@ export function FeedbackSection({
                 setActiveReplyId(null);
                 setReplyIdentityMode("real");
               }}
-              canReply={isSignedIn}
-              isSaving={isSaving}
+              onEditComment={onEditComment}
+              onDeleteComment={onDeleteComment}
             />
-          ))}
-        </div>
-      )}
-
-      {isSignedIn ? (
-        <form
-          className="rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2.5"
-          onSubmit={async (event) => {
-            event.preventDefault();
-            if (!feedbackText.trim()) return;
-            await onSubmitFeedback(feedbackText, feedbackIdentityMode);
-            setFeedbackText("");
-            setFeedbackIdentityMode("real");
-          }}
-        >
-          <div className="mb-2 flex min-w-0 items-center gap-2 text-xs text-zinc-500">
-            <span className="truncate font-semibold text-zinc-800">{currentUserName}</span>
-            <span className="shrink-0">أضف رأيك</span>
-          </div>
-          <IdentitySelect value={feedbackIdentityMode} onChange={setFeedbackIdentityMode} selectId="feedback-identity-mode" />
-          <div className="mt-2 flex items-center gap-2 [direction:ltr]">
-            <input
-              value={feedbackText}
-              onChange={(event) => setFeedbackText(event.target.value)}
-              placeholder="اكتب رأيك بشكل مختصر..."
-              className="w-full min-w-0 bg-transparent text-right text-sm text-zinc-900 placeholder:text-zinc-400 outline-none"
-            />
-            <button
-              type="submit"
-              disabled={isSaving || !feedbackText.trim()}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-white disabled:opacity-50"
-              aria-label="إرسال الرأي"
-            >
-              <Send size={14} />
-            </button>
-          </div>
-        </form>
-      ) : (
-        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-700">
-          <p>سجّل الدخول لإضافة رأيك أو الرد على الآخرين.</p>
-          <button
-            type="button"
-            onClick={onLogin}
-            className="mt-2 rounded-lg border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white"
-          >
-            تسجيل الدخول
-          </button>
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </section>
   );
 }
