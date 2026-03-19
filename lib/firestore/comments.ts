@@ -1,12 +1,16 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   getDocs,
   limit,
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import type { CommentDisplayIdentityMode, WallpaperComment } from "@/types/comment";
@@ -65,4 +69,35 @@ export async function createWallpaperComment(input: {
   });
 
   return docRef.id;
+}
+
+export async function updateWallpaperComment(input: {
+  commentId: string;
+  content: string;
+  displayIdentityMode: CommentDisplayIdentityMode;
+}) {
+  await updateDoc(doc(commentsCollection, input.commentId), {
+    content: input.content.trim(),
+    displayIdentityMode: input.displayIdentityMode,
+    isAnonymous: input.displayIdentityMode !== "real",
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function deleteWallpaperComment(input: {
+  commentId: string;
+  replyIds?: string[];
+}) {
+  const ids = [input.commentId, ...(input.replyIds ?? [])];
+
+  if (ids.length <= 1) {
+    await deleteDoc(doc(commentsCollection, input.commentId));
+    return;
+  }
+
+  const batch = writeBatch(db);
+  ids.forEach((id) => {
+    batch.delete(doc(commentsCollection, id));
+  });
+  await batch.commit();
 }

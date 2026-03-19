@@ -97,6 +97,37 @@ export async function listPublishedWallpapers(maxItems = 30) {
 }
 
 
+
+export async function listPublishedWallpapersByCategory(categorySlug: string, maxItems = 12) {
+  let snapshot;
+
+  try {
+    snapshot = await getDocs(
+      query(
+        wallpapersCollection,
+        where("isPublished", "==", true),
+        where("categorySlugs", "array-contains", categorySlug),
+        orderBy("createdAt", "desc"),
+        limit(maxItems)
+      )
+    );
+  } catch {
+    snapshot = await getDocs(
+      query(
+        wallpapersCollection,
+        where("isPublished", "==", true),
+        where("categorySlugs", "array-contains", categorySlug),
+        limit(maxItems)
+      )
+    );
+  }
+
+  return snapshot.docs.map((item) => ({
+    id: item.id,
+    ...(item.data() as Omit<Wallpaper, "id">),
+  }));
+}
+
 export async function listPublishedWallpapersByQuestionPrompt(
   questionPromptSlug: string,
   maxItems = 50
