@@ -83,10 +83,7 @@ export default function AdminQuestionsPage() {
 
                 <div className="min-w-0 space-y-1">
                   <p className="line-clamp-1 text-sm font-semibold text-zinc-900">{question.title}</p>
-                  <p className="line-clamp-1 text-xs text-zinc-600">
-                    الخلفية المرتبطة: {question.wallpaperTitle || question.wallpaperId}
-                  </p>
-                  <p className="text-xs text-zinc-500">الحالة: {question.isActive ? "مفعّل" : "مخفي"}</p>
+                  <p className="text-xs text-zinc-500">رابط السؤال: /question/{question.slug}</p>
                 </div>
 
                 <div className="col-span-2 flex gap-2 sm:col-auto sm:justify-end">

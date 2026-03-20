@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/upload";
 import { createCategory, listCategories } from "@/lib/firestore/categories";
-import { createQuestion, getQuestionBySlug, updateQuestion } from "@/lib/firestore/questions";
+import { createQuestion } from "@/lib/firestore/questions";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { createWallpaper, updateWallpaper } from "@/lib/firestore/wallpapers";
 import type { Category } from "@/types/category";
@@ -25,6 +25,7 @@ const wallpaperSchema = z.object({
 const inlineCategorySchema = z.object({
   nameAr: z.string().trim().min(1, "اسم التصنيف مطلوب"),
 });
+
 const inlineQuestionSchema = z.object({
   title: z.string().trim().min(1, "نص السؤال مطلوب"),
 });
@@ -55,31 +56,6 @@ function FieldHint({ children }: { children: React.ReactNode }) {
   return <p className="text-xs leading-5 text-zinc-600 sm:text-sm">{children}</p>;
 }
 
-async function syncSelectedQuestionsToWallpaper(
-  questionSlugs: string[],
-  linkedWallpaperId: string,
-  linkedWallpaperTitle: string
-) {
-  await Promise.all(
-    questionSlugs.map(async (slug) => {
-      const question = await getQuestionBySlug(slug);
-
-      if (!question?.id) {
-        return;
-      }
-
-      await updateQuestion(question.id, {
-        title: question.title,
-        imageUrl: question.imageUrl,
-        wallpaperId: linkedWallpaperId,
-        wallpaperTitle: linkedWallpaperTitle,
-        slug: question.slug,
-        isActive: question.isActive,
-      });
-    })
-  );
-}
-
 export function WallpaperForm({
   mode,
   wallpaperId,
@@ -96,7 +72,7 @@ export function WallpaperForm({
   const [categories, setCategories] = useState<Category[]>([]);
   const [questionPrompts, setQuestionPrompts] = useState<QuestionPrompt[]>([]);
   const [selectedCategorySlugs, setSelectedCategorySlugs] = useState<string[]>([]);
-  const [selectedQuestionPromptSlugs, setSelectedQuestionPromptSlugs] = useState<string[]>([]);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string>(initialWallpaper?.questionId ?? "");
   const [uploadedImages, setUploadedImages] = useState<UploadedImagePreview[]>([]);
   const [showInlineCategoryForm, setShowInlineCategoryForm] = useState(false);
   const [showInlineQuestionForm, setShowInlineQuestionForm] = useState(false);
@@ -131,10 +107,7 @@ export function WallpaperForm({
 
   useEffect(() => {
     async function loadPageData() {
-      const [categoriesResult, promptsResult] = await Promise.all([
-        listCategories(),
-        listQuestionPrompts(),
-      ]);
+      const [categoriesResult, promptsResult] = await Promise.all([listCategories(), listQuestionPrompts()]);
       setCategories(categoriesResult);
       setQuestionPrompts(promptsResult);
     }
@@ -146,7 +119,6 @@ export function WallpaperForm({
     if (!initialWallpaper) return;
 
     setSelectedCategorySlugs(initialWallpaper.categorySlugs ?? []);
-    setSelectedQuestionPromptSlugs(initialWallpaper.questionPromptSlugs ?? []);
     setUploadedImages(
       (initialWallpaper.images ?? []).map((image, index) => ({
         ...image,
@@ -161,16 +133,32 @@ export function WallpaperForm({
     });
   }, [initialWallpaper, reset]);
 
+  useEffect(() => {
+    if (!initialWallpaper) return;
+
+    if (initialWallpaper.questionId) {
+      setSelectedQuestionId(initialWallpaper.questionId);
+      return;
+    }
+
+    const legacyPromptSlug = initialWallpaper.questionPromptSlugs?.[0];
+    if (!legacyPromptSlug) return;
+
+    const matchedQuestion = questionPrompts.find((item) => item.slug === legacyPromptSlug);
+    if (matchedQuestion?.id) {
+      setSelectedQuestionId(matchedQuestion.id);
+    }
+  }, [initialWallpaper, questionPrompts]);
+
   const selectedCategoriesText = useMemo(() => {
     if (selectedCategorySlugs.length === 0) return "لم يتم اختيار تصنيف";
     return selectedCategorySlugs.join("، ");
   }, [selectedCategorySlugs]);
-  const selectedQuestionsText = useMemo(() => {
-    if (selectedQuestionPromptSlugs.length === 0) return "لم يتم اختيار سؤال";
-    return selectedQuestionPromptSlugs
-      .map((slug) => questionPrompts.find((item) => item.slug === slug)?.questionAr ?? slug)
-      .join("، ");
-  }, [questionPrompts, selectedQuestionPromptSlugs]);
+
+  const selectedQuestionText = useMemo(() => {
+    if (!selectedQuestionId) return "لم يتم اختيار سؤال";
+    return questionPrompts.find((item) => item.id === selectedQuestionId)?.questionAr ?? "لم يتم اختيار سؤال";
+  }, [questionPrompts, selectedQuestionId]);
 
   const toggleCategory = (slug: string) => {
     setSelectedCategorySlugs((prev) =>
@@ -178,10 +166,9 @@ export function WallpaperForm({
     );
   };
 
-  const toggleQuestionPrompt = (slug: string) => {
-    setSelectedQuestionPromptSlugs((prev) =>
-      prev.includes(slug) ? prev.filter((item) => item !== slug) : [...prev, slug]
-    );
+  const toggleQuestion = (questionId?: string) => {
+    if (!questionId) return;
+    setSelectedQuestionId((prev) => (prev === questionId ? "" : questionId));
   };
 
   const handleFileSelect = async (file: File | null) => {
@@ -313,10 +300,7 @@ export function WallpaperForm({
       const createdId = await createQuestion({
         title: normalizedTitle,
         imageUrl: newQuestionImageUrl,
-        wallpaperId: wallpaperId,
-        wallpaperTitle: title.trim() || initialWallpaper?.title || "",
         slug,
-        isActive: true,
       });
 
       const createdQuestion: QuestionPrompt = {
@@ -329,7 +313,7 @@ export function WallpaperForm({
       };
 
       setQuestionPrompts((prev) => [createdQuestion, ...prev]);
-      setSelectedQuestionPromptSlugs((prev) => [...new Set([...prev, slug])]);
+      setSelectedQuestionId(createdId);
       setNewQuestionTitle("");
       setNewQuestionImageUrl("");
       setNewQuestionImagePublicId("");
@@ -360,15 +344,11 @@ export function WallpaperForm({
     }
 
     const values = parsed.data;
-    const selectedQuestionIds = selectedQuestionPromptSlugs
-      .map((slug) => questionPrompts.find((item) => item.slug === slug)?.id)
-      .filter((value): value is string => Boolean(value));
     const payload = {
       title: values.title?.trim() ?? "",
       description: values.description?.trim() ?? "",
       categorySlugs: selectedCategorySlugs,
-      questionPromptSlugs: selectedQuestionPromptSlugs,
-      questionIds: selectedQuestionIds,
+      questionId: selectedQuestionId || undefined,
       searchKeywords: splitCommaSeparated(values.searchKeywords),
       moodTags: splitCommaSeparated(values.moodTags),
       images: uploadedImages.map((image) => ({
@@ -381,19 +361,15 @@ export function WallpaperForm({
     setIsSaving(true);
 
     try {
-      const linkedWallpaperTitle = payload.title || initialWallpaper?.title || "";
-
       if (mode === "edit" && wallpaperId) {
         await updateWallpaper(wallpaperId, payload);
-        await syncSelectedQuestionsToWallpaper(selectedQuestionPromptSlugs, wallpaperId, linkedWallpaperTitle);
         setStatusMessage({ type: "success", message: "تم تحديث الخلفية بنجاح." });
       } else {
-        const createdWallpaperId = await createWallpaper(payload);
-        await syncSelectedQuestionsToWallpaper(selectedQuestionPromptSlugs, createdWallpaperId, linkedWallpaperTitle);
+        await createWallpaper(payload);
         setStatusMessage({ type: "success", message: "تم نشر الخلفية." });
         reset({ title: "", description: "", searchKeywords: "", moodTags: "" });
         setSelectedCategorySlugs([]);
-        setSelectedQuestionPromptSlugs([]);
+        setSelectedQuestionId("");
         setUploadedImages([]);
         setFileInputKey((prev) => prev + 1);
       }
@@ -465,9 +441,7 @@ export function WallpaperForm({
                   type="button"
                   onClick={() => toggleCategory(category.slug)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
-                    active
-                      ? "border-zinc-900 bg-zinc-900 text-white"
-                      : "border-zinc-300 bg-white text-zinc-800"
+                    active ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-800"
                   }`}
                 >
                   {category.nameAr}
@@ -509,16 +483,14 @@ export function WallpaperForm({
           </div>
           <div className="flex flex-wrap gap-2">
             {questionPrompts.map((prompt) => {
-              const active = selectedQuestionPromptSlugs.includes(prompt.slug);
+              const active = selectedQuestionId === prompt.id;
               return (
                 <button
-                  key={prompt.slug}
+                  key={prompt.id ?? prompt.slug}
                   type="button"
-                  onClick={() => toggleQuestionPrompt(prompt.slug)}
+                  onClick={() => toggleQuestion(prompt.id)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
-                    active
-                      ? "border-zinc-900 bg-zinc-900 text-white"
-                      : "border-zinc-300 bg-white text-zinc-800"
+                    active ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-800"
                   }`}
                 >
                   {prompt.questionAr}
@@ -526,8 +498,7 @@ export function WallpaperForm({
               );
             })}
           </div>
-          <FieldHint>المحدد حالياً: {selectedQuestionsText}</FieldHint>
-          <FieldHint>اختياري: يمكنك ربط الخلفية مع أكثر من سؤال.</FieldHint>
+          <FieldHint>المحدد حالياً: {selectedQuestionText}</FieldHint>
 
           {showInlineQuestionForm && (
             <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-3">

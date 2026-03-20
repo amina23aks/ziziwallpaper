@@ -1,8 +1,8 @@
-import { listActiveQuestions } from "@/lib/firestore/questions";
+import { listQuestions } from "@/lib/firestore/questions";
 
 export async function listQuestionPrompts(maxItems = 20) {
   try {
-    const questions = await listActiveQuestions(maxItems);
+    const questions = await listQuestions(maxItems);
 
     return questions.map((question, index) => ({
       id: question.id,
@@ -10,7 +10,7 @@ export async function listQuestionPrompts(maxItems = 20) {
       slug: question.slug,
       imageUrl: question.imageUrl,
       order: index,
-      isActive: question.isActive,
+      isActive: true,
       createdAt: question.createdAt,
       updatedAt: question.updatedAt,
     }));

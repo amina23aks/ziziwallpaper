@@ -1,21 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/upload";
 import { createQuestion, updateQuestion } from "@/lib/firestore/questions";
-import { listWallpapers } from "@/lib/firestore/wallpapers";
 import type { Question } from "@/types/question";
-import type { Wallpaper } from "@/types/wallpaper";
 
 const questionSchema = z.object({
   title: z.string().trim().min(1, "نص السؤال مطلوب"),
-  wallpaperId: z.string().optional(),
-  isActive: z.boolean(),
 });
 
 type QuestionFormValues = z.infer<typeof questionSchema>;
@@ -40,8 +36,6 @@ export function QuestionForm({
   initialQuestion?: Question | null;
 }) {
   const router = useRouter();
-  const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
-  const [isLoadingWallpapers, setIsLoadingWallpapers] = useState(true);
   const [imageUrl, setImageUrl] = useState(initialQuestion?.imageUrl ?? "");
   const [isUploading, setIsUploading] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0);
@@ -61,41 +55,19 @@ export function QuestionForm({
   } = useForm<QuestionFormValues>({
     defaultValues: {
       title: initialQuestion?.title ?? "",
-      wallpaperId: initialQuestion?.wallpaperId ?? "",
-      isActive: initialQuestion?.isActive ?? true,
     },
   });
 
-  const selectedWallpaperId = watch("wallpaperId");
-
-  useEffect(() => {
-    async function loadWallpapers() {
-      try {
-        const data = await listWallpapers(100);
-        setWallpapers(data);
-      } finally {
-        setIsLoadingWallpapers(false);
-      }
-    }
-
-    loadWallpapers();
-  }, []);
+  const titleValue = watch("title") ?? initialQuestion?.title ?? "";
 
   useEffect(() => {
     if (!initialQuestion) return;
 
     reset({
       title: initialQuestion.title,
-      wallpaperId: initialQuestion.wallpaperId ?? "",
-      isActive: initialQuestion.isActive,
     });
     setImageUrl(initialQuestion.imageUrl);
   }, [initialQuestion, reset]);
-
-  const selectedWallpaper = useMemo(
-    () => wallpapers.find((item) => item.id === selectedWallpaperId),
-    [selectedWallpaperId, wallpapers]
-  );
 
   const handleFileSelect = async (file: File | null) => {
     if (!file) return;
@@ -133,15 +105,10 @@ export function QuestionForm({
       return;
     }
 
-    const wallpaper = wallpapers.find((item) => item.id === parsed.data.wallpaperId);
-
     const payload = {
       title: parsed.data.title,
       imageUrl,
-      wallpaperId: wallpaper?.id,
-      wallpaperTitle: wallpaper?.title,
       slug: initialQuestion?.slug || slugify(parsed.data.title),
-      isActive: parsed.data.isActive,
     };
 
     if (!payload.slug) {
@@ -158,7 +125,7 @@ export function QuestionForm({
       } else {
         await createQuestion(payload);
         setStatusMessage({ type: "success", message: "تم إنشاء السؤال." });
-        reset({ title: "", wallpaperId: "", isActive: true });
+        reset({ title: "" });
         setImageUrl("");
         setFileInputKey((prev) => prev + 1);
       }
@@ -175,7 +142,7 @@ export function QuestionForm({
     <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
       <AdminTopBar
         title={mode === "edit" ? "تعديل السؤال" : "إضافة سؤال"}
-        subtitle="أنشئ بطاقة سؤال مرتبطة بخلفية واحدة"
+        subtitle="أنشئ بطاقة سؤال بصورة ونص فقط"
         backHref="/admin/questions"
       />
 
@@ -192,28 +159,6 @@ export function QuestionForm({
             placeholder="مثال: هل تحتاج إلى هدوء؟"
           />
           {errors.title ? <p className="text-sm text-red-600">{errors.title.message}</p> : null}
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="wallpaperId" className="block text-sm font-semibold text-zinc-900">
-            الخلفية المرتبطة (اختياري)
-          </label>
-          <select
-            id="wallpaperId"
-            {...register("wallpaperId")}
-            className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2.5 text-sm font-medium text-zinc-900"
-            disabled={isLoadingWallpapers}
-          >
-            <option value="">بدون تحديد</option>
-            {wallpapers.map((wallpaper) => (
-              <option key={wallpaper.id} value={wallpaper.id}>
-                {wallpaper.title || wallpaper.id}
-              </option>
-            ))}
-          </select>
-          {selectedWallpaper ? (
-            <p className="text-xs text-zinc-600">السؤال سيفتح الخلفية: {selectedWallpaper.title || selectedWallpaper.id}</p>
-          ) : null}
         </div>
 
         <section className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4">
@@ -234,7 +179,7 @@ export function QuestionForm({
               <div className="relative aspect-square bg-zinc-100">
                 <Image
                   src={imageUrl}
-                  alt={watch("title") || "صورة السؤال"}
+                  alt={titleValue || "صورة السؤال"}
                   fill
                   className="object-cover"
                   sizes="180px"
@@ -244,14 +189,6 @@ export function QuestionForm({
             </div>
           ) : null}
         </section>
-
-        <label className="flex items-center justify-between rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-          <div className="text-right">
-            <p className="text-sm font-semibold text-zinc-900">تفعيل السؤال</p>
-            <p className="text-xs text-zinc-600">عند تعطيله لن يظهر في واجهة الموقع.</p>
-          </div>
-          <input type="checkbox" {...register("isActive")} className="h-4 w-4 accent-zinc-900" />
-        </label>
 
         {statusMessage ? (
           <div

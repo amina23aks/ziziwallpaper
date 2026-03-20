@@ -72,24 +72,7 @@ export async function listQuestions(maxItems = 50) {
 }
 
 export async function listActiveQuestions(maxItems = 20) {
-  let snapshot;
-
-  try {
-    snapshot = await getDocs(
-      query(
-        questionsCollection,
-        where("isActive", "==", true),
-        orderBy("createdAt", "desc"),
-        limit(maxItems)
-      )
-    );
-  } catch {
-    snapshot = await getDocs(
-      query(questionsCollection, where("isActive", "==", true), limit(maxItems))
-    );
-  }
-
-  return snapshot.docs.map((item) => mapQuestion(item));
+  return listQuestions(maxItems);
 }
 
 export async function getQuestionBySlug(slug: string): Promise<Question | null> {

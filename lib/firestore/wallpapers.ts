@@ -55,9 +55,7 @@ export async function listWallpapers(maxItems = 20) {
   let snapshot;
 
   try {
-    snapshot = await getDocs(
-      query(wallpapersCollection, orderBy("createdAt", "desc"), limit(maxItems))
-    );
+    snapshot = await getDocs(query(wallpapersCollection, orderBy("createdAt", "desc"), limit(maxItems)));
   } catch {
     snapshot = await getDocs(query(wallpapersCollection, limit(maxItems)));
   }
@@ -96,8 +94,6 @@ export async function listPublishedWallpapers(maxItems = 30) {
   }));
 }
 
-
-
 export async function listPublishedWallpapersByCategory(categorySlug: string, maxItems = 12) {
   let snapshot;
 
@@ -128,10 +124,7 @@ export async function listPublishedWallpapersByCategory(categorySlug: string, ma
   }));
 }
 
-export async function listPublishedWallpapersByQuestionPrompt(
-  questionPromptSlug: string,
-  maxItems = 50
-) {
+export async function listPublishedWallpapersByQuestionPrompt(questionPromptSlug: string, maxItems = 50) {
   let snapshot;
 
   try {
@@ -169,7 +162,7 @@ export async function listPublishedWallpapersByQuestionId(questionId: string, ma
       query(
         wallpapersCollection,
         where("isPublished", "==", true),
-        where("questionIds", "array-contains", questionId),
+        where("questionId", "==", questionId),
         orderBy("createdAt", "desc"),
         limit(maxItems)
       )
@@ -179,7 +172,7 @@ export async function listPublishedWallpapersByQuestionId(questionId: string, ma
       query(
         wallpapersCollection,
         where("isPublished", "==", true),
-        where("questionIds", "array-contains", questionId),
+        where("questionId", "==", questionId),
         limit(maxItems)
       )
     );
