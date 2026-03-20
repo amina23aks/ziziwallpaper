@@ -360,11 +360,15 @@ export function WallpaperForm({
     }
 
     const values = parsed.data;
+    const selectedQuestionIds = selectedQuestionPromptSlugs
+      .map((slug) => questionPrompts.find((item) => item.slug === slug)?.id)
+      .filter((value): value is string => Boolean(value));
     const payload = {
       title: values.title?.trim() ?? "",
       description: values.description?.trim() ?? "",
       categorySlugs: selectedCategorySlugs,
       questionPromptSlugs: selectedQuestionPromptSlugs,
+      questionIds: selectedQuestionIds,
       searchKeywords: splitCommaSeparated(values.searchKeywords),
       moodTags: splitCommaSeparated(values.moodTags),
       images: uploadedImages.map((image) => ({

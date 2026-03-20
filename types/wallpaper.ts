@@ -13,6 +13,7 @@ export type Wallpaper = {
   searchKeywords: string[];
   moodTags: string[];
   questionPromptSlugs?: string[];
+  questionIds?: string[];
   images: WallpaperImage[];
   isPublished: boolean;
   createdAt?: Timestamp | FieldValue | null;

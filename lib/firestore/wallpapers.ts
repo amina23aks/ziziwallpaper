@@ -161,6 +161,36 @@ export async function listPublishedWallpapersByQuestionPrompt(
   }));
 }
 
+export async function listPublishedWallpapersByQuestionId(questionId: string, maxItems = 50) {
+  let snapshot;
+
+  try {
+    snapshot = await getDocs(
+      query(
+        wallpapersCollection,
+        where("isPublished", "==", true),
+        where("questionIds", "array-contains", questionId),
+        orderBy("createdAt", "desc"),
+        limit(maxItems)
+      )
+    );
+  } catch {
+    snapshot = await getDocs(
+      query(
+        wallpapersCollection,
+        where("isPublished", "==", true),
+        where("questionIds", "array-contains", questionId),
+        limit(maxItems)
+      )
+    );
+  }
+
+  return snapshot.docs.map((item) => ({
+    id: item.id,
+    ...(item.data() as Omit<Wallpaper, "id">),
+  }));
+}
+
 export async function getWallpaperStats() {
   const [allCount, publishedCount] = await Promise.all([
     getCountFromServer(wallpapersCollection),

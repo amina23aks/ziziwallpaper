@@ -230,9 +230,16 @@ export function QuestionForm({
           />
           {isUploading ? <p className="text-sm text-zinc-700">جاري رفع الصورة...</p> : null}
           {imageUrl ? (
-            <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-              <div className="relative aspect-[4/3] bg-zinc-100">
-                <Image src={imageUrl} alt={watch("title") || "صورة السؤال"} fill className="object-cover" unoptimized />
+            <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-zinc-200 bg-white">
+              <div className="relative aspect-square bg-zinc-100">
+                <Image
+                  src={imageUrl}
+                  alt={watch("title") || "صورة السؤال"}
+                  fill
+                  className="object-cover"
+                  sizes="180px"
+                  unoptimized
+                />
               </div>
             </div>
           ) : null}
