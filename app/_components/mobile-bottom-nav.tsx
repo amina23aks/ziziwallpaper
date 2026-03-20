@@ -50,6 +50,8 @@ export function MobileBottomNav({
         ) : null}
       </aside>
 
+      <div className="h-[calc(var(--mobile-bottom-nav-height)+env(safe-area-inset-bottom))] md:hidden" aria-hidden="true" />
+
       <nav className="fixed inset-x-0 bottom-0 z-40 flex w-full items-center justify-around border-t border-zinc-200 bg-white/98 px-4 py-3 shadow-[0_-1px_8px_rgba(0,0,0,0.04)] backdrop-blur md:hidden">
         <Link
           href="/"

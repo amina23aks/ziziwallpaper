@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { Star } from "lucide-react";
+import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
 import { MasonryGrid } from "@/app/_components/masonry-grid";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
@@ -12,10 +14,10 @@ export default function FavoritesPage() {
   const { wallpapers, isLoading } = useCurrentUserFavorites();
 
   return (
-    <main className="min-h-screen w-full overflow-x-hidden bg-zinc-50 pb-24 pt-16 md:pr-20 md:pt-6">
-      <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-[92rem] flex-col px-4 py-5 sm:px-6 lg:px-8">
-        <header className="space-y-1">
-          <p className="text-xs font-semibold text-zinc-600">ZIZI</p>
+    <main className="min-h-screen w-full overflow-x-hidden bg-zinc-50 pt-6 md:pr-20 md:pt-6">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[92rem] flex-col px-4 py-4 sm:px-6 lg:px-8">
+        <header className="flex items-center gap-2">
+          <Star className="h-5 w-5 fill-current text-zinc-900" />
           <h1 className="text-xl font-extrabold text-zinc-900">المفضلة</h1>
         </header>
 
@@ -42,14 +44,19 @@ export default function FavoritesPage() {
             <p className="mt-1 text-xs text-zinc-500">احفظ الخلفيات التي تعجبك لتظهر هنا.</p>
           </section>
         ) : (
-          <div className="mt-4">
-            <MasonryGrid>
-              {wallpapers.map((wallpaper, index) => (
-                <div key={wallpaper.id ?? index} className="mb-2 inline-block w-full break-inside-avoid align-top sm:mb-3">
-                  <PublicWallpaperCard wallpaper={wallpaper} />
-                </div>
-              ))}
-            </MasonryGrid>
+          <div className="mt-4 flex-1">
+            <div className="xl:hidden">
+              <MasonryGrid className="columns-2 gap-3 sm:columns-2 lg:columns-2">
+                {wallpapers.map((wallpaper, index) => (
+                  <div key={wallpaper.id ?? index} className="mb-3 inline-block w-full break-inside-avoid align-top">
+                    <PublicWallpaperCard wallpaper={wallpaper} />
+                  </div>
+                ))}
+              </MasonryGrid>
+            </div>
+            <div className="hidden xl:block">
+              <DesktopWallpaperFeed wallpapers={wallpapers} columnCount={5} />
+            </div>
           </div>
         )}
       </div>

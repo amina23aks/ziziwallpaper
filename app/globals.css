@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --mobile-bottom-nav-height: 72px;
 }
 
 @theme inline {
