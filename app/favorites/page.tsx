@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
-import { MasonryGrid } from "@/app/_components/masonry-grid";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
-import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useCurrentUserFavorites } from "@/lib/hooks/use-favorites";
 
@@ -45,18 +43,7 @@ export default function FavoritesPage() {
           </section>
         ) : (
           <div className="mt-4 flex-1">
-            <div className="xl:hidden">
-              <MasonryGrid className="columns-2 gap-3 sm:columns-2 lg:columns-2">
-                {wallpapers.map((wallpaper, index) => (
-                  <div key={wallpaper.id ?? index} className="mb-3 inline-block w-full break-inside-avoid align-top">
-                    <PublicWallpaperCard wallpaper={wallpaper} />
-                  </div>
-                ))}
-              </MasonryGrid>
-            </div>
-            <div className="hidden xl:block">
-              <DesktopWallpaperFeed wallpapers={wallpapers} columnCount={5} />
-            </div>
+            <DesktopWallpaperFeed wallpapers={wallpapers} columnCount={5} />
           </div>
         )}
       </div>
