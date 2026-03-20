@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/upload";
 import { createCategory, listCategories } from "@/lib/firestore/categories";
-import { createQuestion } from "@/lib/firestore/questions";
+import { createQuestion, getQuestionBySlug, updateQuestion } from "@/lib/firestore/questions";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { createWallpaper, updateWallpaper } from "@/lib/firestore/wallpapers";
 import type { Category } from "@/types/category";
@@ -53,6 +53,31 @@ function slugify(text: string) {
 
 function FieldHint({ children }: { children: React.ReactNode }) {
   return <p className="text-xs leading-5 text-zinc-600 sm:text-sm">{children}</p>;
+}
+
+async function syncSelectedQuestionsToWallpaper(
+  questionSlugs: string[],
+  linkedWallpaperId: string,
+  linkedWallpaperTitle: string
+) {
+  await Promise.all(
+    questionSlugs.map(async (slug) => {
+      const question = await getQuestionBySlug(slug);
+
+      if (!question?.id) {
+        return;
+      }
+
+      await updateQuestion(question.id, {
+        title: question.title,
+        imageUrl: question.imageUrl,
+        wallpaperId: linkedWallpaperId,
+        wallpaperTitle: linkedWallpaperTitle,
+        slug: question.slug,
+        isActive: question.isActive,
+      });
+    })
+  );
 }
 
 export function WallpaperForm({
@@ -352,11 +377,15 @@ export function WallpaperForm({
     setIsSaving(true);
 
     try {
+      const linkedWallpaperTitle = payload.title || initialWallpaper?.title || "";
+
       if (mode === "edit" && wallpaperId) {
         await updateWallpaper(wallpaperId, payload);
+        await syncSelectedQuestionsToWallpaper(selectedQuestionPromptSlugs, wallpaperId, linkedWallpaperTitle);
         setStatusMessage({ type: "success", message: "تم تحديث الخلفية بنجاح." });
       } else {
-        await createWallpaper(payload);
+        const createdWallpaperId = await createWallpaper(payload);
+        await syncSelectedQuestionsToWallpaper(selectedQuestionPromptSlugs, createdWallpaperId, linkedWallpaperTitle);
         setStatusMessage({ type: "success", message: "تم نشر الخلفية." });
         reset({ title: "", description: "", searchKeywords: "", moodTags: "" });
         setSelectedCategorySlugs([]);
@@ -515,14 +544,14 @@ export function WallpaperForm({
                 />
                 {isUploadingQuestionImage ? <p className="text-sm text-zinc-700">جاري رفع صورة السؤال...</p> : null}
                 {newQuestionImageUrl ? (
-                  <div className="overflow-hidden rounded-xl border border-zinc-200">
-                    <div className="relative aspect-[4/3] bg-zinc-100">
+                  <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                    <div className="relative aspect-square bg-zinc-100">
                       <Image
                         src={newQuestionImageUrl}
                         alt={newQuestionTitle || "صورة السؤال"}
                         fill
                         className="object-cover"
-                        sizes="(max-width: 640px) 90vw, 320px"
+                        sizes="180px"
                         unoptimized
                       />
                     </div>

@@ -116,6 +116,7 @@ export default function HomePage() {
                         fill
                         className="object-cover"
                         sizes="(max-width: 640px) 45vw, 220px"
+                        unoptimized
                       />
                     </div>
                     <p className="p-2 text-center text-xs font-semibold text-zinc-800">{prompt.questionAr}</p>
