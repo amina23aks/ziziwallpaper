@@ -104,7 +104,7 @@ export default function HomePage() {
               <div className="grid grid-cols-2 gap-2">
                 {questionPrompts.map((prompt) => (
                   <Link
-                    key={prompt.slug}
+                    key={prompt.id ?? prompt.slug}
                     href={`/question/${prompt.slug}`}
                     onClick={() => setIsQuestionsOpen(false)}
                     className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
@@ -116,6 +116,7 @@ export default function HomePage() {
                         fill
                         className="object-cover"
                         sizes="(max-width: 640px) 45vw, 220px"
+                        unoptimized
                       />
                     </div>
                     <p className="p-2 text-center text-xs font-semibold text-zinc-800">{prompt.questionAr}</p>
