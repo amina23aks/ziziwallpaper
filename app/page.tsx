@@ -5,9 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
 import { FixedFeedHeader } from "@/app/_components/fixed-feed-header";
-import { MasonryGrid } from "@/app/_components/masonry-grid";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
-import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
@@ -136,20 +134,7 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <>
-            <div className="xl:hidden">
-              <MasonryGrid>
-                {filteredWallpapers.map((wallpaper, index) => (
-                  <div key={wallpaper.id ?? index} className="mb-2 inline-block w-full break-inside-avoid align-top sm:mb-3">
-                    <PublicWallpaperCard wallpaper={wallpaper} />
-                  </div>
-                ))}
-              </MasonryGrid>
-            </div>
-            <div className="hidden xl:block">
-              <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
-            </div>
-          </>
+          <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
         )}
       </div>
 
