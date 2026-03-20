@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/upload";
 import { createCategory, listCategories } from "@/lib/firestore/categories";
+import { createQuestion } from "@/lib/firestore/questions";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { createWallpaper, updateWallpaper } from "@/lib/firestore/wallpapers";
 import type { Category } from "@/types/category";
@@ -23,6 +24,9 @@ const wallpaperSchema = z.object({
 
 const inlineCategorySchema = z.object({
   nameAr: z.string().trim().min(1, "اسم التصنيف مطلوب"),
+});
+const inlineQuestionSchema = z.object({
+  title: z.string().trim().min(1, "نص السؤال مطلوب"),
 });
 
 type WallpaperFormValues = z.infer<typeof wallpaperSchema>;
@@ -70,7 +74,13 @@ export function WallpaperForm({
   const [selectedQuestionPromptSlugs, setSelectedQuestionPromptSlugs] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<UploadedImagePreview[]>([]);
   const [showInlineCategoryForm, setShowInlineCategoryForm] = useState(false);
+  const [showInlineQuestionForm, setShowInlineQuestionForm] = useState(false);
   const [newCategoryNameAr, setNewCategoryNameAr] = useState("");
+  const [newQuestionTitle, setNewQuestionTitle] = useState("");
+  const [newQuestionImageUrl, setNewQuestionImageUrl] = useState("");
+  const [newQuestionImagePublicId, setNewQuestionImagePublicId] = useState("");
+  const [isUploadingQuestionImage, setIsUploadingQuestionImage] = useState(false);
+  const [questionImageInputKey, setQuestionImageInputKey] = useState(0);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
     message: string;
@@ -130,6 +140,12 @@ export function WallpaperForm({
     if (selectedCategorySlugs.length === 0) return "لم يتم اختيار تصنيف";
     return selectedCategorySlugs.join("، ");
   }, [selectedCategorySlugs]);
+  const selectedQuestionsText = useMemo(() => {
+    if (selectedQuestionPromptSlugs.length === 0) return "لم يتم اختيار سؤال";
+    return selectedQuestionPromptSlugs
+      .map((slug) => questionPrompts.find((item) => item.slug === slug)?.questionAr ?? slug)
+      .join("، ");
+  }, [questionPrompts, selectedQuestionPromptSlugs]);
 
   const toggleCategory = (slug: string) => {
     setSelectedCategorySlugs((prev) =>
@@ -172,6 +188,25 @@ export function WallpaperForm({
 
   const removeUploadedImage = (publicId: string) => {
     setUploadedImages((prev) => prev.filter((image) => image.publicId !== publicId));
+  };
+
+  const handleQuestionImageSelect = async (file: File | null) => {
+    if (!file) return;
+
+    setIsUploadingQuestionImage(true);
+    setStatusMessage(null);
+
+    try {
+      const uploaded = await uploadImageToCloudinary(file);
+      setNewQuestionImageUrl(uploaded.secureUrl);
+      setNewQuestionImagePublicId(uploaded.publicId);
+      setQuestionImageInputKey((prev) => prev + 1);
+      setStatusMessage({ type: "success", message: "تم رفع صورة السؤال." });
+    } catch {
+      setStatusMessage({ type: "error", message: "تعذر رفع صورة السؤال حالياً." });
+    } finally {
+      setIsUploadingQuestionImage(false);
+    }
   };
 
   const handleInlineCategorySave = async () => {
@@ -220,6 +255,64 @@ export function WallpaperForm({
       setStatusMessage({ type: "success", message: "تمت إضافة التصنيف واختياره تلقائياً." });
     } catch {
       setStatusMessage({ type: "error", message: "تعذر إضافة التصنيف الآن." });
+    }
+  };
+
+  const handleInlineQuestionSave = async () => {
+    const parsed = inlineQuestionSchema.safeParse({ title: newQuestionTitle });
+
+    if (!parsed.success) {
+      setStatusMessage({ type: "error", message: "أدخل نص السؤال." });
+      return;
+    }
+
+    if (!newQuestionImageUrl) {
+      setStatusMessage({ type: "error", message: "ارفع صورة للسؤال قبل الحفظ." });
+      return;
+    }
+
+    const normalizedTitle = parsed.data.title.trim();
+    const slug = slugify(normalizedTitle);
+
+    if (!slug) {
+      setStatusMessage({ type: "error", message: "تعذر إنشاء رابط السؤال، جرّب نصاً آخر." });
+      return;
+    }
+
+    if (questionPrompts.some((question) => question.slug === slug)) {
+      setStatusMessage({ type: "error", message: "هذا السؤال موجود بالفعل." });
+      return;
+    }
+
+    try {
+      const createdId = await createQuestion({
+        title: normalizedTitle,
+        imageUrl: newQuestionImageUrl,
+        wallpaperId: wallpaperId,
+        wallpaperTitle: title.trim() || initialWallpaper?.title || "",
+        slug,
+        isActive: true,
+      });
+
+      const createdQuestion: QuestionPrompt = {
+        id: createdId,
+        questionAr: normalizedTitle,
+        slug,
+        imageUrl: newQuestionImageUrl,
+        order: questionPrompts.length,
+        isActive: true,
+      };
+
+      setQuestionPrompts((prev) => [createdQuestion, ...prev]);
+      setSelectedQuestionPromptSlugs((prev) => [...new Set([...prev, slug])]);
+      setNewQuestionTitle("");
+      setNewQuestionImageUrl("");
+      setNewQuestionImagePublicId("");
+      setQuestionImageInputKey((prev) => prev + 1);
+      setShowInlineQuestionForm(false);
+      setStatusMessage({ type: "success", message: "تمت إضافة السؤال واختياره تلقائياً." });
+    } catch {
+      setStatusMessage({ type: "error", message: "تعذر إضافة السؤال الآن." });
     }
   };
 
@@ -371,7 +464,16 @@ export function WallpaperForm({
         </div>
 
         <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 sm:p-4">
-          <label className="block text-sm font-semibold text-zinc-900">اقتراحات زر ؟</label>
+          <div className="flex items-center justify-between gap-2">
+            <label className="block text-sm font-semibold text-zinc-900">اقتراحات زر ؟</label>
+            <button
+              type="button"
+              onClick={() => setShowInlineQuestionForm((prev) => !prev)}
+              className="text-xs font-semibold text-zinc-800"
+            >
+              ➕ إضافة سؤال
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             {questionPrompts.map((prompt) => {
               const active = selectedQuestionPromptSlugs.includes(prompt.slug);
@@ -391,7 +493,66 @@ export function WallpaperForm({
               );
             })}
           </div>
+          <FieldHint>المحدد حالياً: {selectedQuestionsText}</FieldHint>
           <FieldHint>اختياري: يمكنك ربط الخلفية مع أكثر من سؤال.</FieldHint>
+
+          {showInlineQuestionForm && (
+            <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-3">
+              <input
+                value={newQuestionTitle}
+                onChange={(event) => setNewQuestionTitle(event.target.value)}
+                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400"
+                placeholder="نص السؤال"
+              />
+
+              <div className="space-y-2">
+                <input
+                  key={questionImageInputKey}
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => handleQuestionImageSelect(event.target.files?.[0] ?? null)}
+                  className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
+                />
+                {isUploadingQuestionImage ? <p className="text-sm text-zinc-700">جاري رفع صورة السؤال...</p> : null}
+                {newQuestionImageUrl ? (
+                  <div className="overflow-hidden rounded-xl border border-zinc-200">
+                    <div className="relative aspect-[4/3] bg-zinc-100">
+                      <Image
+                        src={newQuestionImageUrl}
+                        alt={newQuestionTitle || "صورة السؤال"}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 90vw, 320px"
+                        unoptimized
+                      />
+                    </div>
+                    {newQuestionImagePublicId ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewQuestionImageUrl("");
+                          setNewQuestionImagePublicId("");
+                          setQuestionImageInputKey((prev) => prev + 1);
+                        }}
+                        className="w-full border-t border-zinc-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50"
+                      >
+                        إزالة صورة السؤال
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleInlineQuestionSave}
+                disabled={isUploadingQuestionImage}
+                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-zinc-900 px-4 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                حفظ السؤال
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -479,7 +640,7 @@ export function WallpaperForm({
 
         <button
           type="submit"
-          disabled={isSaving || isUploading}
+          disabled={isSaving || isUploading || isUploadingQuestionImage}
           className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
           {isSaving

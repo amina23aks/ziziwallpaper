@@ -7,16 +7,16 @@ import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
 import { FixedFeedHeader } from "@/app/_components/fixed-feed-header";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { listActiveCategories } from "@/lib/firestore/categories";
-import { listActiveQuestions } from "@/lib/firestore/questions";
+import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
 import type { Category } from "@/types/category";
-import type { Question } from "@/types/question";
+import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper } from "@/types/wallpaper";
 
 export default function HomePage() {
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questionPrompts, setQuestionPrompts] = useState<QuestionPrompt[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
@@ -28,11 +28,11 @@ export default function HomePage() {
         const [publishedWallpapers, activeCategories, prompts] = await Promise.all([
           listPublishedWallpapers(100),
           listActiveCategories(100),
-          listActiveQuestions(),
+          listQuestionPrompts(),
         ]);
         setWallpapers(publishedWallpapers);
         setCategories(activeCategories);
-        setQuestions(prompts);
+        setQuestionPrompts(prompts);
       } finally {
         setIsLoading(false);
       }
@@ -102,23 +102,23 @@ export default function HomePage() {
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {questions.map((question) => (
+                {questionPrompts.map((prompt) => (
                   <Link
-                    key={question.id ?? question.slug}
-                    href={question.wallpaperId ? `/wallpaper/${question.wallpaperId}` : "#"}
+                    key={prompt.id ?? prompt.slug}
+                    href={`/question/${prompt.slug}`}
                     onClick={() => setIsQuestionsOpen(false)}
                     className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
                   >
                     <div className="relative aspect-[4/3] bg-zinc-100">
                       <Image
-                        src={question.imageUrl}
-                        alt={question.title}
+                        src={prompt.imageUrl}
+                        alt={prompt.questionAr}
                         fill
                         className="object-cover"
                         sizes="(max-width: 640px) 45vw, 220px"
                       />
                     </div>
-                    <p className="p-2 text-center text-xs font-semibold text-zinc-800">{question.title}</p>
+                    <p className="p-2 text-center text-xs font-semibold text-zinc-800">{prompt.questionAr}</p>
                   </Link>
                 ))}
               </div>

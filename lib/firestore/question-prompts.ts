@@ -1,64 +1,20 @@
-import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
-import type { QuestionPrompt } from "@/types/question-prompt";
-
-const questionPromptsCollection = collection(db, "questionPrompts");
-
-export const fallbackQuestionPrompts: QuestionPrompt[] = [
-  {
-    questionAr: "هل تريد النوم؟",
-    slug: "want-sleep",
-    imageUrl: "/questions/sleep.png",
-    order: 0,
-    isActive: true,
-  },
-  {
-    questionAr: "هل تريد الإنجاز؟",
-    slug: "want-achievement",
-    imageUrl: "/questions/do.png",
-    order: 1,
-    isActive: true,
-  },
-  {
-    questionAr: "هل أنت مشتت؟",
-    slug: "distracted",
-    imageUrl: "/questions/focus.png",
-    order: 2,
-    isActive: true,
-  },
-  {
-    questionAr: "هل تريد طاقة؟",
-    slug: "need-energy",
-    imageUrl: "/questions/energy.png",
-    order: 3,
-    isActive: true,
-  },
-];
+import { listActiveQuestions } from "@/lib/firestore/questions";
 
 export async function listQuestionPrompts(maxItems = 20) {
-  let prompts: QuestionPrompt[] = [];
-
   try {
-    const snapshot = await getDocs(
-      query(
-        questionPromptsCollection,
-        where("isActive", "==", true),
-        orderBy("order", "asc"),
-        limit(maxItems)
-      )
-    );
+    const questions = await listActiveQuestions(maxItems);
 
-    prompts = snapshot.docs.map((item) => ({
-      id: item.id,
-      ...(item.data() as Omit<QuestionPrompt, "id">),
+    return questions.map((question, index) => ({
+      id: question.id,
+      questionAr: question.title,
+      slug: question.slug,
+      imageUrl: question.imageUrl,
+      order: index,
+      isActive: question.isActive,
+      createdAt: question.createdAt,
+      updatedAt: question.updatedAt,
     }));
   } catch {
-    prompts = [];
+    return [];
   }
-
-  if (prompts.length === 0) {
-    return fallbackQuestionPrompts;
-  }
-
-  return prompts;
 }

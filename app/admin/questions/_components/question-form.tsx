@@ -14,7 +14,7 @@ import type { Wallpaper } from "@/types/wallpaper";
 
 const questionSchema = z.object({
   title: z.string().trim().min(1, "نص السؤال مطلوب"),
-  wallpaperId: z.string().trim().min(1, "اختر خلفية مرتبطة"),
+  wallpaperId: z.string().optional(),
   isActive: z.boolean(),
 });
 
@@ -86,7 +86,7 @@ export function QuestionForm({
 
     reset({
       title: initialQuestion.title,
-      wallpaperId: initialQuestion.wallpaperId,
+      wallpaperId: initialQuestion.wallpaperId ?? "",
       isActive: initialQuestion.isActive,
     });
     setImageUrl(initialQuestion.imageUrl);
@@ -125,9 +125,6 @@ export function QuestionForm({
       if (fieldErrors.title?.[0]) {
         setError("title", { message: fieldErrors.title[0] });
       }
-      if (fieldErrors.wallpaperId?.[0]) {
-        setError("wallpaperId", { message: fieldErrors.wallpaperId[0] });
-      }
       return;
     }
 
@@ -138,16 +135,11 @@ export function QuestionForm({
 
     const wallpaper = wallpapers.find((item) => item.id === parsed.data.wallpaperId);
 
-    if (!wallpaper?.id) {
-      setStatusMessage({ type: "error", message: "الخلفية المرتبطة غير صالحة." });
-      return;
-    }
-
     const payload = {
       title: parsed.data.title,
       imageUrl,
-      wallpaperId: wallpaper.id,
-      wallpaperTitle: wallpaper.title,
+      wallpaperId: wallpaper?.id,
+      wallpaperTitle: wallpaper?.title,
       slug: initialQuestion?.slug || slugify(parsed.data.title),
       isActive: parsed.data.isActive,
     };
@@ -204,7 +196,7 @@ export function QuestionForm({
 
         <div className="space-y-2">
           <label htmlFor="wallpaperId" className="block text-sm font-semibold text-zinc-900">
-            الخلفية المرتبطة
+            الخلفية المرتبطة (اختياري)
           </label>
           <select
             id="wallpaperId"
@@ -212,7 +204,7 @@ export function QuestionForm({
             className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2.5 text-sm font-medium text-zinc-900"
             disabled={isLoadingWallpapers}
           >
-            <option value="">اختر خلفية</option>
+            <option value="">بدون تحديد</option>
             {wallpapers.map((wallpaper) => (
               <option key={wallpaper.id} value={wallpaper.id}>
                 {wallpaper.title || wallpaper.id}
@@ -222,7 +214,6 @@ export function QuestionForm({
           {selectedWallpaper ? (
             <p className="text-xs text-zinc-600">السؤال سيفتح الخلفية: {selectedWallpaper.title || selectedWallpaper.id}</p>
           ) : null}
-          {errors.wallpaperId ? <p className="text-sm text-red-600">{errors.wallpaperId.message}</p> : null}
         </div>
 
         <section className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4">
