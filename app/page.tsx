@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
 import { FixedFeedHeader } from "@/app/_components/fixed-feed-header";
 import { MasonryGrid } from "@/app/_components/masonry-grid";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
@@ -44,17 +45,29 @@ export default function HomePage() {
 
 
   const filteredWallpapers = useMemo(() => {
-    return wallpapers.filter((wallpaper) => {
-      const query = searchQuery.trim().toLowerCase();
-      const matchesCategory =
-        selectedCategory === "all" || wallpaper.categorySlugs?.includes(selectedCategory);
-      const matchesSearch =
-        query.length === 0 ||
-        wallpaper.title.toLowerCase().includes(query) ||
-        wallpaper.searchKeywords?.some((item) => item.toLowerCase().includes(query));
+    const query = searchQuery.trim().toLowerCase();
 
-      return matchesCategory && matchesSearch;
-    });
+    return wallpapers
+      .filter((wallpaper) => {
+        const matchesCategory =
+          selectedCategory === "all" || wallpaper.categorySlugs?.includes(selectedCategory);
+        const matchesSearch =
+          query.length === 0 ||
+          wallpaper.title.toLowerCase().includes(query) ||
+          wallpaper.searchKeywords?.some((item) => item.toLowerCase().includes(query));
+
+        return matchesCategory && matchesSearch;
+      })
+      .sort((left, right) => {
+        const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
+        const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
+
+        if (rightSeconds !== leftSeconds) {
+          return rightSeconds - leftSeconds;
+        }
+
+        return (right.id ?? "").localeCompare(left.id ?? "");
+      });
   }, [wallpapers, searchQuery, selectedCategory]);
 
   return (
@@ -123,13 +136,20 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <MasonryGrid>
-            {filteredWallpapers.map((wallpaper, index) => (
-              <div key={wallpaper.id ?? index} className="mb-2 inline-block w-full break-inside-avoid align-top sm:mb-3">
-                <PublicWallpaperCard wallpaper={wallpaper} />
-              </div>
-            ))}
-          </MasonryGrid>
+          <>
+            <div className="xl:hidden">
+              <MasonryGrid>
+                {filteredWallpapers.map((wallpaper, index) => (
+                  <div key={wallpaper.id ?? index} className="mb-2 inline-block w-full break-inside-avoid align-top sm:mb-3">
+                    <PublicWallpaperCard wallpaper={wallpaper} />
+                  </div>
+                ))}
+              </MasonryGrid>
+            </div>
+            <div className="hidden xl:block">
+              <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
+            </div>
+          </>
         )}
       </div>
 
