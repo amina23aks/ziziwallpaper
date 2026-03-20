@@ -12,8 +12,8 @@ import {
 import { getWallpaperById } from "@/lib/firestore/wallpapers";
 import type { Wallpaper } from "@/types/wallpaper";
 
-const favoriteIdsCache = new Map<string, Set<string>>();
-const favoriteIdsRequests = new Map<string, Promise<Set<string>>>();
+const favoriteIdsCache = new Map<string, string[]>();
+const favoriteIdsRequests = new Map<string, Promise<string[]>>();
 
 function isWallpaper(item: Wallpaper | null): item is Wallpaper {
   return item !== null;
@@ -32,10 +32,9 @@ async function ensureFavoriteIdsLoaded(userId: string) {
 
   const request = listFavoriteWallpaperIdsByUser(userId, 300)
     .then((ids) => {
-      const set = new Set(ids);
-      favoriteIdsCache.set(userId, set);
+      favoriteIdsCache.set(userId, ids);
       favoriteIdsRequests.delete(userId);
-      return set;
+      return ids;
     })
     .catch((error) => {
       favoriteIdsRequests.delete(userId);
@@ -47,13 +46,17 @@ async function ensureFavoriteIdsLoaded(userId: string) {
 }
 
 function updateFavoriteIdCache(userId: string, wallpaperId: string, shouldSave: boolean) {
-  const existing = favoriteIdsCache.get(userId) ?? new Set<string>();
+  const existing = favoriteIdsCache.get(userId) ?? [];
+
   if (shouldSave) {
-    existing.add(wallpaperId);
-  } else {
-    existing.delete(wallpaperId);
+    favoriteIdsCache.set(userId, [wallpaperId, ...existing.filter((id) => id !== wallpaperId)]);
+    return;
   }
-  favoriteIdsCache.set(userId, existing);
+
+  favoriteIdsCache.set(
+    userId,
+    existing.filter((id) => id !== wallpaperId)
+  );
 }
 
 export function useFavoriteStatus(wallpaperId?: string) {
@@ -74,9 +77,9 @@ export function useFavoriteStatus(wallpaperId?: string) {
       }
 
       try {
-        const idsSet = await ensureFavoriteIdsLoaded(user.uid);
+        const ids = await ensureFavoriteIdsLoaded(user.uid);
         if (isMounted) {
-          setIsFavorited(idsSet.has(wallpaperId));
+          setIsFavorited(ids.includes(wallpaperId));
         }
       } finally {
         if (isMounted) {
@@ -163,7 +166,7 @@ export function useCurrentUserFavorites() {
     setIsLoading(true);
 
     try {
-      const favoriteIds = Array.from(await ensureFavoriteIdsLoaded(user.uid));
+      const favoriteIds = await ensureFavoriteIdsLoaded(user.uid);
       const results = await Promise.all(favoriteIds.map((id) => getWallpaperById(id)));
       setWallpapers(results.filter(isWallpaper));
     } finally {
