@@ -682,10 +682,11 @@ function CommentThreadNode({
   const isReplying = activeReplyId === itemId;
   const childReplies = repliesByParent.get(itemId ?? "") ?? [];
   const isReply = depth > 0;
+  const mobileIndentClass = depth === 0 ? "" : depth === 1 ? "pr-3 sm:pr-4" : "pr-4 sm:pr-4";
 
   return (
     <article className={depth === 0 ? "py-2.5" : "py-2"}>
-      <div className="flex items-start gap-2.5">
+      <div className={["flex items-start gap-2.5", mobileIndentClass].join(" ").trim()}>
         <AvatarBadge
           name={visibleName}
           subtle={isReply}
@@ -713,7 +714,7 @@ function CommentThreadNode({
           />
 
           {childReplies.length > 0 ? (
-            <div className="space-y-2 border-r border-zinc-200 pr-3">
+            <div className="space-y-2 border-r border-zinc-200 pr-2.5 sm:pr-3">
               {childReplies.map((reply) => (
                 <CommentThreadNode
                   key={reply.id}

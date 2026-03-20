@@ -1,36 +1,33 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { MasonryGrid } from "@/app/_components/masonry-grid";
-import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
-import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
-import { listPublishedWallpapersByQuestionPrompt } from "@/lib/firestore/wallpapers";
-import type { QuestionPrompt } from "@/types/question-prompt";
+import { useEffect, useState } from "react";
+import { getQuestionBySlug } from "@/lib/firestore/questions";
+import { getWallpaperById } from "@/lib/firestore/wallpapers";
+import type { Question } from "@/types/question";
 import type { Wallpaper } from "@/types/wallpaper";
 
 export default function QuestionResultsPage() {
   const params = useParams<{ slug: string }>();
+  const router = useRouter();
   const slug = params.slug;
-  const [questionPrompts, setQuestionPrompts] = useState<QuestionPrompt[]>([]);
-  const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
+  const [question, setQuestion] = useState<Question | null>(null);
+  const [wallpaper, setWallpaper] = useState<Wallpaper | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const prompts = await listQuestionPrompts();
-        setQuestionPrompts(prompts);
-
-        const hasSlug = prompts.some((item) => item.slug === slug);
-        if (!hasSlug) {
-          setWallpapers([]);
+        const selectedQuestion = await getQuestionBySlug(slug);
+        setQuestion(selectedQuestion);
+        if (!selectedQuestion?.wallpaperId) {
           return;
         }
 
-        const data = await listPublishedWallpapersByQuestionPrompt(slug, 100);
-        setWallpapers(data);
+        const linkedWallpaper = await getWallpaperById(selectedQuestion.wallpaperId);
+        setWallpaper(linkedWallpaper);
       } finally {
         setIsLoading(false);
       }
@@ -41,16 +38,11 @@ export default function QuestionResultsPage() {
     }
   }, [slug]);
 
-  const selectedQuestion = useMemo(
-    () => questionPrompts.find((item) => item.slug === slug),
-    [questionPrompts, slug]
-  );
-
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl bg-zinc-50 px-4 py-6 sm:px-6">
       <header className="mb-5 flex items-center justify-between">
         <h1 className="text-xl font-extrabold text-zinc-900 sm:text-2xl">
-          {selectedQuestion ? selectedQuestion.questionAr : "نتائج السؤال"}
+          {question ? question.title : "نتائج السؤال"}
         </h1>
         <Link href="/" className="text-sm font-semibold text-zinc-800 hover:underline">
           العودة للرئيسية
@@ -59,22 +51,25 @@ export default function QuestionResultsPage() {
 
       {isLoading ? (
         <p className="text-sm text-zinc-600">جاري تحميل النتائج...</p>
-      ) : !selectedQuestion ? (
+      ) : !question ? (
         <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-8 text-center text-sm text-zinc-700">
           هذا السؤال غير متاح حالياً.
         </div>
-      ) : wallpapers.length === 0 ? (
+      ) : !wallpaper?.id ? (
         <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-8 text-center text-sm text-zinc-700">
-          لا توجد خلفيات مرتبطة بهذا السؤال حالياً.
+          لا توجد خلفية مرتبطة بهذا السؤال حالياً.
         </div>
       ) : (
-        <MasonryGrid>
-          {wallpapers.map((wallpaper, index) => (
-            <div key={wallpaper.id ?? index} className="mb-3 break-inside-avoid">
-              <PublicWallpaperCard wallpaper={wallpaper} />
-            </div>
-          ))}
-        </MasonryGrid>
+        <div className="rounded-2xl border border-zinc-200 bg-white p-5 text-right shadow-sm">
+          <p className="mb-3 text-sm text-zinc-600">سيتم تحويلك إلى الخلفية المرتبطة بهذا السؤال.</p>
+          <button
+            type="button"
+            onClick={() => router.push(`/wallpaper/${wallpaper.id}`)}
+            className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white"
+          >
+            فتح الخلفية
+          </button>
+        </div>
       )}
     </main>
   );

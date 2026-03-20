@@ -50,6 +50,12 @@ export default function AdminDashboardPage() {
         >
           إدارة التصنيفات
         </Link>
+        <Link
+          href="/admin/questions"
+          className="rounded-2xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-900 shadow-sm"
+        >
+          إدارة الأسئلة
+        </Link>
       </section>
 
       <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
