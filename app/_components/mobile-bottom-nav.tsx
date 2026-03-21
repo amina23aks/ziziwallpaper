@@ -17,7 +17,7 @@ export function MobileBottomNav({
 
   return (
     <>
-      <aside className="fixed right-4 top-24 z-40 hidden w-14 rounded-2xl border border-zinc-200 bg-white/95 py-3 shadow-sm backdrop-blur md:flex md:flex-col md:items-center md:gap-2 lg:top-28">
+      <aside className="fixed right-2 top-24 z-40 hidden w-14 rounded-2xl border border-zinc-200 bg-white/95 py-3 shadow-sm backdrop-blur md:flex md:flex-col md:items-center md:gap-2 lg:right-3 lg:top-28">
         <Link
           href="/"
           className={`${itemClass} ${activeTab === "home" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}

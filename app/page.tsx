@@ -83,11 +83,11 @@ export default function HomePage() {
 
         {isQuestionsOpen && (
           <div
-            className="fixed inset-0 z-40 flex items-start justify-center bg-black/55 px-4 pb-24 pt-[7.25rem] sm:px-6 sm:pt-[7.5rem] md:pb-8 md:pt-24"
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 px-4 pb-24 pt-20 sm:px-6 md:items-start md:pb-8 md:pt-20 lg:pt-16"
             onClick={() => setIsQuestionsOpen(false)}
           >
             <section
-              className="flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-3 shadow-xl sm:p-4"
+              className="flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-3 shadow-xl sm:p-4 lg:max-w-3xl"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
@@ -101,7 +101,7 @@ export default function HomePage() {
                   ×
                 </button>
               </div>
-              <div className="max-h-[min(29rem,calc(100dvh-13.5rem))] overflow-y-auto overscroll-contain pr-1 sm:max-h-[min(31rem,calc(100dvh-15rem))] lg:max-h-[min(26rem,calc(100dvh-9rem))]">
+              <div className="max-h-[min(28rem,calc(100dvh-11rem))] overflow-y-auto overscroll-contain pr-1 sm:max-h-[min(29rem,calc(100dvh-12rem))] lg:max-h-[min(24rem,calc(100dvh-7rem))]">
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
                   {questionPrompts.map((prompt) => (
                     <Link
