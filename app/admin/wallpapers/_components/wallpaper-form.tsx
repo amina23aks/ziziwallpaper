@@ -348,7 +348,7 @@ export function WallpaperForm({
       title: values.title?.trim() ?? "",
       description: values.description?.trim() ?? "",
       categorySlugs: selectedCategorySlugs,
-      ...(selectedQuestionId ? { questionId: selectedQuestionId } : {}),
+      questionId: selectedQuestionId || undefined,
       searchKeywords: splitCommaSeparated(values.searchKeywords),
       moodTags: splitCommaSeparated(values.moodTags),
       images: uploadedImages.map((image) => ({

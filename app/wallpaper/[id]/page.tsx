@@ -113,7 +113,7 @@ export default function WallpaperDetailsPage() {
 
   return (
     <main className="min-h-screen w-full overflow-x-hidden bg-zinc-50 px-4 py-6 pb-24 pt-16 md:pr-20 md:pt-6">
-      <header className="mb-4 flex items-center justify-start [direction:ltr]">
+      <header className="sticky top-0 z-30 mb-4 flex items-center justify-start bg-zinc-50/95 py-2 backdrop-blur [direction:ltr]">
         <Link
           href="/"
           className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-800"
@@ -236,11 +236,7 @@ export default function WallpaperDetailsPage() {
               </div>
             </div>
 
-            {formattedDescription ? (
-              <p className="min-w-0 overflow-hidden whitespace-pre-wrap break-words text-right text-sm leading-7 text-zinc-700 [overflow-wrap:anywhere]">
-                {formattedDescription}
-              </p>
-            ) : null}
+            {formattedDescription ? <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">{formattedDescription}</p> : null}
 
             <FeedbackSection
               comments={comments}
