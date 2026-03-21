@@ -83,7 +83,7 @@ export default function HomePage() {
 
         {isQuestionsOpen && (
           <div
-            className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 px-4 pb-24 pt-20 sm:px-6 md:items-start md:pb-8 md:pt-20 lg:pt-16"
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 px-4 pb-24 pt-20 sm:px-6 md:items-start md:pb-8 md:pt-[10rem] lg:pt-[9rem]"
             onClick={() => setIsQuestionsOpen(false)}
           >
             <section
