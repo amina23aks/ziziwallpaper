@@ -392,7 +392,7 @@ export function WallpaperForm({
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="mt-5 space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6"
+        className="mt-3 space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6 md:mt-5"
       >
         <div className="space-y-2">
           <label htmlFor="title" className="block text-sm font-semibold text-zinc-900">

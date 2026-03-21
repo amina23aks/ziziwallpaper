@@ -47,7 +47,7 @@ export default function AdminQuestionsPage() {
     <main className="mx-auto w-full max-w-6xl space-y-5 bg-zinc-950 px-4 py-6 sm:px-6 lg:px-8">
       <AdminTopBar title="الأسئلة" subtitle="إدارة بطاقات الأسئلة" backHref="/admin" />
 
-      <section className="mt-5 flex items-center justify-start [direction:ltr]">
+      <section className="mt-3 flex items-center justify-start [direction:ltr] md:mt-5">
         <Link
           href="/admin/questions/new"
           className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900"

@@ -113,7 +113,21 @@ export default function WallpaperDetailsPage() {
 
   return (
     <main className="min-h-screen w-full overflow-x-hidden bg-zinc-50 px-4 py-6 pb-24 pt-16 md:pr-20 md:pt-6">
-      <header className="sticky top-0 z-30 mb-4 flex items-center justify-start bg-zinc-50/95 py-2 backdrop-blur [direction:ltr]">
+      <div className="h-14 md:hidden" />
+
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-zinc-200 bg-zinc-50 px-4 py-2 md:hidden">
+        <div className="flex min-h-10 items-center justify-start [direction:ltr]">
+          <Link
+            href="/"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-800"
+            aria-label="رجوع"
+          >
+            ←
+          </Link>
+        </div>
+      </header>
+
+      <header className="mb-4 hidden items-center justify-start bg-zinc-50/95 py-2 backdrop-blur [direction:ltr] md:sticky md:top-0 md:z-30 md:flex">
         <Link
           href="/"
           className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-800"
