@@ -237,7 +237,7 @@ export default function WallpaperDetailsPage() {
             </div>
 
             {formattedDescription ? (
-              <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">
+              <p className="min-w-0 overflow-hidden whitespace-pre-wrap break-words text-right text-sm leading-7 text-zinc-700 [overflow-wrap:anywhere]">
                 {formattedDescription}
               </p>
             ) : null}

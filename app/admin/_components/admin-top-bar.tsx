@@ -17,7 +17,7 @@ export function AdminTopBar({
   trailing?: ReactNode;
 }) {
   return (
-    <header className="space-y-2 text-right">
+    <header className="sticky top-0 z-30 -mx-4 space-y-2 border-b border-zinc-800/70 bg-zinc-950/95 px-4 py-3 text-right backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
       <div className="flex items-center justify-between [direction:ltr]">
         {leading ? (
           <div className="[direction:rtl]">{leading}</div>

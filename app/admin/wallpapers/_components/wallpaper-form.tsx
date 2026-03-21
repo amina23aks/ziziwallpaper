@@ -348,7 +348,7 @@ export function WallpaperForm({
       title: values.title?.trim() ?? "",
       description: values.description?.trim() ?? "",
       categorySlugs: selectedCategorySlugs,
-      questionId: selectedQuestionId || undefined,
+      ...(selectedQuestionId ? { questionId: selectedQuestionId } : {}),
       searchKeywords: splitCommaSeparated(values.searchKeywords),
       moodTags: splitCommaSeparated(values.moodTags),
       images: uploadedImages.map((image) => ({
@@ -392,7 +392,7 @@ export function WallpaperForm({
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6"
+        className="mt-5 space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6"
       >
         <div className="space-y-2">
           <label htmlFor="title" className="block text-sm font-semibold text-zinc-900">

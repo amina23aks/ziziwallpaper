@@ -138,7 +138,7 @@ export default function AdminCategoriesPage() {
     <main className="mx-auto w-full max-w-4xl space-y-5 bg-zinc-950 px-4 py-6 sm:px-6 lg:px-8">
       <AdminTopBar title="التصنيفات" subtitle="تعديل الأسماء أو حذف التصنيفات" backHref="/admin" />
 
-      <section className="space-y-3">
+      <section className="mt-5 space-y-3">
         <div className="flex items-center justify-start [direction:ltr]">
           <button
             type="button"
