@@ -83,14 +83,14 @@ export default function HomePage() {
 
         {isQuestionsOpen && (
           <div
-            className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 px-4"
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 px-4 pb-24 pt-20 sm:px-6 md:items-start md:pb-8 md:pt-[10rem] lg:pt-[9rem]"
             onClick={() => setIsQuestionsOpen(false)}
           >
             <section
-              className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-3 shadow-xl"
+              className="flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-3 shadow-xl sm:p-4 lg:max-w-3xl"
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="mb-3 flex items-center justify-between">
+              <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
                 <p className="text-sm font-bold text-zinc-900">اختر سؤالك</p>
                 <button
                   type="button"
@@ -101,27 +101,29 @@ export default function HomePage() {
                   ×
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                {questionPrompts.map((prompt) => (
-                  <Link
-                    key={prompt.id ?? prompt.slug}
-                    href={`/question/${prompt.slug}`}
-                    onClick={() => setIsQuestionsOpen(false)}
-                    className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
-                  >
-                    <div className="relative aspect-[4/3] bg-zinc-100">
-                      <Image
-                        src={prompt.imageUrl}
-                        alt={prompt.questionAr}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 45vw, 220px"
-                        unoptimized
-                      />
-                    </div>
-                    <p className="p-2 text-center text-xs font-semibold text-zinc-800">{prompt.questionAr}</p>
-                  </Link>
-                ))}
+              <div className="max-h-[min(28rem,calc(100dvh-11rem))] overflow-y-auto overscroll-contain pr-1 sm:max-h-[min(29rem,calc(100dvh-12rem))] lg:max-h-[min(24rem,calc(100dvh-7rem))]">
+                <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
+                  {questionPrompts.map((prompt) => (
+                    <Link
+                      key={prompt.id ?? prompt.slug}
+                      href={`/question/${prompt.slug}`}
+                      onClick={() => setIsQuestionsOpen(false)}
+                      className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
+                    >
+                      <div className="relative aspect-[4/3] bg-zinc-100">
+                        <Image
+                          src={prompt.imageUrl}
+                          alt={prompt.questionAr}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 42vw, (max-width: 1280px) 28vw, 220px"
+                          unoptimized
+                        />
+                      </div>
+                      <p className="p-2 text-center text-xs font-semibold text-zinc-800">{prompt.questionAr}</p>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </section>
           </div>
