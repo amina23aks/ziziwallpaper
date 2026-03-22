@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { getFirestore } from "firebase-admin/firestore";
 import { v2 as cloudinary } from "cloudinary";
+import { getAdminAuth } from "@/lib/firebase/admin";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -7,13 +9,45 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+
+async function verifyAdminRequest(request: Request) {
+  const authorization = request.headers.get("authorization");
+
+  if (!authorization?.startsWith("Bearer ")) {
+    throw new Error("Unauthorized");
+  }
+
+  const token = authorization.slice("Bearer ".length).trim();
+  const decodedToken = await getAdminAuth().verifyIdToken(token);
+  const userSnapshot = await getFirestore().collection("users").doc(decodedToken.uid).get();
+  const role = userSnapshot.data()?.role;
+
+  if (role !== "admin") {
+    throw new Error("Forbidden");
+  }
+
+  return decodedToken.uid;
+}
+
 export async function POST(request: Request) {
   try {
+    await verifyAdminRequest(request);
+
     const formData = await request.formData();
     const file = formData.get("file");
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      return NextResponse.json({ error: "Unsupported file type" }, { status: 400 });
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json({ error: "File is too large" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -30,6 +64,8 @@ export async function POST(request: Request) {
           {
             folder: "ziziwallpapers",
             resource_type: "image",
+            overwrite: false,
+            unique_filename: true,
           },
           (error, result) => {
             if (error || !result) {
@@ -54,7 +90,9 @@ export async function POST(request: Request) {
       width: uploadResult.width,
       height: uploadResult.height,
     });
-  } catch {
-    return NextResponse.json({ error: "Image upload failed" }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Image upload failed";
+    const status = message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

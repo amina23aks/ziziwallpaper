@@ -9,15 +9,11 @@ import {
   listFavoriteWallpaperIdsByUser,
   removeFavorite,
 } from "@/lib/firestore/favorites";
-import { getWallpaperById } from "@/lib/firestore/wallpapers";
+import { listWallpapersByIds } from "@/lib/firestore/wallpapers";
 import type { Wallpaper } from "@/types/wallpaper";
 
 const favoriteIdsCache = new Map<string, string[]>();
 const favoriteIdsRequests = new Map<string, Promise<string[]>>();
-
-function isWallpaper(item: Wallpaper | null): item is Wallpaper {
-  return item !== null;
-}
 
 async function ensureFavoriteIdsLoaded(userId: string) {
   const cached = favoriteIdsCache.get(userId);
@@ -167,8 +163,8 @@ export function useCurrentUserFavorites() {
 
     try {
       const favoriteIds = await ensureFavoriteIdsLoaded(user.uid);
-      const results = await Promise.all(favoriteIds.map((id) => getWallpaperById(id)));
-      setWallpapers(results.filter(isWallpaper));
+      const results = await listWallpapersByIds(favoriteIds);
+      setWallpapers(results.filter((item) => item.isPublished));
     } finally {
       setIsLoading(false);
     }

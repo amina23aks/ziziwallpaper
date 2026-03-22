@@ -17,14 +17,16 @@ import { FeedbackSection } from "@/app/_components/feedback-section";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
+import { isAdminRole } from "@/lib/auth/roles";
 import {
   createWallpaperComment,
   deleteWallpaperComment,
   listWallpaperComments,
+  toClientTimestamp,
   updateWallpaperComment,
 } from "@/lib/firestore/comments";
 import {
-  getWallpaperById,
+  getPublishedWallpaperById,
   listPublishedWallpapersByCategory,
 } from "@/lib/firestore/wallpapers";
 import { useToggleFavorite } from "@/lib/hooks/use-favorites";
@@ -62,20 +64,15 @@ export default function WallpaperDetailsPage() {
   const [isCommentSaving, setIsCommentSaving] = useState(false);
   const [isFavoriteLoginDialogOpen, setIsFavoriteLoginDialogOpen] = useState(false);
   const swiperRef = useRef<SwiperType | null>(null);
+  const isAdmin = isAdminRole(userProfile);
   const { isFavorited, isLoading: isFavoriteLoading, isToggling, toggleFavorite } = useToggleFavorite(id, {
     onAuthRequired: () => setIsFavoriteLoginDialogOpen(true),
   });
 
-  const loadComments = useCallback(async () => {
-    if (!id) return;
-    const data = await listWallpaperComments(id, 200);
-    setComments(data);
-  }, [id]);
-
   useEffect(() => {
     async function loadData() {
       try {
-        const wallpaperData = await getWallpaperById(id);
+        const wallpaperData = await getPublishedWallpaperById(id);
         setWallpaper(wallpaperData);
 
         if (wallpaperData?.categorySlugs?.[0]) {
@@ -85,7 +82,11 @@ export default function WallpaperDetailsPage() {
           setSuggestedWallpapers([]);
         }
 
-        await loadComments();
+        if (wallpaperData?.id) {
+          setComments(await listWallpaperComments(wallpaperData.id, 200));
+        } else {
+          setComments([]);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -94,7 +95,31 @@ export default function WallpaperDetailsPage() {
     if (id) {
       loadData();
     }
-  }, [id, loadComments]);
+  }, [id]);
+
+  const appendComment = useCallback((input: WallpaperComment) => {
+    setComments((prev) =>
+      [...prev, input].sort((left, right) => {
+        const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
+        const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
+
+        if (leftSeconds !== rightSeconds) {
+          return leftSeconds - rightSeconds;
+        }
+
+        return (left.id ?? "").localeCompare(right.id ?? "");
+      })
+    );
+  }, []);
+
+  const updateCommentInState = useCallback((commentId: string, updater: (item: WallpaperComment) => WallpaperComment) => {
+    setComments((prev) => prev.map((item) => (item.id === commentId ? updater(item) : item)));
+  }, []);
+
+  const removeCommentTree = useCallback((commentId: string, replyIds: string[] = []) => {
+    const idsToRemove = new Set([commentId, ...replyIds]);
+    setComments((prev) => prev.filter((item) => !item.id || !idsToRemove.has(item.id)));
+  }, []);
 
 
   if (isLoading) {
@@ -257,22 +282,36 @@ export default function WallpaperDetailsPage() {
               isSignedIn={isSignedIn}
               currentUserId={user?.uid}
               currentUserName={userProfile?.displayName?.trim() || "مستخدم"}
-              isAdmin={userProfile?.role === "admin"}
+              isAdmin={isAdmin}
               onLogin={() => router.push("/login")}
               isSaving={isCommentSaving}
               onSubmitFeedback={async (value, identityMode) => {
                 if (!user || !id || !value.trim()) return;
                 setIsCommentSaving(true);
                 try {
-                  await createWallpaperComment({
+                  const commentId = await createWallpaperComment({
                     wallpaperId: id,
                     userId: user.uid,
                     userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
                     displayIdentityMode: identityMode,
                     content: value,
-                    isAdminAuthor: userProfile?.role === "admin",
+                    isAdminAuthor: isAdmin,
                   });
-                  await loadComments();
+
+                  appendComment({
+                    id: commentId,
+                    wallpaperId: id,
+                    userId: user.uid,
+                    userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
+                    displayIdentityMode: identityMode,
+                    isAnonymous: identityMode !== "real",
+                    content: value.trim(),
+                    isAdminAuthor: isAdmin,
+                    isAdminReply: false,
+                    parentId: null,
+                    createdAt: toClientTimestamp(),
+                    updatedAt: toClientTimestamp(),
+                  });
                 } finally {
                   setIsCommentSaving(false);
                 }
@@ -281,17 +320,31 @@ export default function WallpaperDetailsPage() {
                 if (!user || !id || !value.trim()) return;
                 setIsCommentSaving(true);
                 try {
-                  await createWallpaperComment({
+                  const commentId = await createWallpaperComment({
                     wallpaperId: id,
                     userId: user.uid,
                     userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
                     displayIdentityMode: identityMode,
                     content: value,
                     parentId,
-                    isAdminReply: userProfile?.role === "admin",
-                    isAdminAuthor: userProfile?.role === "admin",
+                    isAdminReply: isAdmin,
+                    isAdminAuthor: isAdmin,
                   });
-                  await loadComments();
+
+                  appendComment({
+                    id: commentId,
+                    wallpaperId: id,
+                    userId: user.uid,
+                    userDisplayName: userProfile?.displayName?.trim() || "مستخدم",
+                    displayIdentityMode: identityMode,
+                    isAnonymous: identityMode !== "real",
+                    content: value.trim(),
+                    isAdminReply: isAdmin,
+                    isAdminAuthor: isAdmin,
+                    parentId,
+                    createdAt: toClientTimestamp(),
+                    updatedAt: toClientTimestamp(),
+                  });
                 } finally {
                   setIsCommentSaving(false);
                 }
@@ -307,7 +360,13 @@ export default function WallpaperDetailsPage() {
                     content: value,
                     displayIdentityMode: identityMode,
                   });
-                  await loadComments();
+                  updateCommentInState(comment.id, (item) => ({
+                    ...item,
+                    content: value.trim(),
+                    displayIdentityMode: identityMode,
+                    isAnonymous: identityMode !== "real",
+                    updatedAt: toClientTimestamp(),
+                  }));
                 } finally {
                   setIsCommentSaving(false);
                 }
@@ -315,7 +374,6 @@ export default function WallpaperDetailsPage() {
               onDeleteComment={async (comment, replyIds) => {
                 if (!user || !comment.id) return;
                 const isOwner = comment.userId === user.uid;
-                const isAdmin = userProfile?.role === "admin";
                 if (!isOwner && !isAdmin) return;
                 setIsCommentSaving(true);
                 try {
@@ -323,7 +381,7 @@ export default function WallpaperDetailsPage() {
                     commentId: comment.id,
                     replyIds,
                   });
-                  await loadComments();
+                  removeCommentTree(comment.id, replyIds);
                 } finally {
                   setIsCommentSaving(false);
                 }
