@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
 import { getQuestionBySlug } from "@/lib/firestore/questions";
-import { listPublishedWallpapersByQuestionId } from "@/lib/firestore/wallpapers";
+import { listPublishedWallpapersByQuestion } from "@/lib/firestore/wallpapers";
 import type { Question } from "@/types/question";
 import type { Wallpaper } from "@/types/wallpaper";
 
@@ -27,19 +27,8 @@ export default function QuestionResultsPage() {
           return;
         }
 
-        const data = await listPublishedWallpapersByQuestionId(selectedQuestion.id, 100);
-        const sorted = [...data].sort((left, right) => {
-          const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-          const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-
-          if (rightSeconds !== leftSeconds) {
-            return rightSeconds - leftSeconds;
-          }
-
-          return (right.id ?? "").localeCompare(left.id ?? "");
-        });
-
-        setWallpapers(sorted);
+        const data = await listPublishedWallpapersByQuestion(selectedQuestion.id, selectedQuestion.slug, 100);
+        setWallpapers(data);
       } finally {
         setIsLoading(false);
       }

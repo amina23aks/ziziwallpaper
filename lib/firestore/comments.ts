@@ -1,4 +1,5 @@
 import {
+  Timestamp,
   addDoc,
   collection,
   deleteDoc,
@@ -16,6 +17,10 @@ import { db } from "@/lib/firebase/client";
 import type { CommentDisplayIdentityMode, WallpaperComment } from "@/types/comment";
 
 const commentsCollection = collection(db, "comments");
+
+export function toClientTimestamp(date = new Date()) {
+  return Timestamp.fromDate(date);
+}
 
 export async function listWallpaperComments(wallpaperId: string, maxItems = 200) {
   let snapshot;

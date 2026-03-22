@@ -10,7 +10,7 @@ import { uploadImageToCloudinary } from "@/lib/cloudinary/upload";
 import { createCategory, listCategories } from "@/lib/firestore/categories";
 import { createQuestion } from "@/lib/firestore/questions";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
-import { createWallpaper, updateWallpaper } from "@/lib/firestore/wallpapers";
+import { buildWallpaperQuestionFields, createWallpaper, updateWallpaper } from "@/lib/firestore/wallpapers";
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper, WallpaperImage } from "@/types/wallpaper";
@@ -348,14 +348,17 @@ export function WallpaperForm({
       title: values.title?.trim() ?? "",
       description: values.description?.trim() ?? "",
       categorySlugs: selectedCategorySlugs,
-      questionId: selectedQuestionId || undefined,
+      ...buildWallpaperQuestionFields({
+        questionId: selectedQuestionId || undefined,
+        legacyQuestionPromptSlug: questionPrompts.find((item) => item.id === selectedQuestionId)?.slug,
+      }),
       searchKeywords: splitCommaSeparated(values.searchKeywords),
       moodTags: splitCommaSeparated(values.moodTags),
       images: uploadedImages.map((image) => ({
         secureUrl: image.secureUrl,
         alt: values.title?.trim() || "",
       })),
-      isPublished: true,
+      isPublished: initialWallpaper?.isPublished ?? true,
     };
 
     setIsSaving(true);

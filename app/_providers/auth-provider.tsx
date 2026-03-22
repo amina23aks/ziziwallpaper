@@ -11,7 +11,7 @@ import {
 } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { getClientAuth } from "@/lib/firebase/client";
-import { ensureUserProfileDocument, getUserProfile } from "@/lib/firestore/users";
+import { getOrCreateUserProfile, getUserProfile } from "@/lib/firestore/users";
 import type { UserProfile } from "@/types/user-profile";
 
 type AuthContextValue = {
@@ -37,7 +37,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    await ensureUserProfileDocument(currentUser);
     const profile = await getUserProfile(currentUser.uid);
     setUserProfile(profile);
   }, []);
@@ -53,14 +52,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        await refreshUserProfile();
+        const profile = await getOrCreateUserProfile(nextUser);
+        setUserProfile(profile);
       } finally {
         setIsAuthLoading(false);
       }
     });
 
     return unsubscribe;
-  }, [refreshUserProfile]);
+  }, []);
 
   const value = useMemo(
     () => ({

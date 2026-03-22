@@ -14,6 +14,35 @@ function buildUserProfile(user: User): UserProfile {
   };
 }
 
+function normalizeExistingProfile(uid: string, data: Partial<UserProfile> | undefined): UserProfile {
+  return {
+    uid,
+    displayName: data?.displayName ?? "",
+    email: data?.email ?? "",
+    photoURL: data?.photoURL ?? "",
+    role: data?.role === "admin" ? "admin" : "user",
+    profileCompleted: data?.profileCompleted ?? Boolean(data?.displayName?.trim()),
+    createdAt: data?.createdAt,
+    updatedAt: data?.updatedAt,
+  };
+}
+
+function getProfilePatch(user: User, existingProfile: UserProfile) {
+  const nextDisplayName = user.displayName ?? existingProfile.displayName ?? "";
+  const nextPhotoURL = user.photoURL ?? existingProfile.photoURL ?? "";
+  const nextEmail = user.email ?? existingProfile.email ?? "";
+  const nextProfileCompleted = existingProfile.profileCompleted ?? Boolean(nextDisplayName.trim());
+
+  const patch: Partial<UserProfile> = {};
+
+  if (existingProfile.displayName !== nextDisplayName) patch.displayName = nextDisplayName;
+  if (existingProfile.photoURL !== nextPhotoURL) patch.photoURL = nextPhotoURL;
+  if (existingProfile.email !== nextEmail) patch.email = nextEmail;
+  if (existingProfile.profileCompleted !== nextProfileCompleted) patch.profileCompleted = nextProfileCompleted;
+
+  return patch;
+}
+
 export async function ensureUserProfileDocument(user: User) {
   const userRef = doc(db, "users", user.uid);
   const snapshot = await getDoc(userRef);
@@ -30,24 +59,24 @@ export async function ensureUserProfileDocument(user: User) {
     return newProfile;
   }
 
-  const existingProfile = snapshot.data() as Omit<UserProfile, "uid">;
+  const existingProfile = normalizeExistingProfile(user.uid, snapshot.data() as Partial<UserProfile>);
+  const patch = getProfilePatch(user, existingProfile);
 
-  await updateDoc(userRef, {
-    displayName: user.displayName ?? existingProfile.displayName ?? "",
-    photoURL: user.photoURL ?? existingProfile.photoURL ?? "",
-    email: user.email ?? existingProfile.email ?? "",
-    profileCompleted: existingProfile.profileCompleted ?? false,
-    updatedAt: serverTimestamp(),
-  });
+  if (Object.keys(patch).length > 0) {
+    await updateDoc(userRef, {
+      ...patch,
+      updatedAt: serverTimestamp(),
+    });
+  }
 
   return {
-    uid: user.uid,
     ...existingProfile,
-    displayName: user.displayName ?? existingProfile.displayName ?? "",
-    photoURL: user.photoURL ?? existingProfile.photoURL ?? "",
-    email: user.email ?? existingProfile.email ?? "",
-    profileCompleted: existingProfile.profileCompleted ?? false,
+    ...patch,
   } satisfies UserProfile;
+}
+
+export async function getOrCreateUserProfile(user: User) {
+  return ensureUserProfileDocument(user);
 }
 
 export async function getUserProfile(uid: string) {
@@ -57,10 +86,7 @@ export async function getUserProfile(uid: string) {
     return null;
   }
 
-  return {
-    uid: snapshot.id,
-    ...(snapshot.data() as Omit<UserProfile, "uid">),
-  } satisfies UserProfile;
+  return normalizeExistingProfile(uid, snapshot.data() as Partial<UserProfile>);
 }
 
 export async function updateUserDisplayName(uid: string, displayName: string) {

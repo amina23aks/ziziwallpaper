@@ -4,10 +4,12 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
+import { isAdminRole } from "@/lib/auth/roles";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { isSignedIn, isAuthLoading, userProfile } = useAuth();
+  const isAdmin = isAdminRole(userProfile);
 
   useEffect(() => {
     if (!isAuthLoading && !isSignedIn) {
@@ -15,10 +17,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return;
     }
 
-    if (!isAuthLoading && isSignedIn && userProfile && userProfile.role !== "admin") {
+    if (!isAuthLoading && isSignedIn && userProfile && !isAdmin) {
       router.replace("/");
     }
-  }, [isAuthLoading, isSignedIn, userProfile, router]);
+  }, [isAdmin, isAuthLoading, isSignedIn, userProfile, router]);
 
   if (isAuthLoading || (isSignedIn && !userProfile)) {
     return (
@@ -28,7 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!isSignedIn || userProfile?.role !== "admin") {
+  if (!isSignedIn || !isAdmin) {
     return null;
   }
 

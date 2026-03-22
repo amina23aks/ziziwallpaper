@@ -47,12 +47,12 @@ export async function removeFavorite(userId: string, wallpaperId: string) {
   await deleteDoc(doc(db, "favorites", favoriteId));
 }
 
-
 export async function isWallpaperFavoritedByUser(userId: string, wallpaperId: string) {
   const favoriteId = getFavoriteDocId(userId, wallpaperId);
   const snapshot = await getDoc(doc(db, "favorites", favoriteId));
   return snapshot.exists();
 }
+
 export async function listFavoritesByUser(userId: string, maxItems = 200) {
   let snapshot;
 
@@ -72,5 +72,5 @@ export async function listFavoritesByUser(userId: string, maxItems = 200) {
 
 export async function listFavoriteWallpaperIdsByUser(userId: string, maxItems = 200) {
   const favorites = await listFavoritesByUser(userId, maxItems);
-  return favorites.map((item) => item.wallpaperId).filter(Boolean);
+  return Array.from(new Set(favorites.map((item) => item.wallpaperId).filter(Boolean)));
 }
