@@ -5,12 +5,14 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function userDoc() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    function currentUserDocPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
     function isAdmin() {
-      return isSignedIn() && userDoc().data.role == 'admin';
+      return isSignedIn()
+        && exists(currentUserDocPath())
+        && get(currentUserDocPath()).data.role == 'admin';
     }
 
     function isOwner(userId) {
@@ -22,21 +24,32 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/wallpapers/$(wallpaperId)).data.isPublished == true;
     }
 
+    function isCommentOwner() {
+      return isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    function isFavoriteOwnerByResource() {
+      return isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    function isFavoriteOwnerByRequest() {
+      return isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
 
-      // user can only create their own doc as a normal user profile
+      // User can only create their own doc as a normal user profile.
       allow create: if isOwner(userId)
-                    && request.resource.data.uid == userId
-                    && request.resource.data.role == 'user';
+        && request.resource.data.uid == userId
+        && request.resource.data.role == 'user';
 
-      // owner can update profile fields but cannot change uid/role
+      // Owner can update profile fields but cannot change uid/role.
       allow update: if (
-                      isOwner(userId)
-                      && request.resource.data.uid == resource.data.uid
-                      && request.resource.data.role == resource.data.role
-                    )
-                    || isAdmin();
+        isOwner(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == resource.data.role
+      ) || isAdmin();
 
       allow delete: if false;
     }
@@ -57,13 +70,11 @@ service cloud.firestore {
     }
 
     match /favorites/{favoriteId} {
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow read, delete: if isFavoriteOwnerByResource();
 
-      allow create: if isSignedIn()
-                    && request.resource.data.userId == request.auth.uid
-                    && request.resource.data.wallpaperId is string;
+      allow create: if isFavoriteOwnerByRequest()
+        && request.resource.data.wallpaperId is string;
 
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
       allow update: if false;
     }
 
@@ -71,19 +82,18 @@ service cloud.firestore {
       allow read: if isPublishedWallpaper(resource.data.wallpaperId);
 
       allow create: if isSignedIn()
-                    && request.resource.data.userId == request.auth.uid
-                    && request.resource.data.wallpaperId is string
-                    && isPublishedWallpaper(request.resource.data.wallpaperId)
-                    && request.resource.data.content is string;
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.wallpaperId is string
+        && request.resource.data.content is string
+        && isPublishedWallpaper(request.resource.data.wallpaperId);
 
-      // user edits only own comment while preserving ownership linkage
-      allow update: if isSignedIn()
-                    && resource.data.userId == request.auth.uid
-                    && request.resource.data.userId == resource.data.userId
-                    && request.resource.data.wallpaperId == resource.data.wallpaperId;
+      // User edits only own comment while preserving ownership + wallpaper linkage.
+      allow update: if isCommentOwner()
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.wallpaperId == resource.data.wallpaperId;
 
-      // owner can delete own comment/reply, admin can delete any
-      allow delete: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      // Owner can delete own comment/reply. Admin can delete any comment.
+      allow delete: if isCommentOwner() || isAdmin();
     }
   }
 }
