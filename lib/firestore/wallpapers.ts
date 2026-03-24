@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteField,
   deleteDoc,
   doc,
   documentId,
@@ -62,8 +63,10 @@ function chunkIds(ids: string[]) {
 }
 
 export async function createWallpaper(data: CreateWallpaperInput) {
+  const { questionId, ...rest } = data;
   const docRef = await addDoc(wallpapersCollection, {
-    ...data,
+    ...rest,
+    ...(questionId ? { questionId } : {}),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -72,8 +75,10 @@ export async function createWallpaper(data: CreateWallpaperInput) {
 }
 
 export async function updateWallpaper(id: string, data: UpdateWallpaperInput) {
+  const { questionId, ...rest } = data;
   await updateDoc(doc(db, "wallpapers", id), {
-    ...data,
+    ...rest,
+    ...(questionId ? { questionId } : { questionId: deleteField() }),
     updatedAt: serverTimestamp(),
   });
 }
@@ -292,7 +297,6 @@ export function buildWallpaperQuestionFields(input: {
 }) {
   if (!input.questionId) {
     return {
-      questionId: undefined,
       questionIds: [],
       questionPromptSlugs: [],
     };
