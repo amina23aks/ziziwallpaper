@@ -9,7 +9,7 @@ import {
   listFavoriteWallpaperIdsByUser,
   removeFavorite,
 } from "@/lib/firestore/favorites";
-import { listWallpapersByIds } from "@/lib/firestore/wallpapers";
+import { listPublishedWallpapersByIds } from "@/lib/firestore/wallpapers";
 import type { Wallpaper } from "@/types/wallpaper";
 
 const favoriteIdsCache = new Map<string, string[]>();
@@ -163,8 +163,8 @@ export function useCurrentUserFavorites() {
 
     try {
       const favoriteIds = await ensureFavoriteIdsLoaded(user.uid);
-      const results = await listWallpapersByIds(favoriteIds);
-      setWallpapers(results.filter((item) => item.isPublished));
+      const results = await listPublishedWallpapersByIds(favoriteIds);
+      setWallpapers(results);
     } finally {
       setIsLoading(false);
     }

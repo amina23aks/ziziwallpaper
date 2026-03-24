@@ -56,6 +56,15 @@ function FieldHint({ children }: { children: React.ReactNode }) {
   return <p className="text-xs leading-5 text-zinc-600 sm:text-sm">{children}</p>;
 }
 
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
 export function WallpaperForm({
   mode,
   wallpaperId,
@@ -191,8 +200,8 @@ export function WallpaperForm({
       ]);
       setFileInputKey((prev) => prev + 1);
       setStatusMessage({ type: "success", message: "تم رفع الصورة وإضافتها." });
-    } catch {
-      setStatusMessage({ type: "error", message: "تعذر رفع الصورة حالياً." });
+    } catch (error) {
+      setStatusMessage({ type: "error", message: getErrorMessage(error, "تعذر رفع الصورة حالياً.") });
     } finally {
       setIsUploading(false);
     }
@@ -214,8 +223,8 @@ export function WallpaperForm({
       setNewQuestionImagePublicId(uploaded.publicId);
       setQuestionImageInputKey((prev) => prev + 1);
       setStatusMessage({ type: "success", message: "تم رفع صورة السؤال." });
-    } catch {
-      setStatusMessage({ type: "error", message: "تعذر رفع صورة السؤال حالياً." });
+    } catch (error) {
+      setStatusMessage({ type: "error", message: getErrorMessage(error, "تعذر رفع صورة السؤال حالياً.") });
     } finally {
       setIsUploadingQuestionImage(false);
     }
@@ -265,8 +274,8 @@ export function WallpaperForm({
       setNewCategoryNameAr("");
       setShowInlineCategoryForm(false);
       setStatusMessage({ type: "success", message: "تمت إضافة التصنيف واختياره تلقائياً." });
-    } catch {
-      setStatusMessage({ type: "error", message: "تعذر إضافة التصنيف الآن." });
+    } catch (error) {
+      setStatusMessage({ type: "error", message: getErrorMessage(error, "تعذر إضافة التصنيف الآن.") });
     }
   };
 
@@ -320,8 +329,8 @@ export function WallpaperForm({
       setQuestionImageInputKey((prev) => prev + 1);
       setShowInlineQuestionForm(false);
       setStatusMessage({ type: "success", message: "تمت إضافة السؤال واختياره تلقائياً." });
-    } catch {
-      setStatusMessage({ type: "error", message: "تعذر إضافة السؤال الآن." });
+    } catch (error) {
+      setStatusMessage({ type: "error", message: getErrorMessage(error, "تعذر إضافة السؤال الآن.") });
     }
   };
 
@@ -378,8 +387,8 @@ export function WallpaperForm({
       }
 
       router.refresh();
-    } catch {
-      setStatusMessage({ type: "error", message: "حدث خطأ أثناء الحفظ." });
+    } catch (error) {
+      setStatusMessage({ type: "error", message: getErrorMessage(error, "حدث خطأ أثناء الحفظ.") });
     } finally {
       setIsSaving(false);
     }

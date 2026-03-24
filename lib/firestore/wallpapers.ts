@@ -139,6 +139,37 @@ export async function listWallpapersByIds(ids: string[]) {
   return normalizedIds.map((id) => wallpaperById.get(id)).filter(Boolean) as Wallpaper[];
 }
 
+
+export async function listPublishedWallpapersByIds(ids: string[]) {
+  const normalizedIds = Array.from(new Set(ids.filter(Boolean)));
+
+  if (normalizedIds.length === 0) {
+    return [];
+  }
+
+  const snapshots = await Promise.all(
+    chunkIds(normalizedIds).map((group) =>
+      getDocs(
+        query(
+          wallpapersCollection,
+          where(documentId(), "in", group),
+          where("isPublished", "==", true)
+        )
+      )
+    )
+  );
+
+  const wallpaperById = new Map<string, Wallpaper>();
+
+  snapshots.forEach((snapshot) => {
+    snapshot.docs.forEach((item) => {
+      wallpaperById.set(item.id, mapWallpaper(item));
+    });
+  });
+
+  return normalizedIds.map((id) => wallpaperById.get(id)).filter(Boolean) as Wallpaper[];
+}
+
 export async function listRecentWallpapers(maxItems = 6) {
   return listWallpapers(maxItems);
 }
