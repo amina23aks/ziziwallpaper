@@ -11,7 +11,7 @@ import {
 } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { getClientAuth } from "@/lib/firebase/client";
-import { getOrCreateUserProfile, getUserProfile } from "@/lib/firestore/users";
+import { ensureUserProfileDocument, getUserProfile } from "@/lib/firestore/users";
 import type { UserProfile } from "@/types/user-profile";
 
 type AuthContextValue = {
@@ -52,7 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        const profile = await getOrCreateUserProfile(nextUser);
+        const existingProfile = await getUserProfile(nextUser.uid);
+
+        if (existingProfile) {
+          setUserProfile(existingProfile);
+          return;
+        }
+
+        const profile = await ensureUserProfileDocument(nextUser);
         setUserProfile(profile);
       } finally {
         setIsAuthLoading(false);

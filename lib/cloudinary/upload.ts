@@ -28,6 +28,15 @@ export async function uploadImageToCloudinary(file: File): Promise<UploadedImage
 
   if (!response.ok) {
     const data = (await response.json().catch(() => null)) as { error?: string } | null;
+
+    if (response.status === 401) {
+      throw new Error("جلسة الدخول منتهية. يرجى تسجيل الدخول مرة أخرى.");
+    }
+
+    if (response.status === 403) {
+      throw new Error("غير مصرح لك بالرفع. هذه العملية متاحة للمشرف فقط.");
+    }
+
     throw new Error(data?.error || "Failed to upload image");
   }
 

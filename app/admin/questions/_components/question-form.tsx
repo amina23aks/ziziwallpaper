@@ -26,6 +26,15 @@ function slugify(text: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
 export function QuestionForm({
   mode,
   questionId,
@@ -80,8 +89,8 @@ export function QuestionForm({
       setImageUrl(uploaded.secureUrl);
       setStatusMessage({ type: "success", message: "تم رفع صورة السؤال." });
       setFileInputKey((prev) => prev + 1);
-    } catch {
-      setStatusMessage({ type: "error", message: "تعذر رفع الصورة حالياً." });
+    } catch (error) {
+      setStatusMessage({ type: "error", message: getErrorMessage(error, "تعذر رفع الصورة حالياً.") });
     } finally {
       setIsUploading(false);
     }
@@ -131,8 +140,8 @@ export function QuestionForm({
       }
 
       router.refresh();
-    } catch {
-      setStatusMessage({ type: "error", message: "تعذر حفظ السؤال حالياً." });
+    } catch (error) {
+      setStatusMessage({ type: "error", message: getErrorMessage(error, "تعذر حفظ السؤال حالياً.") });
     } finally {
       setIsSaving(false);
     }
