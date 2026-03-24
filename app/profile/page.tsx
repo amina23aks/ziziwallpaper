@@ -8,6 +8,7 @@ import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { ProfileNameEditor } from "@/app/_components/profile-name-editor";
 import { AdminOnlyProfileEntry } from "@/app/profile/_components/admin-only-profile-entry";
 import { useAuth } from "@/app/_providers/auth-provider";
+import { isAdminRole } from "@/lib/auth/roles";
 import { signOutUser } from "@/lib/auth/auth";
 import { updateUserDisplayName } from "@/lib/firestore/users";
 
@@ -66,7 +67,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="mt-4">
-          <AdminOnlyProfileEntry isAdmin={userProfile?.role === "admin"} />
+          <AdminOnlyProfileEntry isAdmin={isAdminRole(userProfile)} />
         </div>
 
         <div className="mt-6 flex justify-start">

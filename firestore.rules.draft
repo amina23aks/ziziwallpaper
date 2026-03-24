@@ -12,7 +12,16 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn()
         && exists(currentUserDocPath())
-        && get(currentUserDocPath()).data.role == 'admin';
+        && (
+          get(currentUserDocPath()).data.role == 'admin'
+          || get(currentUserDocPath()).data.role == 'superadmin'
+        );
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn()
+        && exists(currentUserDocPath())
+        && get(currentUserDocPath()).data.role == 'superadmin';
     }
 
     function isOwner(userId) {
@@ -37,19 +46,34 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
+      function hasOnlyUserProfileFields() {
+        return request.resource.data.keys().hasOnly([
+          'uid',
+          'displayName',
+          'email',
+          'photoURL',
+          'role',
+          'profileCompleted',
+          'createdAt',
+          'updatedAt'
+        ]);
+      }
+
       allow read: if isOwner(userId) || isAdmin();
 
       // User can only create their own doc as a normal user profile.
       allow create: if isOwner(userId)
+        && hasOnlyUserProfileFields()
         && request.resource.data.uid == userId
         && request.resource.data.role == 'user';
 
       // Owner can update profile fields but cannot change uid/role.
       allow update: if (
         isOwner(userId)
+        && hasOnlyUserProfileFields()
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.role == resource.data.role
-      ) || isAdmin();
+      ) || isSuperAdmin();
 
       allow delete: if false;
     }
@@ -81,16 +105,55 @@ service cloud.firestore {
     match /comments/{commentId} {
       allow read: if isPublishedWallpaper(resource.data.wallpaperId);
 
+      function isValidCommentCreatePayload() {
+        return request.resource.data.keys().hasOnly([
+            'wallpaperId',
+            'userId',
+            'userDisplayName',
+            'displayIdentityMode',
+            'isAnonymous',
+            'content',
+            'parentId',
+            'isAdminReply',
+            'isAdminAuthor',
+            'createdAt',
+            'updatedAt'
+          ])
+          && request.resource.data.userDisplayName is string
+          && request.resource.data.content is string
+          && (request.resource.data.parentId == null || request.resource.data.parentId is string)
+          && request.resource.data.displayIdentityMode in ['real', 'anonymous', 'blouza']
+          && request.resource.data.isAnonymous is bool
+          && request.resource.data.isAdminReply is bool
+          && request.resource.data.isAdminAuthor is bool;
+      }
+
       allow create: if isSignedIn()
+        && isValidCommentCreatePayload()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.wallpaperId is string
-        && request.resource.data.content is string
         && isPublishedWallpaper(request.resource.data.wallpaperId);
 
-      // User edits only own comment while preserving ownership + wallpaper linkage.
+      function isSafeCommentUpdate() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'content',
+            'updatedAt'
+          ])
+          && request.resource.data.content is string
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.wallpaperId == resource.data.wallpaperId
+          && request.resource.data.parentId == resource.data.parentId
+          && request.resource.data.isAdminReply == resource.data.isAdminReply
+          && request.resource.data.isAdminAuthor == resource.data.isAdminAuthor
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.userDisplayName == resource.data.userDisplayName
+          && request.resource.data.displayIdentityMode == resource.data.displayIdentityMode
+          && request.resource.data.isAnonymous == resource.data.isAnonymous;
+      }
+
+      // User edits only own comment while preserving immutable linkage + identity fields.
       allow update: if isCommentOwner()
-        && request.resource.data.userId == resource.data.userId
-        && request.resource.data.wallpaperId == resource.data.wallpaperId;
+        && isSafeCommentUpdate();
 
       // Owner can delete own comment/reply. Admin can delete any comment.
       allow delete: if isCommentOwner() || isAdmin();

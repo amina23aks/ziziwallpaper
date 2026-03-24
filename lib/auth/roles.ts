@@ -5,14 +5,21 @@ export function getUserRole(profile?: UserProfile | null): UserRole {
     return "guest";
   }
 
-  return profile.role === "admin" ? "admin" : "user";
+  if (profile.role === "superadmin") return "superadmin";
+  if (profile.role === "admin") return "admin";
+  return "user";
 }
 
 export function isAdminRole(profile?: UserProfile | null) {
-  return getUserRole(profile) === "admin";
+  const role = getUserRole(profile);
+  return role === "admin" || role === "superadmin";
+}
+
+export function isSuperAdminRole(profile?: UserProfile | null) {
+  return getUserRole(profile) === "superadmin";
 }
 
 export function isUserRole(profile?: UserProfile | null) {
   const role = getUserRole(profile);
-  return role === "user" || role === "admin";
+  return role === "user" || role === "admin" || role === "superadmin";
 }

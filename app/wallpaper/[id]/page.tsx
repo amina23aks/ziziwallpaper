@@ -349,7 +349,7 @@ export default function WallpaperDetailsPage() {
                   setIsCommentSaving(false);
                 }
               }}
-              onEditComment={async (comment, value, identityMode) => {
+              onEditComment={async (comment, value) => {
                 if (!user || !comment.id || !value.trim()) return;
                 const isOwner = comment.userId === user.uid;
                 if (!isOwner) return;
@@ -358,13 +358,10 @@ export default function WallpaperDetailsPage() {
                   await updateWallpaperComment({
                     commentId: comment.id,
                     content: value,
-                    displayIdentityMode: identityMode,
                   });
                   updateCommentInState(comment.id, (item) => ({
                     ...item,
                     content: value.trim(),
-                    displayIdentityMode: identityMode,
-                    isAnonymous: identityMode !== "real",
                     updatedAt: toClientTimestamp(),
                   }));
                 } finally {

@@ -24,7 +24,7 @@ async function verifyAdminRequest(request: Request) {
   const userSnapshot = await getFirestore().collection("users").doc(decodedToken.uid).get();
   const role = userSnapshot.data()?.role;
 
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "superadmin") {
     throw new Error("Forbidden");
   }
 
