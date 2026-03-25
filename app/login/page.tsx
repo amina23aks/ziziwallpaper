@@ -167,13 +167,13 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleAuth}
           disabled={isSubmitting}
-          className="mt-3 grid w-full grid-cols-[1.25rem_minmax(0,1fr)_1.25rem] items-center rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-50 hover:shadow disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          className="mt-3 inline-flex w-full items-center justify-start gap-3 rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-left text-sm font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-50 hover:shadow disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          dir="ltr"
         >
           <span className="inline-flex h-5 w-5 items-center justify-center">
             <GoogleMark />
           </span>
-          <span className="text-center">Continue with Google</span>
-          <span aria-hidden="true" />
+          <span>Continue with Google</span>
         </button>
 
         <div className="mt-4 flex items-center justify-between text-sm">
