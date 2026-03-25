@@ -53,7 +53,7 @@ function slugify(text: string) {
 }
 
 function FieldHint({ children }: { children: React.ReactNode }) {
-  return <p className="text-xs leading-5 text-zinc-600 sm:text-sm">{children}</p>;
+  return <p className="text-xs leading-5 text-zinc-600 sm:text-sm dark:text-zinc-400">{children}</p>;
 }
 
 
@@ -395,7 +395,7 @@ export function WallpaperForm({
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-3xl bg-zinc-50 px-4 py-6 sm:px-6 lg:px-8 dark:bg-zinc-950">
       <AdminTopBar
         title={mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية"}
         subtitle="أدخل بيانات الخلفية"
@@ -404,42 +404,42 @@ export function WallpaperForm({
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="mt-3 space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6 md:mt-5"
+        className="mt-3 space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6 md:mt-5 dark:border-zinc-800 dark:bg-zinc-900"
       >
         <div className="space-y-2">
-          <label htmlFor="title" className="block text-sm font-semibold text-zinc-900">
+          <label htmlFor="title" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             عنوان الخلفية (اختياري)
           </label>
           <input
             id="title"
             type="text"
             {...register("title")}
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400"
+            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
             placeholder="مثال: خلفية ليلية"
           />
           {errors.title && <p className="text-sm text-red-600">{errors.title.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="description" className="block text-sm font-semibold text-zinc-900">
+          <label htmlFor="description" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             وصف
           </label>
           <textarea
             id="description"
             rows={3}
             {...register("description")}
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400"
+            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
             placeholder="اختياري"
           />
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 sm:p-4">
+        <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 sm:p-4 dark:border-zinc-800 dark:bg-zinc-950/80">
           <div className="flex items-center justify-between gap-2">
-            <label className="block text-sm font-semibold text-zinc-900">التصنيفات</label>
+            <label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">التصنيفات</label>
             <button
               type="button"
               onClick={() => setShowInlineCategoryForm((prev) => !prev)}
-              className="text-xs font-semibold text-zinc-800"
+              className="text-xs font-semibold text-zinc-800 dark:text-zinc-300"
             >
               ➕ إضافة تصنيف
             </button>
@@ -453,7 +453,7 @@ export function WallpaperForm({
                   type="button"
                   onClick={() => toggleCategory(category.slug)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
-                    active ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-800"
+                    active ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
                   }`}
                 >
                   {category.nameAr}
@@ -464,11 +464,11 @@ export function WallpaperForm({
           <FieldHint>المحدد حالياً: {selectedCategoriesText}</FieldHint>
 
           {showInlineCategoryForm && (
-            <div className="space-y-2 rounded-xl border border-zinc-200 bg-white p-3">
+            <div className="space-y-2 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900">
               <input
                 value={newCategoryNameAr}
                 onChange={(event) => setNewCategoryNameAr(event.target.value)}
-                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400"
+                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                 placeholder="اسم التصنيف بالعربية"
               />
               <button
@@ -482,13 +482,13 @@ export function WallpaperForm({
           )}
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 sm:p-4">
+        <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 sm:p-4 dark:border-zinc-800 dark:bg-zinc-950/80">
           <div className="flex items-center justify-between gap-2">
-            <label className="block text-sm font-semibold text-zinc-900">اقتراحات زر ؟</label>
+            <label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">اقتراحات زر ؟</label>
             <button
               type="button"
               onClick={() => setShowInlineQuestionForm((prev) => !prev)}
-              className="text-xs font-semibold text-zinc-800"
+              className="text-xs font-semibold text-zinc-800 dark:text-zinc-300"
             >
               ➕ إضافة سؤال
             </button>
@@ -502,7 +502,7 @@ export function WallpaperForm({
                   type="button"
                   onClick={() => toggleQuestion(prompt.id)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
-                    active ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-800"
+                    active ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
                   }`}
                 >
                   {prompt.questionAr}
@@ -513,11 +513,11 @@ export function WallpaperForm({
           <FieldHint>المحدد حالياً: {selectedQuestionText}</FieldHint>
 
           {showInlineQuestionForm && (
-            <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-3">
+            <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900">
               <input
                 value={newQuestionTitle}
                 onChange={(event) => setNewQuestionTitle(event.target.value)}
-                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400"
+                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                 placeholder="نص السؤال"
               />
 
@@ -527,12 +527,12 @@ export function WallpaperForm({
                   type="file"
                   accept="image/*"
                   onChange={(event) => handleQuestionImageSelect(event.target.files?.[0] ?? null)}
-                  className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
+                  className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
                 />
-                {isUploadingQuestionImage ? <p className="text-sm text-zinc-700">جاري رفع صورة السؤال...</p> : null}
+                {isUploadingQuestionImage ? <p className="text-sm text-zinc-700 dark:text-zinc-300">جاري رفع صورة السؤال...</p> : null}
                 {newQuestionImageUrl ? (
-                  <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-zinc-200 bg-white">
-                    <div className="relative aspect-square bg-zinc-100">
+                  <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+                    <div className="relative aspect-square bg-zinc-100 dark:bg-zinc-800">
                       <Image
                         src={newQuestionImageUrl}
                         alt={newQuestionTitle || "صورة السؤال"}
@@ -550,7 +550,7 @@ export function WallpaperForm({
                           setNewQuestionImagePublicId("");
                           setQuestionImageInputKey((prev) => prev + 1);
                         }}
-                        className="w-full border-t border-zinc-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50"
+                        className="w-full border-t border-zinc-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-zinc-700 dark:hover:bg-red-950/30"
                       >
                         إزالة صورة السؤال
                       </button>
@@ -573,34 +573,34 @@ export function WallpaperForm({
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor="searchKeywords" className="block text-sm font-semibold text-zinc-900">
+            <label htmlFor="searchKeywords" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               كلمات البحث
             </label>
             <input
               id="searchKeywords"
               type="text"
               {...register("searchKeywords")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400"
+              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
               placeholder="ليل، هدوء، سماء"
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="moodTags" className="block text-sm font-semibold text-zinc-900">
+            <label htmlFor="moodTags" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               كلمات المزاج
             </label>
             <input
               id="moodTags"
               type="text"
               {...register("moodTags")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400"
+              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
               placeholder="هادئ، تركيز"
             />
           </div>
         </div>
 
-        <section className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4">
+        <section className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-950">
           <div>
-            <p className="text-sm font-semibold text-zinc-900">📤 رفع الصور</p>
+            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">📤 رفع الصور</p>
             <FieldHint>اختر صورة وسيتم رفعها تلقائياً وإضافتها للمعاينة.</FieldHint>
           </div>
           <input
@@ -608,17 +608,17 @@ export function WallpaperForm({
             type="file"
             accept="image/*"
             onChange={(event) => handleFileSelect(event.target.files?.[0] ?? null)}
-            className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
+            className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
           />
-          {isUploading && <p className="text-sm text-zinc-700">جاري رفع الصورة...</p>}
+          {isUploading && <p className="text-sm text-zinc-700 dark:text-zinc-300">جاري رفع الصورة...</p>}
 
           {uploadedImages.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-zinc-900">المعاينة</p>
+              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">المعاينة</p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {uploadedImages.map((image, index) => (
-                  <article key={image.publicId} className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-                    <div className="relative aspect-square bg-zinc-100">
+                  <article key={image.publicId} className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+                    <div className="relative aspect-square bg-zinc-100 dark:bg-zinc-800">
                       <Image
                         src={image.secureUrl}
                         alt={title.trim() || `صورة ${index + 1}`}
@@ -631,7 +631,7 @@ export function WallpaperForm({
                     <button
                       type="button"
                       onClick={() => removeUploadedImage(image.publicId)}
-                      className="w-full border-t border-zinc-200 px-2 py-2 text-xs font-semibold text-red-700 hover:bg-red-50"
+                      className="w-full border-t border-zinc-200 px-2 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-zinc-700 dark:hover:bg-red-950/30"
                     >
                       🗑️ إزالة الصورة
                     </button>

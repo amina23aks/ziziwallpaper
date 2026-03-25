@@ -167,10 +167,12 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleAuth}
           disabled={isSubmitting}
-          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-300/90 bg-white/75 px-4 py-2.5 text-sm font-semibold text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_8px_22px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600/70 dark:bg-zinc-800/50 dark:text-zinc-100 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_8px_22px_rgba(0,0,0,0.35)] dark:hover:bg-zinc-800/70"
+          className="relative mt-3 inline-flex w-full items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-50 hover:shadow disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
         >
-          <GoogleMark />
-          Continue with Google
+          <span className="absolute left-4 inline-flex h-5 w-5 items-center justify-center">
+            <GoogleMark />
+          </span>
+          <span className="text-center">Continue with Google</span>
         </button>
 
         <div className="mt-4 flex items-center justify-between text-sm">

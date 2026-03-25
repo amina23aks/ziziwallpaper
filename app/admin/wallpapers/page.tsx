@@ -44,13 +44,13 @@ export default function AdminWallpapersPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-5 bg-zinc-50 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-6xl space-y-5 bg-zinc-50 px-4 py-6 sm:px-6 lg:px-8 dark:bg-zinc-950">
       <AdminTopBar title="الخلفيات" subtitle="إدارة الخلفيات" backHref="/admin" />
 
       <section className="mt-3 flex items-center justify-start [direction:ltr] md:mt-5">
         <Link
           href="/admin/wallpapers/new"
-          className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900"
+          className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
         >
           <Plus size={13} />
           <span>إضافة خلفية</span>
@@ -58,24 +58,24 @@ export default function AdminWallpapersPage() {
       </section>
 
       {statusMessage && (
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800">
+        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
           {statusMessage}
         </div>
       )}
 
-      <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         {isLoading ? (
-          <p className="p-4 text-sm text-zinc-600">جاري تحميل الخلفيات...</p>
+          <p className="p-4 text-sm text-zinc-600 dark:text-zinc-400">جاري تحميل الخلفيات...</p>
         ) : wallpapers.length === 0 ? (
-          <p className="p-4 text-sm text-zinc-600">لا توجد خلفيات محفوظة حتى الآن.</p>
+          <p className="p-4 text-sm text-zinc-600 dark:text-zinc-400">لا توجد خلفيات محفوظة حتى الآن.</p>
         ) : (
-          <div className="divide-y divide-zinc-200">
+          <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
             {wallpapers.map((wallpaper, index) => (
               <article
                 key={wallpaper.id ?? index}
                 className="grid grid-cols-[64px_minmax(0,1fr)] gap-3 p-3 sm:grid-cols-[72px_minmax(0,1fr)_auto] sm:items-center sm:gap-4"
               >
-                <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100">
+                <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
                   {wallpaper.images?.[0]?.secureUrl ? (
                     <Image
                       src={wallpaper.images[0].secureUrl}
@@ -89,11 +89,11 @@ export default function AdminWallpapersPage() {
                 </div>
 
                 <div className="min-w-0 space-y-1">
-                  <p className="line-clamp-1 text-sm font-semibold text-zinc-900">{wallpaper.title}</p>
-                  <p className="line-clamp-1 text-xs text-zinc-600">
+                  <p className="line-clamp-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{wallpaper.title}</p>
+                  <p className="line-clamp-1 text-xs text-zinc-600 dark:text-zinc-400">
                     {wallpaper.categorySlugs?.join("، ") || "بدون تصنيف"}
                   </p>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     الحالة: {wallpaper.isPublished ? "منشورة" : "غير منشورة"}
                   </p>
                 </div>
@@ -101,7 +101,7 @@ export default function AdminWallpapersPage() {
                 <div className="col-span-2 flex gap-2 sm:col-auto sm:justify-end">
                   <Link
                     href={wallpaper.id ? `/admin/wallpapers/${wallpaper.id}/edit` : "#"}
-                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-800 sm:flex-none"
+                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-800 sm:flex-none dark:border-zinc-700 dark:text-zinc-200"
                   >
                     تعديل
                   </Link>
