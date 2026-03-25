@@ -29,7 +29,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-5 bg-zinc-950 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-5xl space-y-5 bg-zinc-50 px-4 py-6 sm:px-6 lg:px-8">
       <AdminTopBar
         title="لوحة الإدارة"
         subtitle="إدارة المحتوى"
