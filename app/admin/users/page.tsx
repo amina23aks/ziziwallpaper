@@ -106,7 +106,7 @@ export default function AdminUsersPage() {
                       setIsSavingUid(null);
                     }
                   }}
-                  className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                  className="rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface)] px-2 py-1 text-sm text-[var(--app-text)]"
                 >
                   {ROLE_OPTIONS.map((role) => (
                     <option key={role} value={role}>

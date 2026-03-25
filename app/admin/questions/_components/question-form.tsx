@@ -157,14 +157,14 @@ export function QuestionForm({
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-3 space-y-5 rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 shadow-sm sm:p-6 md:mt-5">
         <div className="space-y-2">
-          <label htmlFor="title" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <label htmlFor="title" className="block text-sm font-semibold text-[var(--app-text)]">
             نص السؤال
           </label>
           <input
             id="title"
             type="text"
             {...register("title")}
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm font-medium text-[var(--app-text)] placeholder:text-[var(--app-text-muted)]"
             placeholder="مثال: هل تحتاج إلى هدوء؟"
           />
           {errors.title ? <p className="text-sm text-red-600">{errors.title.message}</p> : null}
@@ -172,19 +172,19 @@ export function QuestionForm({
 
         <section className="space-y-3 rounded-2xl border border-dashed border-[color:var(--app-border)] bg-[var(--app-surface-muted)] p-4">
           <div>
-            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">صورة السؤال</p>
-            <p className="text-xs text-zinc-600 dark:text-zinc-400">نفس مسار الرفع الحالي يُستخدم هنا لتقليل التعقيد.</p>
+            <p className="text-sm font-semibold text-[var(--app-text)]">صورة السؤال</p>
+            <p className="text-xs text-[var(--app-text-muted)]">نفس مسار الرفع الحالي يُستخدم هنا لتقليل التعقيد.</p>
           </div>
           <input
             key={fileInputKey}
             type="file"
             accept="image/*"
             onChange={(event) => handleFileSelect(event.target.files?.[0] ?? null)}
-            className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="block w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-sm text-[var(--app-text)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--app-surface-muted)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--app-text)]"
           />
-          {isUploading ? <p className="text-sm text-zinc-700 dark:text-zinc-300">جاري رفع الصورة...</p> : null}
+          {isUploading ? <p className="text-sm text-[var(--app-text-muted)]">جاري رفع الصورة...</p> : null}
           {imageUrl ? (
-            <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)]">
               <div className="relative aspect-square bg-zinc-100 dark:bg-zinc-800">
                 <Image
                   src={imageUrl}
