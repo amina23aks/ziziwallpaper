@@ -148,7 +148,7 @@ export function QuestionForm({
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-[1400px] bg-zinc-50 px-4 pb-6 pt-0 dark:bg-zinc-950 sm:px-6 md:pr-24 lg:px-8">
       <AdminTopBar
         title={mode === "edit" ? "تعديل السؤال" : "إضافة سؤال"}
         subtitle="أنشئ بطاقة سؤال بصورة ونص فقط"

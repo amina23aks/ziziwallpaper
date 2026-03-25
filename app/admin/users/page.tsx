@@ -50,14 +50,14 @@ export default function AdminUsersPage() {
 
   if (!isSuperAdmin) {
     return (
-      <main className="mx-auto w-full max-w-5xl bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1400px] bg-zinc-50 px-4 pb-6 pt-0 dark:bg-zinc-950 sm:px-6 md:pr-24 lg:px-8">
         <AdminTopBar title="إدارة المستخدمين" subtitle="هذه الصفحة متاحة للسوبر أدمن فقط." backHref="/admin" />
       </main>
     );
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-4 bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-[1400px] space-y-4 bg-zinc-50 px-4 pb-6 pt-0 dark:bg-zinc-950 sm:px-6 md:pr-24 lg:px-8">
       <AdminTopBar title="إدارة المستخدمين" subtitle="ترقية أو خفض أدوار الحسابات" backHref="/admin" />
 
       <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
