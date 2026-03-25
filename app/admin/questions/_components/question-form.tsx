@@ -148,44 +148,44 @@ export function QuestionForm({
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-3xl bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 lg:px-8">
       <AdminTopBar
         title={mode === "edit" ? "تعديل السؤال" : "إضافة سؤال"}
         subtitle="أنشئ بطاقة سؤال بصورة ونص فقط"
         backHref="/admin/questions"
       />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-3 space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6 md:mt-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-3 space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6 md:mt-5">
         <div className="space-y-2">
-          <label htmlFor="title" className="block text-sm font-semibold text-zinc-900">
+          <label htmlFor="title" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             نص السؤال
           </label>
           <input
             id="title"
             type="text"
             {...register("title")}
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900"
+            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
             placeholder="مثال: هل تحتاج إلى هدوء؟"
           />
           {errors.title ? <p className="text-sm text-red-600">{errors.title.message}</p> : null}
         </div>
 
-        <section className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4">
+        <section className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-950/60">
           <div>
-            <p className="text-sm font-semibold text-zinc-900">صورة السؤال</p>
-            <p className="text-xs text-zinc-600">نفس مسار الرفع الحالي يُستخدم هنا لتقليل التعقيد.</p>
+            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">صورة السؤال</p>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400">نفس مسار الرفع الحالي يُستخدم هنا لتقليل التعقيد.</p>
           </div>
           <input
             key={fileInputKey}
             type="file"
             accept="image/*"
             onChange={(event) => handleFileSelect(event.target.files?.[0] ?? null)}
-            className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
+            className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
           />
-          {isUploading ? <p className="text-sm text-zinc-700">جاري رفع الصورة...</p> : null}
+          {isUploading ? <p className="text-sm text-zinc-700 dark:text-zinc-300">جاري رفع الصورة...</p> : null}
           {imageUrl ? (
-            <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-zinc-200 bg-white">
-              <div className="relative aspect-square bg-zinc-100">
+            <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+              <div className="relative aspect-square bg-zinc-100 dark:bg-zinc-800">
                 <Image
                   src={imageUrl}
                   alt={titleValue || "صورة السؤال"}
@@ -203,8 +203,8 @@ export function QuestionForm({
           <div
             className={`rounded-xl border px-4 py-3 text-sm font-medium ${
               statusMessage.type === "success"
-                ? "border-green-200 bg-green-50 text-green-800"
-                : "border-red-200 bg-red-50 text-red-800"
+                ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
+                : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
             }`}
           >
             {statusMessage.message}
@@ -214,7 +214,7 @@ export function QuestionForm({
         <button
           type="submit"
           disabled={isSaving || isUploading}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900"
         >
           {isSaving ? "جاري الحفظ..." : mode === "edit" ? "حفظ السؤال" : "إنشاء السؤال"}
         </button>

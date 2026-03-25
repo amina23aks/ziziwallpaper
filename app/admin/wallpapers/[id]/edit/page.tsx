@@ -28,11 +28,11 @@ export default function EditWallpaperPage() {
   }, [wallpaperId]);
 
   if (isLoading) {
-    return <main className="px-4 py-8 text-sm text-zinc-600">جاري تحميل بيانات الخلفية...</main>;
+    return <main className="bg-zinc-50 px-4 py-8 text-sm text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400">جاري تحميل بيانات الخلفية...</main>;
   }
 
   if (!wallpaper) {
-    return <main className="px-4 py-8 text-sm text-zinc-600">لم يتم العثور على الخلفية المطلوبة.</main>;
+    return <main className="bg-zinc-50 px-4 py-8 text-sm text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400">لم يتم العثور على الخلفية المطلوبة.</main>;
   }
 
   return <WallpaperForm mode="edit" wallpaperId={wallpaperId} initialWallpaper={wallpaper} />;
