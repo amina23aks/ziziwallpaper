@@ -155,7 +155,7 @@ export function QuestionForm({
         backHref="/admin/questions"
       />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-3 space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6 md:mt-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-3 space-y-5 rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 shadow-sm sm:p-6 md:mt-5">
         <div className="space-y-2">
           <label htmlFor="title" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             نص السؤال
@@ -170,7 +170,7 @@ export function QuestionForm({
           {errors.title ? <p className="text-sm text-red-600">{errors.title.message}</p> : null}
         </div>
 
-        <section className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-950/60">
+        <section className="space-y-3 rounded-2xl border border-dashed border-[color:var(--app-border)] bg-[var(--app-surface-muted)] p-4">
           <div>
             <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">صورة السؤال</p>
             <p className="text-xs text-zinc-600 dark:text-zinc-400">نفس مسار الرفع الحالي يُستخدم هنا لتقليل التعقيد.</p>

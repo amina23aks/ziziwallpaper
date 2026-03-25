@@ -404,7 +404,7 @@ export function WallpaperForm({
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="mt-3 space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6 md:mt-5"
+        className="mt-3 space-y-5 rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 shadow-sm sm:p-6 md:mt-5"
       >
         <div className="space-y-2">
           <label htmlFor="title" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
@@ -433,7 +433,7 @@ export function WallpaperForm({
           />
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 dark:border-zinc-800 dark:bg-zinc-950/60 sm:p-4">
+        <div className="space-y-3 rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] p-3 sm:p-4">
           <div className="flex items-center justify-between gap-2">
             <label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">التصنيفات</label>
             <button
@@ -464,7 +464,7 @@ export function WallpaperForm({
           <FieldHint>المحدد حالياً: {selectedCategoriesText}</FieldHint>
 
           {showInlineCategoryForm && (
-            <div className="space-y-2 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="space-y-2 rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-3">
               <input
                 value={newCategoryNameAr}
                 onChange={(event) => setNewCategoryNameAr(event.target.value)}
@@ -482,7 +482,7 @@ export function WallpaperForm({
           )}
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 dark:border-zinc-800 dark:bg-zinc-950/60 sm:p-4">
+        <div className="space-y-3 rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] p-3 sm:p-4">
           <div className="flex items-center justify-between gap-2">
             <label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">اقتراحات زر ؟</label>
             <button
@@ -513,7 +513,7 @@ export function WallpaperForm({
           <FieldHint>المحدد حالياً: {selectedQuestionText}</FieldHint>
 
           {showInlineQuestionForm && (
-            <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="space-y-3 rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-3">
               <input
                 value={newQuestionTitle}
                 onChange={(event) => setNewQuestionTitle(event.target.value)}
@@ -598,7 +598,7 @@ export function WallpaperForm({
           </div>
         </div>
 
-        <section className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-950/60">
+        <section className="space-y-3 rounded-2xl border border-dashed border-[color:var(--app-border)] bg-[var(--app-surface-muted)] p-4">
           <div>
             <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">📤 رفع الصور</p>
             <FieldHint>اختر صورة وسيتم رفعها تلقائياً وإضافتها للمعاينة.</FieldHint>
