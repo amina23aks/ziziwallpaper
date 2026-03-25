@@ -50,7 +50,7 @@ export default function AdminWallpapersPage() {
       <section className="mt-3 flex items-center justify-start [direction:ltr] md:mt-5">
         <Link
           href="/admin/wallpapers/new"
-          className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+          className="inline-flex items-center gap-1 rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--app-text)]"
         >
           <Plus size={13} />
           <span>إضافة خلفية</span>
@@ -58,24 +58,24 @@ export default function AdminWallpapersPage() {
       </section>
 
       {statusMessage && (
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
+        <div className="rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-4 py-3 text-sm font-medium text-[var(--app-text)]">
           {statusMessage}
         </div>
       )}
 
-      <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <section className="overflow-hidden rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] shadow-sm">
         {isLoading ? (
-          <p className="p-4 text-sm text-zinc-600 dark:text-zinc-400">جاري تحميل الخلفيات...</p>
+          <p className="p-4 text-sm text-[var(--app-text-muted)]">جاري تحميل الخلفيات...</p>
         ) : wallpapers.length === 0 ? (
-          <p className="p-4 text-sm text-zinc-600 dark:text-zinc-400">لا توجد خلفيات محفوظة حتى الآن.</p>
+          <p className="p-4 text-sm text-[var(--app-text-muted)]">لا توجد خلفيات محفوظة حتى الآن.</p>
         ) : (
-          <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <div className="divide-y divide-[color:var(--app-border)]">
             {wallpapers.map((wallpaper, index) => (
               <article
                 key={wallpaper.id ?? index}
                 className="grid grid-cols-[64px_minmax(0,1fr)] gap-3 p-3 sm:grid-cols-[72px_minmax(0,1fr)_auto] sm:items-center sm:gap-4"
               >
-                <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
+                <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface-muted)]">
                   {wallpaper.images?.[0]?.secureUrl ? (
                     <Image
                       src={wallpaper.images[0].secureUrl}
@@ -89,11 +89,11 @@ export default function AdminWallpapersPage() {
                 </div>
 
                 <div className="min-w-0 space-y-1">
-                  <p className="line-clamp-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{wallpaper.title}</p>
-                  <p className="line-clamp-1 text-xs text-zinc-600 dark:text-zinc-400">
+                  <p className="line-clamp-1 text-sm font-semibold text-[var(--app-text)]">{wallpaper.title}</p>
+                  <p className="line-clamp-1 text-xs text-[var(--app-text-muted)]">
                     {wallpaper.categorySlugs?.join("، ") || "بدون تصنيف"}
                   </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="text-xs text-[var(--app-text-muted)]">
                     الحالة: {wallpaper.isPublished ? "منشورة" : "غير منشورة"}
                   </p>
                 </div>

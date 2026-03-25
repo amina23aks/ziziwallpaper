@@ -38,49 +38,49 @@ export default function AdminDashboardPage() {
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Link
           href="/admin/wallpapers/new"
-          className="rounded-2xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-900 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
         >
           إضافة خلفية
         </Link>
         <Link
           href="/admin/wallpapers"
-          className="rounded-2xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-900 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
         >
           إدارة الخلفيات
         </Link>
         <Link
           href="/admin/categories"
-          className="rounded-2xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-900 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
         >
           إدارة التصنيفات
         </Link>
         <Link
           href="/admin/questions"
-          className="rounded-2xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-900 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
         >
           إدارة الأسئلة
         </Link>
         {isSuperAdmin ? (
           <Link
             href="/admin/users"
-            className="rounded-2xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-900 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+            className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
           >
             إدارة المستخدمين
           </Link>
         ) : null}
       </section>
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <h2 className="mb-3 text-lg font-bold text-zinc-900 dark:text-zinc-100">أحدث الخلفيات</h2>
+      <section className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 shadow-sm">
+        <h2 className="mb-3 text-lg font-bold text-[var(--app-text)]">أحدث الخلفيات</h2>
         {isLoading ? (
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">جاري التحميل...</p>
+          <p className="text-sm text-[var(--app-text-muted)]">جاري التحميل...</p>
         ) : recentWallpapers.length === 0 ? (
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">لا توجد خلفيات حالياً.</p>
+          <p className="text-sm text-[var(--app-text-muted)]">لا توجد خلفيات حالياً.</p>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {recentWallpapers.map((wallpaper, index) => (
               <article key={wallpaper.id ?? index} className="space-y-2">
-                <div className="relative aspect-square overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
+                <div className="relative aspect-square overflow-hidden rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)]">
                   {wallpaper.images?.[0]?.secureUrl && (
                     <Image
                       src={wallpaper.images[0].secureUrl}
@@ -92,7 +92,7 @@ export default function AdminDashboardPage() {
                     />
                   )}
                 </div>
-                <p className="line-clamp-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{wallpaper.title}</p>
+                <p className="line-clamp-1 text-sm font-semibold text-[var(--app-text)]">{wallpaper.title}</p>
               </article>
             ))}
           </div>

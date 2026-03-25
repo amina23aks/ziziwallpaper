@@ -60,31 +60,31 @@ export default function AdminUsersPage() {
     <main className="mx-auto w-full max-w-[1200px] space-y-4 bg-[var(--app-bg)] px-4 pb-6 pt-0 sm:px-6 md:pr-28 lg:px-8 lg:pr-32">
       <AdminTopBar title="إدارة المستخدمين" subtitle="ترقية أو خفض أدوار الحسابات" backHref="/admin" />
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <section className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 shadow-sm">
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="ابحث بالاسم أو البريد أو UID"
-          className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 outline-none"
+          className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-2 text-sm text-[var(--app-text)] outline-none"
         />
-        {notice ? <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">{notice}</p> : null}
+        {notice ? <p className="mt-2 text-xs text-[var(--app-text-muted)]">{notice}</p> : null}
       </section>
 
       <section className="space-y-2">
-        {isLoading ? <p className="text-sm text-zinc-600 dark:text-zinc-400">جاري تحميل المستخدمين...</p> : null}
-        {!isLoading && filteredUsers.length === 0 ? <p className="text-sm text-zinc-600 dark:text-zinc-400">لا يوجد نتائج.</p> : null}
+        {isLoading ? <p className="text-sm text-[var(--app-text-muted)]">جاري تحميل المستخدمين...</p> : null}
+        {!isLoading && filteredUsers.length === 0 ? <p className="text-sm text-[var(--app-text-muted)]">لا يوجد نتائج.</p> : null}
 
         {filteredUsers.map((item) => {
           const disabled = isSavingUid === item.uid || item.uid === userProfile?.uid;
           return (
             <article
               key={item.uid}
-              className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+              className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-3 shadow-sm"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{item.displayName || "بدون اسم"}</p>
-                  <p className="truncate text-xs text-zinc-600 dark:text-zinc-400">{item.email || item.uid}</p>
+                  <p className="truncate text-sm font-semibold text-[var(--app-text)]">{item.displayName || "بدون اسم"}</p>
+                  <p className="truncate text-xs text-[var(--app-text-muted)]">{item.email || item.uid}</p>
                 </div>
 
                 <select
@@ -106,7 +106,7 @@ export default function AdminUsersPage() {
                       setIsSavingUid(null);
                     }
                   }}
-                  className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                  className="rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface)] px-2 py-1 text-sm text-[var(--app-text)]"
                 >
                   {ROLE_OPTIONS.map((role) => (
                     <option key={role} value={role}>
@@ -116,7 +116,7 @@ export default function AdminUsersPage() {
                 </select>
               </div>
               {item.uid === userProfile?.uid ? (
-                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">لا يمكن تعديل دور حسابك الحالي من هذه الصفحة.</p>
+                <p className="mt-2 text-xs text-[var(--app-text-muted)]">لا يمكن تعديل دور حسابك الحالي من هذه الصفحة.</p>
               ) : null}
             </article>
           );

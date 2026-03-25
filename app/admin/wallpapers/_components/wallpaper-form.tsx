@@ -404,42 +404,42 @@ export function WallpaperForm({
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="mt-3 space-y-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6 md:mt-5"
+        className="mt-3 space-y-5 rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 shadow-sm sm:p-6 md:mt-5"
       >
         <div className="space-y-2">
-          <label htmlFor="title" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <label htmlFor="title" className="block text-sm font-semibold text-[var(--app-text)]">
             عنوان الخلفية (اختياري)
           </label>
           <input
             id="title"
             type="text"
             {...register("title")}
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+            className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm font-medium text-[var(--app-text)] placeholder:text-[var(--app-text-muted)]"
             placeholder="مثال: خلفية ليلية"
           />
           {errors.title && <p className="text-sm text-red-600">{errors.title.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="description" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <label htmlFor="description" className="block text-sm font-semibold text-[var(--app-text)]">
             وصف
           </label>
           <textarea
             id="description"
             rows={3}
             {...register("description")}
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+            className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm font-medium text-[var(--app-text)] placeholder:text-[var(--app-text-muted)]"
             placeholder="اختياري"
           />
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 dark:border-zinc-800 dark:bg-zinc-950/60 sm:p-4">
+        <div className="space-y-3 rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] p-3 sm:p-4">
           <div className="flex items-center justify-between gap-2">
-            <label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">التصنيفات</label>
+            <label className="block text-sm font-semibold text-[var(--app-text)]">التصنيفات</label>
             <button
               type="button"
               onClick={() => setShowInlineCategoryForm((prev) => !prev)}
-              className="text-xs font-semibold text-zinc-800 dark:text-zinc-200"
+              className="text-xs font-semibold text-[var(--app-text-muted)]"
             >
               ➕ إضافة تصنيف
             </button>
@@ -453,7 +453,7 @@ export function WallpaperForm({
                   type="button"
                   onClick={() => toggleCategory(category.slug)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
-                    active ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900" : "border-zinc-300 bg-white text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                    active ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900" : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
                   {category.nameAr}
@@ -464,11 +464,11 @@ export function WallpaperForm({
           <FieldHint>المحدد حالياً: {selectedCategoriesText}</FieldHint>
 
           {showInlineCategoryForm && (
-            <div className="space-y-2 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="space-y-2 rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-3">
               <input
                 value={newCategoryNameAr}
                 onChange={(event) => setNewCategoryNameAr(event.target.value)}
-                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-sm text-[var(--app-text)] placeholder:text-[var(--app-text-muted)]"
                 placeholder="اسم التصنيف بالعربية"
               />
               <button
@@ -482,13 +482,13 @@ export function WallpaperForm({
           )}
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-3 dark:border-zinc-800 dark:bg-zinc-950/60 sm:p-4">
+        <div className="space-y-3 rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] p-3 sm:p-4">
           <div className="flex items-center justify-between gap-2">
-            <label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">اقتراحات زر ؟</label>
+            <label className="block text-sm font-semibold text-[var(--app-text)]">اقتراحات زر ؟</label>
             <button
               type="button"
               onClick={() => setShowInlineQuestionForm((prev) => !prev)}
-              className="text-xs font-semibold text-zinc-800 dark:text-zinc-200"
+              className="text-xs font-semibold text-[var(--app-text-muted)]"
             >
               ➕ إضافة سؤال
             </button>
@@ -502,7 +502,7 @@ export function WallpaperForm({
                   type="button"
                   onClick={() => toggleQuestion(prompt.id)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
-                    active ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900" : "border-zinc-300 bg-white text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                    active ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900" : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
                   {prompt.questionAr}
@@ -513,11 +513,11 @@ export function WallpaperForm({
           <FieldHint>المحدد حالياً: {selectedQuestionText}</FieldHint>
 
           {showInlineQuestionForm && (
-            <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="space-y-3 rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-3">
               <input
                 value={newQuestionTitle}
                 onChange={(event) => setNewQuestionTitle(event.target.value)}
-                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-sm text-[var(--app-text)] placeholder:text-[var(--app-text-muted)]"
                 placeholder="نص السؤال"
               />
 
@@ -527,11 +527,11 @@ export function WallpaperForm({
                   type="file"
                   accept="image/*"
                   onChange={(event) => handleQuestionImageSelect(event.target.files?.[0] ?? null)}
-                  className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                  className="block w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-sm text-[var(--app-text)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--app-surface-muted)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--app-text)]"
                 />
-                {isUploadingQuestionImage ? <p className="text-sm text-zinc-700 dark:text-zinc-300">جاري رفع صورة السؤال...</p> : null}
+                {isUploadingQuestionImage ? <p className="text-sm text-[var(--app-text-muted)]">جاري رفع صورة السؤال...</p> : null}
                 {newQuestionImageUrl ? (
-                  <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+                  <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)]">
                     <div className="relative aspect-square bg-zinc-100 dark:bg-zinc-800">
                       <Image
                         src={newQuestionImageUrl}
@@ -573,34 +573,34 @@ export function WallpaperForm({
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor="searchKeywords" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <label htmlFor="searchKeywords" className="block text-sm font-semibold text-[var(--app-text)]">
               كلمات البحث
             </label>
             <input
               id="searchKeywords"
               type="text"
               {...register("searchKeywords")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+              className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm font-medium text-[var(--app-text)] placeholder:text-[var(--app-text-muted)]"
               placeholder="ليل، هدوء، سماء"
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="moodTags" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <label htmlFor="moodTags" className="block text-sm font-semibold text-[var(--app-text)]">
               كلمات المزاج
             </label>
             <input
               id="moodTags"
               type="text"
               {...register("moodTags")}
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm font-medium text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+              className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm font-medium text-[var(--app-text)] placeholder:text-[var(--app-text-muted)]"
               placeholder="هادئ، تركيز"
             />
           </div>
         </div>
 
-        <section className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-950/60">
+        <section className="space-y-3 rounded-2xl border border-dashed border-[color:var(--app-border)] bg-[var(--app-surface-muted)] p-4">
           <div>
-            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">📤 رفع الصور</p>
+            <p className="text-sm font-semibold text-[var(--app-text)]">📤 رفع الصور</p>
             <FieldHint>اختر صورة وسيتم رفعها تلقائياً وإضافتها للمعاينة.</FieldHint>
           </div>
           <input
@@ -608,16 +608,16 @@ export function WallpaperForm({
             type="file"
             accept="image/*"
             onChange={(event) => handleFileSelect(event.target.files?.[0] ?? null)}
-            className="block w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="block w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-sm text-[var(--app-text)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--app-surface-muted)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--app-text)]"
           />
-          {isUploading && <p className="text-sm text-zinc-700 dark:text-zinc-300">جاري رفع الصورة...</p>}
+          {isUploading && <p className="text-sm text-[var(--app-text-muted)]">جاري رفع الصورة...</p>}
 
           {uploadedImages.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">المعاينة</p>
+              <p className="text-sm font-semibold text-[var(--app-text)]">المعاينة</p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {uploadedImages.map((image, index) => (
-                  <article key={image.publicId} className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+                  <article key={image.publicId} className="overflow-hidden rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)]">
                     <div className="relative aspect-square bg-zinc-100 dark:bg-zinc-800">
                       <Image
                         src={image.secureUrl}
