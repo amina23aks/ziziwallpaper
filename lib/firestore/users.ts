@@ -1,7 +1,22 @@
 import { updateProfile, type User } from "firebase/auth";
-import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db, getClientAuth } from "@/lib/firebase/client";
 import type { UserProfile } from "@/types/user-profile";
+
+function parseProfileRole(value: unknown): UserProfile["role"] {
+  return value === "admin" || value === "superadmin" ? value : "user";
+}
 
 function buildUserProfile(user: User): UserProfile {
   return {
@@ -20,7 +35,7 @@ function normalizeExistingProfile(uid: string, data: Partial<UserProfile> | unde
     displayName: data?.displayName ?? "",
     email: data?.email ?? "",
     photoURL: data?.photoURL ?? "",
-    role: data?.role === "admin" ? "admin" : "user",
+    role: parseProfileRole(data?.role),
     profileCompleted: data?.profileCompleted ?? Boolean(data?.displayName?.trim()),
     createdAt: data?.createdAt,
     updatedAt: data?.updatedAt,
@@ -89,6 +104,19 @@ export async function getUserProfile(uid: string) {
   return normalizeExistingProfile(uid, snapshot.data() as Partial<UserProfile>);
 }
 
+export async function listUserProfiles(maxItems = 50) {
+  let snapshot;
+  try {
+    snapshot = await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(maxItems)));
+  } catch {
+    snapshot = await getDocs(query(collection(db, "users"), limit(maxItems)));
+  }
+
+  return snapshot.docs.map((item) =>
+    normalizeExistingProfile(item.id, item.data() as Partial<UserProfile>)
+  );
+}
+
 export async function updateUserDisplayName(uid: string, displayName: string) {
   const nextDisplayName = displayName.trim();
 
@@ -101,5 +129,33 @@ export async function updateUserDisplayName(uid: string, displayName: string) {
   const currentUser = getClientAuth().currentUser;
   if (currentUser && currentUser.uid === uid) {
     await updateProfile(currentUser, { displayName: nextDisplayName });
+  }
+}
+
+export async function updateUserRoleBySuperAdmin(input: {
+  targetUid: string;
+  role: UserProfile["role"];
+}) {
+  const currentUser = getClientAuth().currentUser;
+  if (!currentUser) {
+    throw new Error("يجب تسجيل الدخول.");
+  }
+
+  const idToken = await currentUser.getIdToken();
+  const response = await fetch("/api/admin/users/role", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({
+      targetUid: input.targetUid,
+      role: input.role,
+    }),
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error ?? "تعذر تحديث الدور.");
   }
 }

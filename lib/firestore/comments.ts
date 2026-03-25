@@ -81,12 +81,9 @@ export async function createWallpaperComment(input: {
 export async function updateWallpaperComment(input: {
   commentId: string;
   content: string;
-  displayIdentityMode: CommentDisplayIdentityMode;
 }) {
   await updateDoc(doc(commentsCollection, input.commentId), {
     content: input.content.trim(),
-    displayIdentityMode: input.displayIdentityMode,
-    isAnonymous: input.displayIdentityMode !== "real",
     updatedAt: serverTimestamp(),
   });
 }

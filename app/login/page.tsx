@@ -11,6 +11,17 @@ import { getUserProfile, updateUserDisplayName } from "@/lib/firestore/users";
 
 type AuthMode = "login" | "signup";
 
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12S17.4 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-4z" />
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 18.9 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.3l-6.3-5.2C29.3 35.1 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z" />
+      <path fill="#1976D2" d="M43.6 20H42V20H24v8h11.3c-1.1 3.1-3.2 5.4-6 6.9l.1-.1 6.3 5.2C35.2 40.4 44 34 44 24c0-1.3-.1-2.7-.4-4z" />
+    </svg>
+  );
+}
+
 function getAuthErrorMessage(code?: string) {
   switch (code) {
     case "auth/invalid-credential":
@@ -156,9 +167,10 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleAuth}
           disabled={isSubmitting}
-          className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-300/90 bg-white/75 px-4 py-2.5 text-sm font-semibold text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_8px_22px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600/70 dark:bg-zinc-800/50 dark:text-zinc-100 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_8px_22px_rgba(0,0,0,0.35)] dark:hover:bg-zinc-800/70"
         >
-          المتابعة باستخدام Google
+          <GoogleMark />
+          Continue with Google
         </button>
 
         <div className="mt-4 flex items-center justify-between text-sm">

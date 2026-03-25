@@ -6,8 +6,10 @@ import { Mail, Shield } from "lucide-react";
 import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { ProfileNameEditor } from "@/app/_components/profile-name-editor";
+import { ThemeToggle } from "@/app/_components/theme-toggle";
 import { AdminOnlyProfileEntry } from "@/app/profile/_components/admin-only-profile-entry";
 import { useAuth } from "@/app/_providers/auth-provider";
+import { isAdminRole } from "@/lib/auth/roles";
 import { signOutUser } from "@/lib/auth/auth";
 import { updateUserDisplayName } from "@/lib/firestore/users";
 
@@ -37,6 +39,9 @@ export default function ProfilePage() {
       <section className="mx-auto w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:max-w-lg md:max-w-xl md:p-8">
         <h1 className="text-xl font-bold text-zinc-900">الحساب</h1>
         <p className="mt-2 text-sm text-zinc-600">ملفك الشخصي في التطبيق.</p>
+        <div className="mt-4 [direction:ltr]">
+          <ThemeToggle />
+        </div>
 
         <div className="mt-5 space-y-3">
           <ProfileNameEditor
@@ -66,7 +71,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="mt-4">
-          <AdminOnlyProfileEntry isAdmin={userProfile?.role === "admin"} />
+          <AdminOnlyProfileEntry isAdmin={isAdminRole(userProfile)} />
         </div>
 
         <div className="mt-6 flex justify-start">

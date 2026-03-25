@@ -465,15 +465,13 @@ function CommentBody({
   onReplyIdentityModeChange?: (value: CommentDisplayIdentityMode) => void;
   onReplySubmit?: () => Promise<void>;
   onReplyCancel?: () => void;
-  onEditSubmit: (content: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
+  onEditSubmit: (content: string) => Promise<void>;
   onDelete: () => Promise<void>;
   isSaving: boolean;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(item.content);
-  const [editIdentityMode, setEditIdentityMode] = useState<CommentDisplayIdentityMode>(item.displayIdentityMode ?? "real");
-  const [isIdentityOpen, setIsIdentityOpen] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const openActions = () => {
@@ -483,7 +481,6 @@ function CommentBody({
 
   const beginEditing = () => {
     setEditText(item.content);
-    setEditIdentityMode(item.displayIdentityMode ?? "real");
     setIsEditing(true);
   };
 
@@ -522,16 +519,6 @@ function CommentBody({
 
           {isEditing ? (
             <div className="mt-2 space-y-2">
-              <div className="relative inline-flex">
-                <IdentityTrigger value={editIdentityMode} realName={currentUserName} small onClick={() => setIsIdentityOpen((prev) => !prev)} />
-                <IdentitySelectorSheet
-                  open={isIdentityOpen}
-                  onClose={() => setIsIdentityOpen(false)}
-                  value={editIdentityMode}
-                  onChange={setEditIdentityMode}
-                  realName={currentUserName}
-                />
-              </div>
               <textarea
                 value={editText}
                 onChange={(event) => setEditText(event.target.value)}
@@ -543,7 +530,7 @@ function CommentBody({
                   type="button"
                   onClick={async () => {
                     if (!editText.trim()) return;
-                    await onEditSubmit(editText, editIdentityMode);
+                    await onEditSubmit(editText);
                     setIsEditing(false);
                   }}
                   disabled={isSaving || !editText.trim()}
@@ -556,7 +543,6 @@ function CommentBody({
                   onClick={() => {
                     setIsEditing(false);
                     setEditText(item.content);
-                    setEditIdentityMode(item.displayIdentityMode ?? "real");
                   }}
                   className="rounded-full bg-zinc-100 px-3 py-1.5 font-semibold text-zinc-700"
                 >
@@ -651,7 +637,7 @@ type CommentNodeProps = {
   onReplyTextChange: (value: string) => void;
   onReplyIdentityModeChange: (value: CommentDisplayIdentityMode) => void;
   onReplySubmit: (parentId: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
-  onEditComment: (comment: WallpaperComment, content: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
+  onEditComment: (comment: WallpaperComment, content: string) => Promise<void>;
   onDeleteComment: (comment: WallpaperComment, replyIds?: string[]) => Promise<void>;
 };
 
@@ -711,7 +697,7 @@ function CommentThreadNode({
             onReplyIdentityModeChange={onReplyIdentityModeChange}
             onReplySubmit={itemId ? () => onReplySubmit(itemId, activeReplyIdentityMode) : undefined}
             onReplyCancel={itemId ? () => onReplyToggle(itemId) : undefined}
-            onEditSubmit={(content, identityMode) => onEditComment(item, content, identityMode)}
+            onEditSubmit={(content) => onEditComment(item, content)}
             onDelete={() => onDeleteComment(item, descendantIdsByParent.get(itemId ?? "") ?? [])}
             isSaving={isSaving}
           />
@@ -770,7 +756,7 @@ export function FeedbackSection({
   onLogin: () => void;
   onSubmitFeedback: (value: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
   onSubmitReply: (parentId: string, value: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
-  onEditComment: (comment: WallpaperComment, value: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
+  onEditComment: (comment: WallpaperComment, value: string) => Promise<void>;
   onDeleteComment: (comment: WallpaperComment, replyIds?: string[]) => Promise<void>;
   isSaving: boolean;
 }) {

@@ -5,9 +5,13 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { listRecentWallpapers } from "@/lib/firestore/wallpapers";
 import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
+import { useAuth } from "@/app/_providers/auth-provider";
+import { isSuperAdminRole } from "@/lib/auth/roles";
 import type { Wallpaper } from "@/types/wallpaper";
 
 export default function AdminDashboardPage() {
+  const { userProfile } = useAuth();
+  const isSuperAdmin = isSuperAdminRole(userProfile);
   const [recentWallpapers, setRecentWallpapers] = useState<Wallpaper[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,7 +29,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-5 bg-zinc-950 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-5xl space-y-5 bg-zinc-50 px-4 py-6 sm:px-6 lg:px-8">
       <AdminTopBar
         title="لوحة الإدارة"
         subtitle="إدارة المحتوى"
@@ -56,6 +60,14 @@ export default function AdminDashboardPage() {
         >
           إدارة الأسئلة
         </Link>
+        {isSuperAdmin ? (
+          <Link
+            href="/admin/users"
+            className="rounded-2xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-900 shadow-sm"
+          >
+            إدارة المستخدمين
+          </Link>
+        ) : null}
       </section>
 
       <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Home, LayoutDashboard, Star, User } from "lucide-react";
 import { useAuth } from "@/app/_providers/auth-provider";
+import { isAdminRole } from "@/lib/auth/roles";
 
 export function MobileBottomNav({
   activeTab,
@@ -11,7 +12,7 @@ export function MobileBottomNav({
 }) {
   const { isSignedIn, userProfile } = useAuth();
   const accountHref = isSignedIn ? "/profile" : "/login";
-  const isAdmin = userProfile?.role === "admin";
+  const isAdmin = isAdminRole(userProfile);
 
   const itemClass = "inline-flex h-10 w-10 items-center justify-center rounded-xl transition-colors";
 

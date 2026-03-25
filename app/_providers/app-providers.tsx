@@ -2,7 +2,12 @@
 
 import type { ReactNode } from "react";
 import { AuthProvider } from "@/app/_providers/auth-provider";
+import { ThemeProvider } from "@/app/_providers/theme-provider";
 
 export function AppProviders({ children }: { children: ReactNode }) {
-  return <AuthProvider>{children}</AuthProvider>;
+  return (
+    <ThemeProvider>
+      <AuthProvider>{children}</AuthProvider>
+    </ThemeProvider>
+  );
 }

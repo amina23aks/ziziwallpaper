@@ -44,7 +44,7 @@ export default function AdminWallpapersPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-5 bg-zinc-950 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-6xl space-y-5 bg-zinc-50 px-4 py-6 sm:px-6 lg:px-8">
       <AdminTopBar title="الخلفيات" subtitle="إدارة الخلفيات" backHref="/admin" />
 
       <section className="mt-3 flex items-center justify-start [direction:ltr] md:mt-5">

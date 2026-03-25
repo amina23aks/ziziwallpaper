@@ -144,7 +144,7 @@ export default function WallpaperDetailsPage() {
         <div className="flex min-h-10 items-center justify-start [direction:ltr]">
           <Link
             href="/"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-800"
+            className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40"
             aria-label="رجوع"
           >
             ←
@@ -155,7 +155,7 @@ export default function WallpaperDetailsPage() {
       <header className="mb-4 hidden items-center justify-start bg-zinc-50/95 py-2 backdrop-blur [direction:ltr] md:sticky md:top-0 md:z-30 md:flex">
         <Link
           href="/"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-800"
+          className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40"
           aria-label="رجوع"
         >
           ←
@@ -349,7 +349,7 @@ export default function WallpaperDetailsPage() {
                   setIsCommentSaving(false);
                 }
               }}
-              onEditComment={async (comment, value, identityMode) => {
+              onEditComment={async (comment, value) => {
                 if (!user || !comment.id || !value.trim()) return;
                 const isOwner = comment.userId === user.uid;
                 if (!isOwner) return;
@@ -358,13 +358,10 @@ export default function WallpaperDetailsPage() {
                   await updateWallpaperComment({
                     commentId: comment.id,
                     content: value,
-                    displayIdentityMode: identityMode,
                   });
                   updateCommentInState(comment.id, (item) => ({
                     ...item,
                     content: value.trim(),
-                    displayIdentityMode: identityMode,
-                    isAnonymous: identityMode !== "real",
                     updatedAt: toClientTimestamp(),
                   }));
                 } finally {
