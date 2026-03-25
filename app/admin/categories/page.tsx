@@ -135,7 +135,7 @@ export default function AdminCategoriesPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-4xl space-y-5 bg-zinc-50 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-4xl space-y-5 bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 lg:px-8">
       <AdminTopBar title="التصنيفات" subtitle="تعديل الأسماء أو حذف التصنيفات" backHref="/admin" />
 
       <section className="mt-3 space-y-3 md:mt-5">
@@ -143,25 +143,25 @@ export default function AdminCategoriesPage() {
           <button
             type="button"
             onClick={() => setShowAddForm((prev) => !prev)}
-            className="inline-flex items-center rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900"
+            className="inline-flex items-center rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
           >
             إضافة تصنيف +
           </button>
         </div>
 
         {showAddForm && (
-          <div className="rounded-xl border border-zinc-200 bg-white p-3">
+          <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 value={newCategoryName}
                 onChange={(event) => setNewCategoryName(event.target.value)}
                 placeholder="اسم التصنيف"
-                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
+                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
               />
               <button
                 type="button"
                 onClick={handleCreate}
-                className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm font-semibold text-white"
+                className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm font-semibold text-white dark:border-zinc-200 dark:bg-zinc-100 dark:text-zinc-900"
               >
                 حفظ
               </button>
@@ -171,16 +171,16 @@ export default function AdminCategoriesPage() {
       </section>
 
       {statusMessage && (
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800">
+        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
           {statusMessage}
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
+      <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-5">
         {isLoading ? (
-          <p className="text-sm text-zinc-600">جاري تحميل التصنيفات...</p>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">جاري تحميل التصنيفات...</p>
         ) : !hasCategories ? (
-          <p className="text-sm text-zinc-600">لا توجد تصنيفات حالياً. يمكنك إضافة تصنيف جديد.</p>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">لا توجد تصنيفات حالياً. يمكنك إضافة تصنيف جديد.</p>
         ) : (
           <div className="space-y-3">
             {categories.map((category, index) => {
@@ -188,20 +188,20 @@ export default function AdminCategoriesPage() {
               return (
                 <article
                   key={category.id ?? index}
-                  className="space-y-3 rounded-xl border border-zinc-200 p-3 sm:flex sm:items-center sm:justify-between sm:space-y-0"
+                  className="space-y-3 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800 dark:bg-zinc-950/40 sm:flex sm:items-center sm:justify-between sm:space-y-0"
                 >
                   <div className="min-w-0 flex-1">
                     {isEditing ? (
                       <input
                         value={editingName}
                         onChange={(event) => setEditingName(event.target.value)}
-                        className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400"
+                        className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400"
                         placeholder="اسم التصنيف"
                       />
                     ) : (
                       <>
-                        <p className="text-sm font-semibold text-zinc-900">{category.nameAr}</p>
-                        <p className="text-xs text-zinc-600">{category.slug}</p>
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{category.nameAr}</p>
+                        <p className="text-xs text-zinc-600 dark:text-zinc-400">{category.slug}</p>
                       </>
                     )}
                   </div>
@@ -222,7 +222,7 @@ export default function AdminCategoriesPage() {
                             setEditingId(null);
                             setEditingName("");
                           }}
-                          className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-700 sm:flex-none"
+                          className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-700 dark:border-zinc-700 dark:text-zinc-200 sm:flex-none"
                         >
                           إلغاء
                         </button>
@@ -231,7 +231,7 @@ export default function AdminCategoriesPage() {
                       <button
                         type="button"
                         onClick={() => handleStartEdit(category)}
-                        className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-700 sm:flex-none"
+                        className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-700 dark:border-zinc-700 dark:text-zinc-200 sm:flex-none"
                       >
                         تعديل
                       </button>
@@ -239,7 +239,7 @@ export default function AdminCategoriesPage() {
                     <button
                       type="button"
                       onClick={() => setDeletingId(category.id ?? null)}
-                      className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 sm:flex-none"
+                      className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 sm:flex-none"
                     >
                       حذف
                     </button>

@@ -28,11 +28,11 @@ export default function EditQuestionPage() {
   }, [questionId]);
 
   if (isLoading) {
-    return <main className="px-4 py-8 text-sm text-zinc-600">جاري تحميل بيانات السؤال...</main>;
+    return <main className="bg-zinc-50 px-4 py-8 text-sm text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400">جاري تحميل بيانات السؤال...</main>;
   }
 
   if (!question) {
-    return <main className="px-4 py-8 text-sm text-zinc-600">لم يتم العثور على السؤال المطلوب.</main>;
+    return <main className="bg-zinc-50 px-4 py-8 text-sm text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400">لم يتم العثور على السؤال المطلوب.</main>;
   }
 
   return <QuestionForm mode="edit" questionId={questionId} initialQuestion={question} />;
