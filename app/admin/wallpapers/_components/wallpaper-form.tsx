@@ -395,7 +395,7 @@ export function WallpaperForm({
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-[1200px] bg-[var(--app-bg)] px-4 pb-6 pt-0 sm:px-6 md:pr-28 lg:px-8 lg:pr-32">
       <AdminTopBar
         title={mode === "edit" ? "تعديل الخلفية" : "إضافة خلفية"}
         subtitle="أدخل بيانات الخلفية"
