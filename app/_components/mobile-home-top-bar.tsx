@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { CircleHelp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { BrandMark } from "@/app/_components/brand-mark";
 
 export function MobileHomeTopBar({
   searchQuery,
@@ -61,12 +61,7 @@ export function MobileHomeTopBar({
           />
         </div>
 
-        <Link
-          href="/"
-          className="inline-flex h-10 min-w-14 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white px-3 text-xs font-extrabold text-zinc-800"
-        >
-          ZIZI
-        </Link>
+        <BrandMark />
       </div>
     </header>
   );

@@ -27,7 +27,7 @@ export function AdminTopBar({
           ) : backHref ? (
             <Link
               href={backHref}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-800"
+              className="inline-flex shrink-0 items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40"
               aria-label="رجوع"
             >
               ←
@@ -52,7 +52,7 @@ export function AdminTopBar({
           ) : backHref ? (
             <Link
               href={backHref}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-800"
+              className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40"
               aria-label="رجوع"
             >
               ←

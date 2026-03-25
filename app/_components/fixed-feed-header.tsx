@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { CircleHelp, Search } from "lucide-react";
 import type { Category } from "@/types/category";
+import { BrandMark } from "@/app/_components/brand-mark";
 
 export function FixedFeedHeader({
   searchQuery,
@@ -42,12 +42,7 @@ export function FixedFeedHeader({
             />
           </div>
 
-          <Link
-            href="/"
-            className="inline-flex h-10 min-w-14 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white px-3 text-xs font-extrabold text-zinc-800 shadow-sm md:min-w-16 md:px-4"
-          >
-            ZIZI
-          </Link>
+          <BrandMark />
         </div>
 
         <div className="flex w-full gap-2 overflow-x-auto pb-1 pr-1 scrollbar-hide [direction:rtl]">

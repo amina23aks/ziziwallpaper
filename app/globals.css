@@ -48,6 +48,7 @@ body {
 }
 
 .dark .bg-zinc-50,
+.dark .bg-zinc-50\/60,
 .dark .bg-zinc-50\/70 {
   background-color: var(--app-surface-muted) !important;
 }
@@ -65,6 +66,7 @@ body {
 .dark .text-zinc-800,
 .dark .text-zinc-700,
 .dark .text-zinc-600,
+.dark .text-zinc-400,
 .dark .text-zinc-500 {
   color: var(--app-text) !important;
 }
@@ -79,6 +81,35 @@ body {
 .dark .border-zinc-200\/90,
 .dark .border-zinc-300 {
   border-color: var(--app-border) !important;
+}
+
+.dark .divide-zinc-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--app-border) !important;
+}
+
+.dark .bg-red-50 {
+  background-color: rgba(127, 29, 29, 0.2) !important;
+}
+
+.dark .border-red-200 {
+  border-color: rgba(248, 113, 113, 0.45) !important;
+}
+
+.dark .text-red-700,
+.dark .text-red-800 {
+  color: #fca5a5 !important;
+}
+
+.dark .bg-green-50 {
+  background-color: rgba(6, 78, 59, 0.24) !important;
+}
+
+.dark .border-green-200 {
+  border-color: rgba(52, 211, 153, 0.45) !important;
+}
+
+.dark .text-green-800 {
+  color: #6ee7b7 !important;
 }
 
 .dark .shadow-sm {
