@@ -135,7 +135,7 @@ export default function AdminCategoriesPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-[1400px] space-y-5 bg-zinc-50 px-4 pb-6 pt-0 dark:bg-zinc-950 sm:px-6 md:pr-24 lg:px-8">
+    <main className="mx-auto w-full max-w-[1200px] space-y-5 bg-[var(--app-bg)] px-4 pb-6 pt-0 sm:px-6 md:pr-28 lg:px-8 lg:pr-32">
       <AdminTopBar title="التصنيفات" subtitle="تعديل الأسماء أو حذف التصنيفات" backHref="/admin" />
 
       <section className="mt-3 space-y-3 md:mt-5">
