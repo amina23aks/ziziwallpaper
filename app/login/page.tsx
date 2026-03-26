@@ -157,7 +157,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting || (mode === "signup" && !displayName.trim())}
-            className="inline-flex w-full items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex w-full items-center justify-center rounded-xl border border-red-200 bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {mode === "login" ? "دخول" : "إنشاء الحساب"}
           </button>
