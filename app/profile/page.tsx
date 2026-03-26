@@ -91,6 +91,7 @@ export default function ProfilePage() {
         title="تأكيد تسجيل الخروج"
         description="هل أنت متأكد من تسجيل الخروج؟"
         confirmText="تسجيل الخروج"
+        confirmVariant="destructive"
         onConfirm={async () => {
           await signOutUser();
           router.replace("/");
