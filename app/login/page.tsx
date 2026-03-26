@@ -109,14 +109,14 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-zinc-50 px-4 py-8 pb-24 pt-16 dark:bg-zinc-950 md:pr-24 md:pt-10">
-      <section className="mx-auto w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:max-w-lg sm:p-6 md:max-w-xl md:p-8">
+    <main className="min-h-screen w-full bg-[var(--app-bg)] px-4 py-8 pb-24 pt-16 md:pr-24 md:pt-10">
+      <section className="mx-auto w-full max-w-md rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-5 shadow-sm sm:max-w-lg sm:p-6 md:max-w-xl md:p-8">
         <div className="mb-6 space-y-2 text-right">
-          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">ZIZI WALLPAPER</p>
-          <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
+          <p className="text-xs font-semibold text-[var(--app-text-muted)]">ZIZI WALLPAPER</p>
+          <h1 className="text-2xl font-extrabold text-[var(--app-text)]">
             {mode === "login" ? "تسجيل الدخول" : "إنشاء حساب جديد"}
           </h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">سجّل الدخول للوصول إلى ميزات الحساب والمفضلة.</p>
+          <p className="text-sm text-[var(--app-text-muted)]">سجّل الدخول للوصول إلى ميزات الحساب والمفضلة.</p>
         </div>
 
         <form className="space-y-3" onSubmit={handleEmailAuth}>
@@ -127,7 +127,7 @@ export default function LoginPage() {
               onChange={(event) => setDisplayName(event.target.value)}
               placeholder="الاسم"
               required
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+              className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] outline-none focus:border-zinc-500"
             />
           )}
           <input
@@ -136,7 +136,7 @@ export default function LoginPage() {
             onChange={(event) => setEmail(event.target.value)}
             placeholder="البريد الإلكتروني"
             required
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+            className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] outline-none focus:border-zinc-500"
           />
           <input
             type="password"
@@ -145,7 +145,7 @@ export default function LoginPage() {
             placeholder="كلمة المرور"
             minLength={6}
             required
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+            className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] outline-none focus:border-zinc-500"
           />
 
           {errorMessage && (
@@ -167,7 +167,7 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleAuth}
           disabled={isSubmitting}
-          className="mt-3 inline-flex w-full items-center justify-center gap-2.5 rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-50 hover:shadow disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          className="mt-3 inline-flex w-full items-center justify-center gap-2.5 rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--app-text)] shadow-sm transition hover:bg-[var(--app-surface-muted)] hover:shadow disabled:cursor-not-allowed disabled:opacity-60"
           dir="ltr"
         >
           <span className="inline-flex h-5 w-5 items-center justify-center">
@@ -177,7 +177,7 @@ export default function LoginPage() {
         </button>
 
         <div className="mt-4 flex items-center justify-between text-sm">
-          <Link href="/" className="font-medium text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200">
+          <Link href="/" className="font-medium text-[var(--app-text-muted)] hover:text-[var(--app-text)]">
             العودة للرئيسية
           </Link>
           <button
@@ -186,7 +186,7 @@ export default function LoginPage() {
               setErrorMessage("");
               setMode(mode === "login" ? "signup" : "login");
             }}
-            className="font-semibold text-zinc-800 hover:underline dark:text-zinc-100"
+            className="font-semibold text-[var(--app-text)] hover:underline"
           >
             {mode === "login" ? "ليس لديك حساب؟ أنشئ حساباً" : "لديك حساب بالفعل؟ سجّل الدخول"}
           </button>

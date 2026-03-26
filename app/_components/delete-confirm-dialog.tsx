@@ -22,16 +22,16 @@ export function DeleteConfirmDialog({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-4" onClick={onCancel}>
       <section
-        className="w-full max-w-sm space-y-3 rounded-2xl border border-zinc-200 bg-white p-4 text-right shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+        className="w-full max-w-sm space-y-3 rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-right shadow-xl"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">{title}</h2>
-        <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">{description}</p>
+        <h2 className="text-base font-bold text-[var(--app-text)]">{title}</h2>
+        <p className="text-sm leading-6 text-[var(--app-text-muted)]">{description}</p>
         <div className="flex items-center justify-end gap-2 pt-1">
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex min-w-20 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-sm font-semibold text-zinc-700 dark:border-zinc-700 dark:text-zinc-200"
+            className="inline-flex min-w-20 items-center justify-center rounded-lg border border-[color:var(--app-border)] px-3 py-2 text-sm font-semibold text-[var(--app-text)]"
           >
             {cancelText}
           </button>
