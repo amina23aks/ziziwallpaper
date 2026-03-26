@@ -78,7 +78,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => setIsLogoutDialogOpen(true)}
-            className="rounded-lg border border-red-700 bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 dark:border-zinc-300 dark:bg-transparent dark:text-zinc-700 dark:hover:bg-transparent"
+            className="rounded-lg border border-[#f3b6bc] bg-[#fff5f6] px-4 py-2 text-sm font-semibold text-[#c40018] hover:bg-[#ffebee] dark:border-zinc-300 dark:bg-transparent dark:text-zinc-700 dark:hover:bg-transparent"
           >
             تسجيل الخروج
           </button>
