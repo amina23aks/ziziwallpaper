@@ -108,7 +108,7 @@ export default function AdminWallpapersPage() {
                   <button
                     type="button"
                     onClick={() => setDeletingId(wallpaper.id ?? null)}
-                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-[#f3b6bc] bg-[#fff5f6] px-3 py-2 text-xs font-semibold text-[#c40018] hover:bg-[#ffebee] dark:border-[#8f1d2a] dark:bg-[#34131a] dark:text-[#ff9eaa] dark:hover:bg-[#412029] sm:flex-none"
+                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 sm:flex-none"
                   >
                     حذف
                   </button>
@@ -123,6 +123,7 @@ export default function AdminWallpapersPage() {
         isOpen={Boolean(deletingId)}
         title="تأكيد حذف الخلفية"
         description="هل أنت متأكد من حذف هذه الخلفية؟ لا يمكن التراجع عن هذا الإجراء."
+        confirmVariant="destructive"
         onConfirm={handleDelete}
         onCancel={() => setDeletingId(null)}
       />

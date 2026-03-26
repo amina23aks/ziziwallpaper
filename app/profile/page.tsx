@@ -78,7 +78,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => setIsLogoutDialogOpen(true)}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-700"
+            className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"
           >
             تسجيل الخروج
           </button>
@@ -91,6 +91,7 @@ export default function ProfilePage() {
         title="تأكيد تسجيل الخروج"
         description="هل أنت متأكد من تسجيل الخروج؟"
         confirmText="تسجيل الخروج"
+        confirmVariant="destructive"
         onConfirm={async () => {
           await signOutUser();
           router.replace("/");
