@@ -89,14 +89,14 @@ export default function AdminQuestionsPage() {
                 <div className="col-span-2 flex gap-2 sm:col-auto sm:justify-end">
                   <Link
                     href={question.id ? `/admin/questions/${question.id}/edit` : "#"}
-                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-800 dark:border-zinc-700 dark:text-zinc-200 sm:flex-none"
+                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-xs font-semibold text-[var(--app-text)] sm:flex-none"
                   >
                     تعديل
                   </Link>
                   <button
                     type="button"
                     onClick={() => setDeletingId(question.id ?? null)}
-                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 sm:flex-none"
+                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-[#f2b5b5] bg-[#fff5f5] px-3 py-2 text-xs font-semibold text-[#c1121f] hover:bg-[#ffeaea] sm:flex-none"
                   >
                     حذف
                   </button>

@@ -45,26 +45,30 @@ export function AdminTopBar({
         </div>
       </header>
 
-      <header className="hidden space-y-2 text-right md:sticky md:top-0 md:z-30 md:-mx-6 md:block md:border-b md:border-[color:var(--app-border)] md:bg-[color:var(--app-surface)] md:px-6 md:py-3 md:backdrop-blur lg:-mx-8 lg:px-8">
-        <div className="flex items-center justify-between [direction:ltr]">
-          {leading ? (
-            <div className="[direction:rtl]">{leading}</div>
-          ) : backHref ? (
-            <Link
-              href={backHref}
-              className="inline-flex items-center justify-center px-1 text-xl leading-none text-[var(--app-text-muted)] transition hover:text-[var(--app-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40"
-              aria-label="رجوع"
-            >
-              ←
-            </Link>
-          ) : (
-            <div className="w-9" />
-          )}
-          {trailing ? <div className="[direction:rtl]">{trailing}</div> : <div className="w-9" />}
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-[var(--app-text)] sm:text-2xl">{title}</h1>
-          {subtitle ? <p className="mt-1 text-sm text-[var(--app-text-muted)]">{subtitle}</p> : null}
+      <header className="hidden text-right md:mb-4 md:block">
+        <div className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-4 py-3 shadow-sm lg:px-5">
+          <div className="flex items-start justify-between gap-3 [direction:ltr]">
+            {leading ? (
+              <div className="pt-0.5 [direction:rtl]">{leading}</div>
+            ) : backHref ? (
+              <Link
+                href={backHref}
+                className="inline-flex items-center justify-center px-1 text-xl leading-none text-[var(--app-text-muted)] transition hover:text-[var(--app-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40"
+                aria-label="رجوع"
+              >
+                ←
+              </Link>
+            ) : (
+              <div className="w-9" />
+            )}
+
+            <div className="min-w-0 flex-1 [direction:rtl]">
+              <h1 className="text-xl font-bold text-[var(--app-text)] sm:text-2xl">{title}</h1>
+              {subtitle ? <p className="mt-1 text-sm text-[var(--app-text-muted)]">{subtitle}</p> : null}
+            </div>
+
+            {trailing ? <div className="pt-0.5 [direction:rtl]">{trailing}</div> : <div className="w-9" />}
+          </div>
         </div>
       </header>
     </>

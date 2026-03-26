@@ -161,7 +161,7 @@ export default function AdminCategoriesPage() {
               <button
                 type="button"
                 onClick={handleCreate}
-                className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm font-semibold text-white dark:border-zinc-200 dark:bg-zinc-100 dark:text-zinc-900"
+                className="rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-2 text-sm font-semibold text-[var(--app-text)]"
               >
                 حفظ
               </button>
@@ -212,7 +212,7 @@ export default function AdminCategoriesPage() {
                         <button
                           type="button"
                           onClick={handleSaveEdit}
-                          className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-semibold text-white sm:flex-none"
+                          className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-2 text-xs font-semibold text-[var(--app-text)] sm:flex-none"
                         >
                           حفظ
                         </button>
@@ -239,7 +239,7 @@ export default function AdminCategoriesPage() {
                     <button
                       type="button"
                       onClick={() => setDeletingId(category.id ?? null)}
-                      className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 sm:flex-none"
+                      className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-[#f2b5b5] bg-[#fff5f5] px-3 py-2 text-xs font-semibold text-[#c1121f] hover:bg-[#ffeaea] sm:flex-none"
                     >
                       حذف
                     </button>
