@@ -101,7 +101,7 @@ export default function AdminWallpapersPage() {
                 <div className="col-span-2 flex gap-2 sm:col-auto sm:justify-end">
                   <Link
                     href={wallpaper.id ? `/admin/wallpapers/${wallpaper.id}/edit` : "#"}
-                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-800 dark:border-zinc-700 dark:text-zinc-200 sm:flex-none"
+                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-xs font-semibold text-[var(--app-text)] sm:flex-none"
                   >
                     تعديل
                   </Link>
