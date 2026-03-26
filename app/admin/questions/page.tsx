@@ -96,7 +96,7 @@ export default function AdminQuestionsPage() {
                   <button
                     type="button"
                     onClick={() => setDeletingId(question.id ?? null)}
-                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-[#8f1d2a] dark:bg-[#34131a] dark:text-[#ff9eaa] dark:hover:bg-[#412029] sm:flex-none"
+                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 sm:flex-none"
                   >
                     حذف
                   </button>
