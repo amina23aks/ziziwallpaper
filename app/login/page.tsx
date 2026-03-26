@@ -10,6 +10,7 @@ import { useAuth } from "@/app/_providers/auth-provider";
 import { getUserProfile, updateUserDisplayName } from "@/lib/firestore/users";
 
 type AuthMode = "login" | "signup";
+const GOOGLE_POPUP_CLOSED_MESSAGE = "تم إغلاق نافذة تسجيل الدخول عبر Google قبل الإكمال.";
 
 function GoogleMark() {
   return (
@@ -33,7 +34,7 @@ function getAuthErrorMessage(code?: string) {
     case "auth/weak-password":
       return "كلمة المرور ضعيفة. استخدم 6 أحرف أو أكثر.";
     case "auth/popup-closed-by-user":
-      return "تم إغلاق نافذة تسجيل الدخول عبر Google قبل الإكمال.";
+      return GOOGLE_POPUP_CLOSED_MESSAGE;
     default:
       return "حدث خطأ غير متوقع. حاول مرة أخرى.";
   }
@@ -48,6 +49,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isGooglePopupClosedError = errorMessage === GOOGLE_POPUP_CLOSED_MESSAGE;
 
   useEffect(() => {
     if (!isAuthLoading && isSignedIn) {
@@ -149,7 +151,13 @@ export default function LoginPage() {
           />
 
           {errorMessage && (
-            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+            <p
+              className={
+                isGooglePopupClosedError
+                  ? "rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-800 dark:border-red-900/70 dark:bg-red-950 dark:text-red-200"
+                  : "rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+              }
+            >
               {errorMessage}
             </p>
           )}
@@ -157,7 +165,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting || (mode === "signup" && !displayName.trim())}
-            className="inline-flex w-full items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex w-full items-center justify-center rounded-xl border border-black !bg-black px-4 py-2.5 text-sm font-semibold !text-white hover:bg-black/90 dark:border-white dark:!bg-white dark:!text-black dark:hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {mode === "login" ? "دخول" : "إنشاء الحساب"}
           </button>
