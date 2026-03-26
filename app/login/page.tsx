@@ -153,9 +153,9 @@ export default function LoginPage() {
           {errorMessage && (
             <p
               className={
-                isGooglePopupClosedError
-                  ? "rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-800 dark:border-red-900/70 dark:bg-red-950 dark:text-red-200"
-                  : "rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+isGooglePopupClosedError
+  ? "rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-800"
+  : "rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
               }
             >
               {errorMessage}
@@ -165,7 +165,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting || (mode === "signup" && !displayName.trim())}
-            className="inline-flex w-full items-center justify-center rounded-xl border border-black !bg-black px-4 py-2.5 text-sm font-semibold !text-white hover:bg-black/90 dark:border-white dark:!bg-white dark:!text-black dark:hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+className="inline-flex w-full items-center justify-center rounded-xl bg-black text-white border border-black px-4 py-2.5 text-sm font-semibold hover:bg-black/90 active:bg-black/95 focus-visible:ring-2 ring-zinc-500 focus-visible:ring-offset-2 shadow-lg shadow-black/20 dark:bg-white dark:text-black dark:border-zinc-200 dark:hover:bg-zinc-50 dark:active:bg-zinc-100 dark:shadow-lg dark:shadow-white/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md"
           >
             {mode === "login" ? "دخول" : "إنشاء الحساب"}
           </button>

@@ -18,11 +18,12 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body className="antialiased bg-[var(--app-bg)] text-[var(--app-text)]">
-        <script
+<script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('zizi-theme');if(t==='dark'){document.documentElement.classList.add('dark')}}catch(e){}})();`,
+            __html: `(() => {try{const t = localStorage.getItem('zizi-theme');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`,
           }}
         />
+
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
