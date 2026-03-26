@@ -20,7 +20,7 @@ export default function RootLayout({
       <body className="antialiased bg-[var(--app-bg)] text-[var(--app-text)]">
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('zizi-theme');if(t==='dark'){document.documentElement.classList.add('dark')}}catch(e){}})();`,
+            __html: `(function(){try{var d=document.documentElement;var t=localStorage.getItem('zizi-theme');var isDark=t==='dark';d.classList.toggle('dark',isDark);d.style.colorScheme=isDark?'dark':'light';}catch(e){}})();`,
           }}
         />
         <AppProviders>{children}</AppProviders>
