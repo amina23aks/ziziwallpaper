@@ -38,7 +38,7 @@ export function DeleteConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className="inline-flex min-w-20 items-center justify-center rounded-lg border border-red-700 bg-red-700 px-3 py-2 text-sm font-semibold text-white hover:bg-red-800 dark:border-red-500 dark:bg-red-600 dark:hover:bg-red-500"
+            className="inline-flex min-w-20 items-center justify-center rounded-lg border border-[#f3b6bc] bg-[#fff5f6] px-3 py-2 text-sm font-semibold text-[#c40018] hover:bg-[#ffebee] dark:border-[#8f1d2a] dark:bg-[#34131a] dark:text-[#ff9eaa] dark:hover:bg-[#412029]"
           >
             {confirmText}
           </button>
