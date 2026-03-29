@@ -162,10 +162,11 @@ isGooglePopupClosedError
             </p>
           )}
 
-          <button
+<button
             type="submit"
+            data-login-button
             disabled={isSubmitting || (mode === "signup" && !displayName.trim())}
-className="inline-flex w-full items-center justify-center rounded-xl bg-black text-white border border-black px-4 py-2.5 text-sm font-semibold hover:bg-black/90 active:bg-black/95 focus-visible:ring-2 ring-zinc-500 focus-visible:ring-offset-2 shadow-lg shadow-black/20 dark:bg-white dark:text-black dark:border-zinc-200 dark:hover:bg-zinc-50 dark:active:bg-zinc-100 dark:shadow-lg dark:shadow-white/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md"
+            className="inline-flex w-full items-center justify-center rounded-xl bg-black text-white border border-black px-4 py-2.5 text-sm font-semibold hover:bg-black/90 active:bg-black/95 focus-visible:ring-2 ring-zinc-500 focus-visible:ring-offset-2 shadow-lg shadow-black/20 hover:shadow-md dark:bg-white dark:text-black dark:border-zinc-200 dark:hover:bg-zinc-50 dark:active:bg-zinc-100 dark:shadow-lg dark:shadow-white/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {mode === "login" ? "دخول" : "إنشاء الحساب"}
           </button>

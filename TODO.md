@@ -1,11 +1,7 @@
-# Zizi Wallpaper Task: Fix Login Button "Enter" Not Changing from Black
+# Task: Make login button black with white text in light mode ✓
 
 ## Steps:
-- [ ] 1. Create this TODO.md
-- [ ] 2. Edit app/login/page.tsx button for better hover/focus feedback
-- [ ] 3. Test by running `npm run dev` and checking /login button interaction in light/dark
-- [ ] 4. Update TODO.md with completion
-- [ ] 5. attempt_completion
-
-Current step: 1/5
-
+1. ✅ Read app/_providers/theme-provider.tsx - class-based dark mode (dark class on html).
+2. ✅ Check app/globals.css - Light vars: --app-bg #f5f5f5, button uses explicit bg-black text-white + dark: variants.
+3. ✅ Updated app/login/page.tsx - reverted light: classes (not supported), confirmed explicit bg-black text-white for light mode ✓
+4. Test and complete.
