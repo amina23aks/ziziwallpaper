@@ -38,32 +38,32 @@ export default function AdminDashboardPage() {
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Link
           href="/admin/wallpapers/new"
-          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
+          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm dark:border-white dark:bg-white dark:text-black"
         >
           إضافة خلفية
         </Link>
         <Link
           href="/admin/wallpapers"
-          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
+          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm dark:border-white dark:bg-white dark:text-black"
         >
           إدارة الخلفيات
         </Link>
         <Link
           href="/admin/categories"
-          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
+          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm dark:border-white dark:bg-white dark:text-black"
         >
           إدارة التصنيفات
         </Link>
         <Link
           href="/admin/questions"
-          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
+          className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm dark:border-white dark:bg-white dark:text-black"
         >
           إدارة الأسئلة
         </Link>
         {isSuperAdmin ? (
           <Link
             href="/admin/users"
-            className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
+            className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm dark:border-white dark:bg-white dark:text-black"
           >
             إدارة المستخدمين
           </Link>
