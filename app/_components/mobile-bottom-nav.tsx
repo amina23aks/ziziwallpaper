@@ -21,21 +21,21 @@ export function MobileBottomNav({
       <aside className="fixed right-2 top-24 z-40 hidden w-14 rounded-2xl border border-zinc-200 bg-white/95 py-3 shadow-sm backdrop-blur md:flex md:flex-col md:items-center md:gap-2 lg:right-3 lg:top-28">
         <Link
           href="/"
-          className={`${itemClass} ${activeTab === "home" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+          className={`${itemClass} ${activeTab === "home" ? "bg-zinc-900 text-white dark:bg-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400"}`}
           aria-label="الرئيسية"
         >
           <Home size={18} />
         </Link>
         <Link
           href="/favorites"
-          className={`${itemClass} ${activeTab === "favorites" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+          className={`${itemClass} ${activeTab === "favorites" ? "bg-zinc-900 text-white dark:bg-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400"}`}
           aria-label="المفضلة"
         >
           <Star size={18} />
         </Link>
         <Link
           href={accountHref}
-          className={`${itemClass} ${activeTab === "account" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+          className={`${itemClass} ${activeTab === "account" ? "bg-zinc-900 text-white dark:bg-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400"}`}
           aria-label="الحساب"
         >
           <User size={18} />
@@ -43,7 +43,7 @@ export function MobileBottomNav({
         {isAdmin ? (
           <Link
             href="/admin"
-            className={`${itemClass} ${activeTab === "admin" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+            className={`${itemClass} ${activeTab === "admin" ? "bg-zinc-900 text-white dark:bg-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400"}`}
             aria-label="لوحة الإدارة"
           >
             <LayoutDashboard size={18} />
@@ -56,21 +56,21 @@ export function MobileBottomNav({
       <nav className="fixed inset-x-0 bottom-0 z-40 flex w-full items-center justify-around border-t border-zinc-200 bg-white/98 px-4 py-3 shadow-[0_-1px_8px_rgba(0,0,0,0.04)] backdrop-blur md:hidden">
         <Link
           href="/"
-          className={`${itemClass} ${activeTab === "home" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+          className={`${itemClass} ${activeTab === "home" ? "bg-zinc-900 text-white dark:bg-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400"}`}
           aria-label="الرئيسية"
         >
           <Home size={18} />
         </Link>
         <Link
           href="/favorites"
-          className={`${itemClass} ${activeTab === "favorites" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+          className={`${itemClass} ${activeTab === "favorites" ? "bg-zinc-900 text-white dark:bg-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400"}`}
           aria-label="المفضلة"
         >
           <Star size={18} />
         </Link>
         <Link
           href={accountHref}
-          className={`${itemClass} ${activeTab === "account" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+          className={`${itemClass} ${activeTab === "account" ? "bg-zinc-900 text-white dark:bg-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400"}`}
           aria-label="الحساب"
         >
           <User size={18} />
@@ -78,7 +78,7 @@ export function MobileBottomNav({
         {isAdmin ? (
           <Link
             href="/admin"
-            className={`${itemClass} ${activeTab === "admin" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+            className={`${itemClass} ${activeTab === "admin" ? "bg-zinc-900 text-white dark:bg-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400"}`}
             aria-label="لوحة الإدارة"
           >
             <LayoutDashboard size={18} />
