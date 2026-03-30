@@ -137,10 +137,10 @@ export default function WallpaperDetailsPage() {
   const formattedDescription = wallpaper.description?.trim();
 
   return (
-    <main className="min-h-screen w-full overflow-x-hidden bg-zinc-50 px-4 py-6 pb-24 pt-16 dark:bg-zinc-950 md:pr-20 md:pt-6">
+    <main className="min-h-screen w-full overflow-x-hidden bg-zinc-50 px-4 py-6 pb-24 pt-16 dark:bg-[var(--app-bg)] md:pr-20 md:pt-6">
       <div className="h-14 md:hidden" />
 
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-950 md:hidden">
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-[color:var(--app-border)] dark:bg-[var(--app-bg)] md:hidden">
         <div className="flex min-h-10 items-center justify-start [direction:ltr]">
           <Link
             href="/"
@@ -152,7 +152,7 @@ export default function WallpaperDetailsPage() {
         </div>
       </header>
 
-      <header className="mb-4 hidden items-center justify-start bg-zinc-50/95 py-2 backdrop-blur [direction:ltr] dark:bg-zinc-950/95 md:sticky md:top-0 md:z-30 md:flex">
+      <header className="mb-4 hidden items-center justify-start bg-zinc-50/95 py-2 backdrop-blur [direction:ltr] dark:bg-[var(--app-bg)]/95 md:sticky md:top-0 md:z-30 md:flex">
         <Link
           href="/"
           className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40 dark:text-zinc-300 dark:hover:text-white dark:focus-visible:ring-zinc-600"
@@ -242,7 +242,7 @@ export default function WallpaperDetailsPage() {
                   type="button"
                   onClick={toggleFavorite}
                   disabled={isFavoriteLoading || isToggling}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-black dark:bg-zinc-900 dark:text-zinc-200"
                   aria-label={isFavorited ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
                 >
                   <Star
