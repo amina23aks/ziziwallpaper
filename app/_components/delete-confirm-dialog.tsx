@@ -20,6 +20,7 @@ export function DeleteConfirmDialog({
   confirmVariant?: "soft" | "destructive";
 }) {
   if (!isOpen) return null;
+  const isSoftConfirm = confirmVariant !== "destructive";
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-4" onClick={onCancel}>
@@ -40,6 +41,7 @@ export function DeleteConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
+            data-soft-confirm={isSoftConfirm ? "true" : undefined}
             className={`inline-flex min-w-20 items-center justify-center rounded-lg border px-3 py-2 text-sm font-semibold ${
               confirmVariant === "destructive"
                 ? "border-red-200 bg-white text-red-700 hover:bg-red-50"
