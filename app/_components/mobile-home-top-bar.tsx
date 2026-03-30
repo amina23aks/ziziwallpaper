@@ -8,12 +8,10 @@ export function MobileHomeTopBar({
   searchQuery,
   onSearchChange,
   onOpenQuestions,
-  isQuestionsActive,
 }: {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onOpenQuestions: () => void;
-  isQuestionsActive: boolean;
 }) {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -48,11 +46,7 @@ export function MobileHomeTopBar({
         <button
           type="button"
           onClick={onOpenQuestions}
-          className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${
-            isQuestionsActive
-              ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-black"
-              : "border-zinc-900 bg-zinc-900 text-white"
-          }`}
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-black"
           aria-label="اقتراحات الأسئلة"
         >
           <CircleHelp size={16} />

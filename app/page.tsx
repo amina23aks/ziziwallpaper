@@ -77,7 +77,6 @@ export default function HomePage() {
         onSelectCategory={setSelectedCategory}
         categories={categories}
         onOpenQuestions={() => setIsQuestionsOpen(true)}
-        isQuestionsActive={isQuestionsOpen}
       />
 
       <div className="mx-auto w-full max-w-[92rem] space-y-4 px-4 py-5 sm:px-6 lg:px-8">
