@@ -454,7 +454,7 @@ export function WallpaperForm({
                   onClick={() => toggleCategory(category.slug)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-white dark:bg-white dark:text-black"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -476,7 +476,7 @@ export function WallpaperForm({
               <button
                 type="button"
                 onClick={handleInlineCategorySave}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-4 text-sm font-semibold text-[var(--app-text)]"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-4 text-sm font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black"
               >
                 حفظ التصنيف
               </button>
@@ -505,7 +505,7 @@ export function WallpaperForm({
                   onClick={() => toggleQuestion(prompt.id)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-white dark:bg-white dark:text-black"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -567,7 +567,7 @@ export function WallpaperForm({
                 type="button"
                 onClick={handleInlineQuestionSave}
                 disabled={isUploadingQuestionImage}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-4 text-sm font-semibold text-[var(--app-text)] disabled:opacity-60"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-4 text-sm font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black disabled:opacity-60"
               >
                 حفظ السؤال
               </button>
@@ -661,7 +661,7 @@ export function WallpaperForm({
         <button
           type="submit"
           disabled={isSaving || isUploading || isUploadingQuestionImage}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--app-text)] disabled:opacity-60"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black disabled:opacity-60"
         >
           {isSaving
             ? mode === "edit"

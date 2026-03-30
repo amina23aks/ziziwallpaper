@@ -214,7 +214,7 @@ export function QuestionForm({
         <button
           type="submit"
           disabled={isSaving || isUploading}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--app-text)] disabled:opacity-60"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black disabled:opacity-60"
         >
           {isSaving ? "جاري الحفظ..." : mode === "edit" ? "حفظ السؤال" : "إنشاء السؤال"}
         </button>
