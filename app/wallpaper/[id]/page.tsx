@@ -17,7 +17,6 @@ import { FeedbackSection } from "@/app/_components/feedback-section";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
-import { useTheme } from "@/app/_providers/theme-provider";
 import { isAdminRole } from "@/lib/auth/roles";
 import {
   createWallpaperComment,
@@ -56,7 +55,6 @@ export default function WallpaperDetailsPage() {
   const id = params.id;
   const router = useRouter();
   const { user, userProfile, isSignedIn } = useAuth();
-  const { setTheme } = useTheme();
   const [wallpaper, setWallpaper] = useState<Wallpaper | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -70,11 +68,6 @@ export default function WallpaperDetailsPage() {
   const { isFavorited, isLoading: isFavoriteLoading, isToggling, toggleFavorite } = useToggleFavorite(id, {
     onAuthRequired: () => setIsFavoriteLoginDialogOpen(true),
   });
-
-  useEffect(() => {
-    setTheme("light");
-    document.documentElement.classList.remove("dark");
-  }, [setTheme]);
 
   useEffect(() => {
     async function loadData() {
@@ -144,14 +137,14 @@ export default function WallpaperDetailsPage() {
   const formattedDescription = wallpaper.description?.trim();
 
   return (
-    <main className="min-h-screen w-full overflow-x-hidden bg-[#f3f3f5] px-4 py-6 pb-24 pt-16 md:pr-20 md:pt-6">
+    <main className="min-h-screen w-full overflow-x-hidden bg-[#f3f3f5] px-4 py-6 pb-24 pt-16 dark:bg-[var(--app-bg)] md:pr-20 md:pt-6">
       <div className="h-14 md:hidden" />
 
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-[#d4d4d8] bg-[#f3f3f5] px-4 py-2 md:hidden">
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-[#d4d4d8] bg-[#f3f3f5] px-4 py-2 dark:border-[color:var(--app-border)] dark:bg-[var(--app-bg)] md:hidden">
         <div className="flex min-h-10 items-center justify-start [direction:ltr]">
           <Link
             href="/"
-            className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40"
+            className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40 dark:text-zinc-300 dark:hover:text-white dark:focus-visible:ring-zinc-600"
             aria-label="رجوع"
           >
             ←
@@ -159,19 +152,19 @@ export default function WallpaperDetailsPage() {
         </div>
       </header>
 
-      <header className="mb-4 hidden items-center justify-start py-2 [direction:ltr] md:sticky md:top-0 md:z-30 md:flex">
+      <header className="mb-4 hidden items-center justify-start bg-[#f3f3f5]/95 py-2 backdrop-blur [direction:ltr] dark:bg-[var(--app-bg)]/95 md:sticky md:top-0 md:z-30 md:flex">
         <Link
           href="/"
-          className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40"
+          className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40 dark:text-zinc-300 dark:hover:text-white dark:focus-visible:ring-zinc-600"
           aria-label="رجوع"
         >
           ←
         </Link>
       </header>
 
-      <article className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl border border-[#d4d4d8] bg-[#f8f8fa] p-3 shadow-sm sm:p-4 lg:max-w-[88rem] lg:p-5">
+      <article className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl border border-[#d4d4d8] bg-[#f8f8fa] p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-4 lg:max-w-[88rem] lg:p-5">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start lg:[direction:ltr]">
-          <div className="relative overflow-hidden rounded-2xl border border-[#d4d4d8] bg-[#e7e7eb]">
+          <div className="relative overflow-hidden rounded-2xl border border-[#d4d4d8] bg-[#e7e7eb] dark:border-zinc-800 dark:bg-zinc-950">
             {hasMultipleImages ? (
               <>
                 <button
@@ -241,25 +234,25 @@ export default function WallpaperDetailsPage() {
             )}
           </div>
 
-          <section className="space-y-4 rounded-2xl border border-[#d4d4d8] bg-[#f1f1f3] p-4 sm:p-5 [direction:rtl]">
+          <section className="space-y-4 rounded-2xl border border-[#d4d4d8] bg-[#f1f1f3] p-4 dark:border-zinc-800 dark:bg-zinc-950/60 sm:p-5 [direction:rtl]">
             <div className="flex min-w-0 items-center justify-between gap-3">
-              <h1 className="min-w-0 flex-1 break-words text-lg font-bold text-zinc-900">{wallpaper.title}</h1>
+              <h1 className="min-w-0 flex-1 break-words text-lg font-bold text-zinc-900 dark:text-zinc-100">{wallpaper.title}</h1>
               <div className="flex shrink-0 items-center gap-2">
                 <button
                   type="button"
                   onClick={toggleFavorite}
                   disabled={isFavoriteLoading || isToggling}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
                   aria-label={isFavorited ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
                 >
                   <Star
                     size={16}
-                    className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-black"}
+                    className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-black dark:text-zinc-300"}
                   />
                 </button>
                 <a
                   href="#comments"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
                   aria-label="الآراء"
                 >
                   <MessageCircle size={16} />
@@ -274,7 +267,7 @@ export default function WallpaperDetailsPage() {
                       filename: `${(wallpaper.title || "wallpaper").replace(/\s+/g, "-")}.jpg`,
                     });
                   }}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
                   aria-label="تنزيل الصورة"
                 >
                   <Download size={16} />
@@ -282,7 +275,7 @@ export default function WallpaperDetailsPage() {
               </div>
             </div>
 
-            {formattedDescription ? <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700">{formattedDescription}</p> : null}
+            {formattedDescription ? <p className="whitespace-pre-line text-right text-sm leading-7 text-zinc-700 dark:text-zinc-300">{formattedDescription}</p> : null}
 
             <FeedbackSection
               comments={comments}
@@ -399,7 +392,7 @@ export default function WallpaperDetailsPage() {
       {suggestedWallpapers.length > 0 ? (
         <section className="mx-auto mt-5 w-full max-w-6xl space-y-3 lg:max-w-[88rem]">
           <div className="[direction:rtl]">
-            <h2 className="text-base font-bold text-zinc-900">اقتراح خلفيات من نفس الصنف</h2>
+            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">اقتراح خلفيات من نفس الصنف</h2>
           </div>
 
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
