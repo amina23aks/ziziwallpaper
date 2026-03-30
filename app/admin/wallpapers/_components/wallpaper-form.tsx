@@ -439,7 +439,7 @@ export function WallpaperForm({
             <button
               type="button"
               onClick={() => setShowInlineCategoryForm((prev) => !prev)}
-              className="text-xs font-semibold text-[var(--app-text-muted)]"
+              className="text-xs font-semibold text-[var(--app-text-muted)] dark:rounded-lg dark:border dark:border-white dark:bg-white dark:px-2 dark:py-1 dark:text-black"
             >
               ➕ إضافة تصنيف
             </button>
@@ -454,7 +454,7 @@ export function WallpaperForm({
                   onClick={() => toggleCategory(category.slug)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-white dark:bg-white dark:text-black"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -476,7 +476,7 @@ export function WallpaperForm({
               <button
                 type="button"
                 onClick={handleInlineCategorySave}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-4 text-sm font-semibold text-[var(--app-text)]"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-4 text-sm font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black"
               >
                 حفظ التصنيف
               </button>
@@ -490,7 +490,7 @@ export function WallpaperForm({
             <button
               type="button"
               onClick={() => setShowInlineQuestionForm((prev) => !prev)}
-              className="text-xs font-semibold text-[var(--app-text-muted)]"
+              className="text-xs font-semibold text-[var(--app-text-muted)] dark:rounded-lg dark:border dark:border-white dark:bg-white dark:px-2 dark:py-1 dark:text-black"
             >
               ➕ إضافة سؤال
             </button>
@@ -505,7 +505,7 @@ export function WallpaperForm({
                   onClick={() => toggleQuestion(prompt.id)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-white dark:bg-white dark:text-black"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -567,7 +567,7 @@ export function WallpaperForm({
                 type="button"
                 onClick={handleInlineQuestionSave}
                 disabled={isUploadingQuestionImage}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-4 text-sm font-semibold text-[var(--app-text)] disabled:opacity-60"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-4 text-sm font-semibold text-[var(--app-text)] disabled:opacity-60 dark:border-white dark:bg-white dark:text-black"
               >
                 حفظ السؤال
               </button>
@@ -661,7 +661,7 @@ export function WallpaperForm({
         <button
           type="submit"
           disabled={isSaving || isUploading || isUploadingQuestionImage}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--app-text)] disabled:opacity-60"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--app-text)] disabled:opacity-60 dark:border-white dark:bg-white dark:text-black"
         >
           {isSaving
             ? mode === "edit"
