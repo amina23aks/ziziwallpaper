@@ -153,7 +153,7 @@ export function PublicWallpaperCard({
             className="pointer-events-none absolute right-2 top-2 z-20 hidden h-8 w-8 items-center justify-center rounded-full bg-white/85 text-zinc-700 opacity-0 shadow transition md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label={isFavorited ? "إلغاء المفضلة" : "إضافة للمفضلة"}
           >
-            <Star size={15} className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-zinc-700"} />
+            <Star size={15} className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-black dark:text-black"} />
           </button>
 
           <Link href={wallpaperHref} className="block">
