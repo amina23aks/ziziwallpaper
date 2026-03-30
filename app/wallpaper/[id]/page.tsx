@@ -17,7 +17,6 @@ import { FeedbackSection } from "@/app/_components/feedback-section";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
-import { useTheme } from "@/app/_providers/theme-provider";
 import { isAdminRole } from "@/lib/auth/roles";
 import {
   createWallpaperComment,
@@ -56,7 +55,6 @@ export default function WallpaperDetailsPage() {
   const id = params.id;
   const router = useRouter();
   const { user, userProfile, isSignedIn } = useAuth();
-  const { theme } = useTheme();
   const [wallpaper, setWallpaper] = useState<Wallpaper | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -72,10 +70,21 @@ export default function WallpaperDetailsPage() {
   });
 
   useEffect(() => {
-    if (theme === "light") {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [theme]);
+    const syncThemeClass = () => {
+      try {
+        const savedTheme = window.localStorage.getItem("zizi-theme");
+        if (savedTheme !== "dark") {
+          document.documentElement.classList.remove("dark");
+        }
+      } catch {
+        document.documentElement.classList.remove("dark");
+      }
+    };
+
+    syncThemeClass();
+    window.addEventListener("storage", syncThemeClass);
+    return () => window.removeEventListener("storage", syncThemeClass);
+  }, []);
 
   useEffect(() => {
     async function loadData() {
