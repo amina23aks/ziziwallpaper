@@ -70,20 +70,7 @@ export default function WallpaperDetailsPage() {
   });
 
   useEffect(() => {
-    const syncThemeClass = () => {
-      try {
-        const savedTheme = window.localStorage.getItem("zizi-theme");
-        if (savedTheme !== "dark") {
-          document.documentElement.classList.remove("dark");
-        }
-      } catch {
-        document.documentElement.classList.remove("dark");
-      }
-    };
-
-    syncThemeClass();
-    window.addEventListener("storage", syncThemeClass);
-    return () => window.removeEventListener("storage", syncThemeClass);
+    document.documentElement.classList.remove("dark");
   }, []);
 
   useEffect(() => {
