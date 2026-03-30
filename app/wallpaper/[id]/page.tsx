@@ -17,7 +17,6 @@ import { FeedbackSection } from "@/app/_components/feedback-section";
 import { PublicWallpaperCard } from "@/app/_components/public-wallpaper-card";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
-import { useTheme } from "@/app/_providers/theme-provider";
 import { isAdminRole } from "@/lib/auth/roles";
 import {
   createWallpaperComment,
@@ -56,7 +55,6 @@ export default function WallpaperDetailsPage() {
   const id = params.id;
   const router = useRouter();
   const { user, userProfile, isSignedIn } = useAuth();
-  const { isDark } = useTheme();
   const [wallpaper, setWallpaper] = useState<Wallpaper | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -70,10 +68,6 @@ export default function WallpaperDetailsPage() {
   const { isFavorited, isLoading: isFavoriteLoading, isToggling, toggleFavorite } = useToggleFavorite(id, {
     onAuthRequired: () => setIsFavoriteLoginDialogOpen(true),
   });
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
-  }, [isDark]);
 
   useEffect(() => {
     async function loadData() {
