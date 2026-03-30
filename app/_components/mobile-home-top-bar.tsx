@@ -3,6 +3,7 @@
 import { CircleHelp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BrandMark } from "@/app/_components/brand-mark";
+import { useTheme } from "@/app/_providers/theme-provider";
 
 export function MobileHomeTopBar({
   searchQuery,
@@ -15,6 +16,8 @@ export function MobileHomeTopBar({
 }) {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const { isDark } = useTheme();
+  const questionButtonClass = isDark ? "border-[#fff] bg-[#fff] text-black" : "border-zinc-900 bg-zinc-900 text-white";
 
   useEffect(() => {
     const onScroll = () => {
@@ -46,7 +49,7 @@ export function MobileHomeTopBar({
         <button
           type="button"
           onClick={onOpenQuestions}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-white"
+          className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${questionButtonClass}`}
           aria-label="اقتراحات الأسئلة"
         >
           <CircleHelp size={16} />
