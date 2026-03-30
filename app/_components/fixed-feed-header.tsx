@@ -21,8 +21,8 @@ export function FixedFeedHeader({
   onOpenQuestions: () => void;
 }) {
   const { isDark } = useTheme();
-  const selectedButtonClass = isDark ? "border-white bg-white text-black" : "border-zinc-900 bg-zinc-900 text-white";
-  const questionButtonClass = isDark ? "border-white bg-white text-black" : "border-zinc-900 bg-zinc-900 text-white";
+  const selectedButtonClass = isDark ? "border-[#fff] bg-[#fff] text-black" : "border-zinc-900 bg-zinc-900 text-white";
+  const questionButtonClass = isDark ? "border-[#fff] bg-[#fff] text-black" : "border-zinc-900 bg-zinc-900 text-white";
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-zinc-200/80 bg-white/95 backdrop-blur-md">

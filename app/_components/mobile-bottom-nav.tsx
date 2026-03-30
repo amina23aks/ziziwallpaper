@@ -15,7 +15,7 @@ export function MobileBottomNav({
   const { isDark } = useTheme();
   const accountHref = isSignedIn ? "/profile" : "/login";
   const isAdmin = isAdminRole(userProfile);
-  const selectedItemClass = isDark ? "bg-white text-black" : "bg-zinc-900 text-white";
+  const selectedItemClass = isDark ? "bg-[#fff] text-black" : "bg-zinc-900 text-white";
 
   const itemClass = "inline-flex h-10 w-10 items-center justify-center rounded-xl transition-colors";
 

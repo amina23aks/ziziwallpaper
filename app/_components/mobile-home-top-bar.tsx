@@ -17,7 +17,7 @@ export function MobileHomeTopBar({
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
   const { isDark } = useTheme();
-  const questionButtonClass = isDark ? "border-white bg-white text-black" : "border-zinc-900 bg-zinc-900 text-white";
+  const questionButtonClass = isDark ? "border-[#fff] bg-[#fff] text-black" : "border-zinc-900 bg-zinc-900 text-white";
 
   useEffect(() => {
     const onScroll = () => {
