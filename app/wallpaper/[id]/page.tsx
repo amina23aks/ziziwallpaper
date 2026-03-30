@@ -152,7 +152,7 @@ export default function WallpaperDetailsPage() {
         </div>
       </header>
 
-      <header className="mb-4 hidden items-center justify-start bg-zinc-50/95 py-2 backdrop-blur [direction:ltr] dark:bg-[var(--app-bg)]/95 md:sticky md:top-0 md:z-30 md:flex">
+      <header className="mb-4 hidden items-center justify-start py-2 [direction:ltr] md:sticky md:top-0 md:z-30 md:flex">
         <Link
           href="/"
           className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40 dark:text-zinc-300 dark:hover:text-white dark:focus-visible:ring-zinc-600"
