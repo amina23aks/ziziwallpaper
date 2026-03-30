@@ -129,7 +129,7 @@ html:not(.dark) [data-login-button]:hover {
 
 /* Force soft confirm buttons (e.g. login-required dialog) to show a visible gray border in light mode */
 html:not(.dark) [data-soft-confirm="true"] {
-  border: 2px solid #9ca3af !important;
+  border: 1px solid #9ca3af !important;
   background-color: #f3f4f6 !important;
   color: #111827 !important;
 }

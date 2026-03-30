@@ -45,7 +45,7 @@ export function DeleteConfirmDialog({
             className={`inline-flex min-w-20 items-center justify-center rounded-lg border px-3 py-2 text-sm font-semibold ${
               confirmVariant === "destructive"
                 ? "border-red-200 bg-white text-red-700 hover:bg-red-50"
-                : "border-2 border-gray-500 bg-gray-100 text-black hover:bg-gray-200 dark:border-white dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                : "border border-gray-400 bg-gray-100 text-black hover:bg-gray-200 dark:border-white dark:bg-white dark:text-black dark:hover:bg-zinc-200"
             }`}
           >
             {confirmText}
