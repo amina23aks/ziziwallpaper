@@ -26,7 +26,7 @@ export function FixedFeedHeader({
           <button
             type="button"
             onClick={onOpenQuestions}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-white shadow-sm"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-white shadow-sm dark:border-white dark:bg-white dark:text-black"
             aria-label="اقتراحات الأسئلة"
           >
             <CircleHelp size={16} />
@@ -51,7 +51,7 @@ export function FixedFeedHeader({
             onClick={() => onSelectCategory("all")}
             className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
               selectedCategory === "all"
-                ? "border-zinc-900 bg-zinc-900 text-white"
+                ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-black"
                 : "border-zinc-200 bg-white text-zinc-800"
             }`}
           >
@@ -66,7 +66,7 @@ export function FixedFeedHeader({
                 onClick={() => onSelectCategory(category.slug)}
                 className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                   active
-                    ? "border-zinc-900 bg-zinc-900 text-white"
+                    ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-black"
                     : "border-zinc-200 bg-white text-zinc-800"
                 }`}
               >
