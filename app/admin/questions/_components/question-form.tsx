@@ -203,7 +203,7 @@ export function QuestionForm({
           <div
             className={`rounded-xl border px-4 py-3 text-sm font-medium ${
               statusMessage.type === "success"
-                ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
+                ? "border-[#bbf7d0] bg-[#ecfdf3] text-[#166534] dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
                 : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
             }`}
           >
@@ -214,6 +214,7 @@ export function QuestionForm({
         <button
           type="submit"
           disabled={isSaving || isUploading}
+          data-admin-action="true"
           className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black disabled:opacity-60"
         >
           {isSaving ? "جاري الحفظ..." : mode === "edit" ? "حفظ السؤال" : "إنشاء السؤال"}
