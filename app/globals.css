@@ -133,3 +133,15 @@ html:not(.dark) [data-soft-confirm="true"] {
   background-color: #f3f4f6 !important;
   color: #111827 !important;
 }
+
+/* Light mode only: clearer placeholders in admin forms */
+html:not(.dark) .admin-area input::placeholder,
+html:not(.dark) .admin-area textarea::placeholder {
+  color: #71717a !important;
+  opacity: 1;
+}
+
+/* Light mode only: clean, consistent admin action button/link borders */
+html:not(.dark) [data-admin-action="true"] {
+  border-color: #d1d5db !important;
+}

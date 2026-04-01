@@ -38,6 +38,7 @@ export default function AdminDashboardPage() {
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Link
           href="/admin/wallpapers/new"
+          data-admin-action="true"
           className="rounded-2xl border border-[color:var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-semibold text-[var(--app-text)] shadow-sm"
         >
           إضافة خلفية

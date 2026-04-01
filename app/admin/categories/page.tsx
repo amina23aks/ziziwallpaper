@@ -143,6 +143,7 @@ export default function AdminCategoriesPage() {
           <button
             type="button"
             onClick={() => setShowAddForm((prev) => !prev)}
+            data-admin-action="true"
             className="inline-flex items-center rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black"
           >
             إضافة تصنيف +
@@ -161,6 +162,7 @@ export default function AdminCategoriesPage() {
               <button
                 type="button"
                 onClick={handleCreate}
+                data-admin-action="true"
                 className="rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-2 text-sm font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black"
               >
                 حفظ
@@ -212,6 +214,7 @@ export default function AdminCategoriesPage() {
                         <button
                           type="button"
                           onClick={handleSaveEdit}
+                          data-admin-action="true"
                           className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-2 text-xs font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black sm:flex-none"
                         >
                           حفظ
@@ -222,6 +225,7 @@ export default function AdminCategoriesPage() {
                             setEditingId(null);
                             setEditingName("");
                           }}
+                          data-admin-action="true"
                           className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-[color:var(--app-border)] px-3 py-2 text-xs font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black sm:flex-none"
                         >
                           إلغاء
@@ -231,6 +235,7 @@ export default function AdminCategoriesPage() {
                       <button
                         type="button"
                         onClick={() => handleStartEdit(category)}
+                        data-admin-action="true"
                         className="inline-flex min-w-20 flex-1 items-center justify-center rounded-lg border border-[color:var(--app-border)] px-3 py-2 text-xs font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black sm:flex-none"
                       >
                         تعديل

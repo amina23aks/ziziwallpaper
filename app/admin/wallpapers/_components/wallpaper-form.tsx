@@ -454,7 +454,7 @@ export function WallpaperForm({
                   onClick={() => toggleCategory(category.slug)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-white dark:bg-white dark:text-black"
+                      ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -476,6 +476,7 @@ export function WallpaperForm({
               <button
                 type="button"
                 onClick={handleInlineCategorySave}
+                data-admin-action="true"
                 className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-4 text-sm font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black"
               >
                 حفظ التصنيف
@@ -505,7 +506,7 @@ export function WallpaperForm({
                   onClick={() => toggleQuestion(prompt.id)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-white dark:bg-white dark:text-black"
+                      ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -567,6 +568,7 @@ export function WallpaperForm({
                 type="button"
                 onClick={handleInlineQuestionSave}
                 disabled={isUploadingQuestionImage}
+                data-admin-action="true"
                 className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-4 text-sm font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black disabled:opacity-60"
               >
                 حفظ السؤال
@@ -650,7 +652,7 @@ export function WallpaperForm({
           <div
             className={`rounded-xl border px-4 py-3 text-sm font-medium ${
               statusMessage.type === "success"
-                ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
+                ? "border-[#bbf7d0] bg-[#ecfdf3] text-[#166534] dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
                 : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
             }`}
           >
@@ -661,6 +663,7 @@ export function WallpaperForm({
         <button
           type="submit"
           disabled={isSaving || isUploading || isUploadingQuestionImage}
+          data-admin-action="true"
           className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black disabled:opacity-60"
         >
           {isSaving

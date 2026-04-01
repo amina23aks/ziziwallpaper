@@ -50,6 +50,7 @@ export default function AdminWallpapersPage() {
       <section className="mt-3 flex items-center justify-start [direction:ltr] md:mt-5">
         <Link
           href="/admin/wallpapers/new"
+          data-admin-action="true"
           className="inline-flex items-center gap-1 rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black"
         >
           <Plus size={13} />
@@ -101,6 +102,7 @@ export default function AdminWallpapersPage() {
                 <div className="col-span-2 flex gap-2 sm:col-auto sm:justify-end">
                   <Link
                     href={wallpaper.id ? `/admin/wallpapers/${wallpaper.id}/edit` : "#"}
+                    data-admin-action="true"
                     className="inline-flex flex-1 items-center justify-center rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-xs font-semibold text-[var(--app-text)] dark:border-white dark:bg-white dark:text-black sm:flex-none"
                   >
                     تعديل

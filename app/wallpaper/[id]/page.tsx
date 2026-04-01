@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Download, MessageCircle, Star } from "lucide-react";
+import { Download, Star } from "lucide-react";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
@@ -255,13 +255,6 @@ export default function WallpaperDetailsPage() {
                     className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-black dark:text-zinc-300"}
                   />
                 </button>
-                <a
-                  href="#comments"
-                  className={actionButtonClass}
-                  aria-label="الآراء"
-                >
-                  <MessageCircle size={16} />
-                </a>
                 <button
                   type="button"
                   onClick={async () => {

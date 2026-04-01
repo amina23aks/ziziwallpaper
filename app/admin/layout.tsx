@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <>
-      <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-text)]">{children}</div>
+      <div className="admin-area min-h-screen bg-[var(--app-bg)] text-[var(--app-text)]">{children}</div>
       <MobileBottomNav activeTab="admin" />
     </>
   );
