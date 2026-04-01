@@ -137,6 +137,9 @@ export default function WallpaperDetailsPage() {
   const canGoPrev = hasMultipleImages && activeImageIndex > 0;
   const canGoNext = hasMultipleImages && activeImageIndex < imageCount - 1;
   const formattedDescription = wallpaper.description?.trim();
+  const actionButtonClass = isDark
+    ? "inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-200"
+    : "inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700";
 
   return (
     <main className={`min-h-screen w-full overflow-x-hidden px-4 py-6 pb-24 pt-16 md:pr-20 md:pt-6 ${isDark ? "bg-[var(--app-bg)]" : "bg-[#f3f3f5]"}`}>
@@ -244,7 +247,7 @@ export default function WallpaperDetailsPage() {
                   type="button"
                   onClick={toggleFavorite}
                   disabled={isFavoriteLoading || isToggling}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                  className={`${actionButtonClass} disabled:cursor-not-allowed disabled:opacity-60`}
                   aria-label={isFavorited ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
                 >
                   <Star
@@ -254,7 +257,7 @@ export default function WallpaperDetailsPage() {
                 </button>
                 <a
                   href="#comments"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                  className={actionButtonClass}
                   aria-label="الآراء"
                 >
                   <MessageCircle size={16} />
@@ -269,7 +272,7 @@ export default function WallpaperDetailsPage() {
                       filename: `${(wallpaper.title || "wallpaper").replace(/\s+/g, "-")}.jpg`,
                     });
                   }}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                  className={actionButtonClass}
                   aria-label="تنزيل الصورة"
                 >
                   <Download size={16} />
