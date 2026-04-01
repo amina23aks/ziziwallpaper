@@ -203,7 +203,7 @@ export function QuestionForm({
           <div
             className={`rounded-xl border px-4 py-3 text-sm font-medium ${
               statusMessage.type === "success"
-                ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
                 : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
             }`}
           >
