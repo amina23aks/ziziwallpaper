@@ -454,7 +454,7 @@ export function WallpaperForm({
                   onClick={() => toggleCategory(category.slug)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-white dark:bg-white dark:text-black"
+                      ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -505,7 +505,7 @@ export function WallpaperForm({
                   onClick={() => toggleQuestion(prompt.id)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-white dark:bg-white dark:text-black"
+                      ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -650,7 +650,7 @@ export function WallpaperForm({
           <div
             className={`rounded-xl border px-4 py-3 text-sm font-medium ${
               statusMessage.type === "success"
-                ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
+                ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
                 : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
             }`}
           >

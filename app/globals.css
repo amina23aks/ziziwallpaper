@@ -8,8 +8,8 @@
   --app-surface: #ffffff;
   --app-surface-muted: #fafafa;
   --app-text: #18181b;
-  --app-text-muted: #52525b;
-  --app-border: #e4e4e7;
+  --app-text-muted: #4b5563;
+  --app-border: #cfd4dc;
 }
 
 @theme inline {
