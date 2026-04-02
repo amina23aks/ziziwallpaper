@@ -76,7 +76,9 @@ function AvatarBadge({
     <div
       className={[
         "flex items-center justify-center rounded-full text-xs font-bold",
-        subtle ? "bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-100" : "bg-zinc-900/90 text-white dark:bg-zinc-100 dark:text-zinc-900",
+        subtle
+          ? "border border-zinc-300 bg-zinc-100 text-zinc-700 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+          : "bg-zinc-900/90 text-white dark:bg-zinc-100 dark:text-zinc-900",
         subtle ? "h-7 w-7" : "h-9 w-9",
         className,
       ].join(" ")}
@@ -144,7 +146,7 @@ function IdentitySelectorSheet({
       <div
         ref={desktopRef}
         className={[
-          "absolute bottom-full z-50 mb-2 hidden w-72 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-2 shadow-[0_18px_50px_rgba(0,0,0,0.15)] dark:border-zinc-700 dark:bg-zinc-900 md:block",
+          "absolute top-full z-50 mt-2 hidden w-72 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-2 shadow-[0_18px_50px_rgba(0,0,0,0.15)] dark:border-zinc-700 dark:bg-zinc-900 md:block",
           align === "left" ? "left-0" : "right-0",
         ].join(" ")}
       >
@@ -168,14 +170,14 @@ function IdentitySelectorSheet({
                 className={[
                   "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-right transition",
                   selected
-                    ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
+                    ? "!bg-zinc-900 !text-white dark:!bg-white dark:!text-black"
                     : "text-zinc-900 hover:bg-zinc-50 dark:text-zinc-100 dark:hover:bg-zinc-800",
                 ].join(" ")}
               >
                 <AvatarBadge name={optionName} subtle={!selected} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
-                  <div className={selected ? "truncate text-sm font-semibold text-white dark:text-black" : "truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100"}>{optionName}</div>
-                  <div className={selected ? "text-xs text-white/80 dark:text-black/70" : "text-xs text-zinc-700 dark:text-zinc-300"}>{option.subtitle}</div>
+                  <div className={selected ? "truncate text-sm font-semibold !text-white dark:!text-black" : "truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100"}>{optionName}</div>
+                  <div className={selected ? "text-xs !text-white/80 dark:!text-black/70" : "text-xs text-zinc-700 dark:text-zinc-300"}>{option.subtitle}</div>
                 </div>
                 {selected ? <Check size={16} className="shrink-0" /> : null}
               </button>
@@ -209,14 +211,14 @@ function IdentitySelectorSheet({
                 className={[
                   "flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-right transition",
                   selected
-                    ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-black"
+                    ? "border-zinc-900 !bg-zinc-900 !text-white dark:border-white dark:!bg-white dark:!text-black"
                     : "border-zinc-200 bg-white text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100",
                 ].join(" ")}
               >
                 <AvatarBadge name={optionName} subtle={!selected} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
-                  <div className={selected ? "truncate text-sm font-semibold text-white dark:text-black" : "truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100"}>{optionName}</div>
-                  <div className={selected ? "text-xs text-white/80 dark:text-black/70" : "text-xs text-zinc-700 dark:text-zinc-300"}>{option.subtitle}</div>
+                  <div className={selected ? "truncate text-sm font-semibold !text-white dark:!text-black" : "truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100"}>{optionName}</div>
+                  <div className={selected ? "text-xs !text-white/80 dark:!text-black/70" : "text-xs text-zinc-700 dark:text-zinc-300"}>{option.subtitle}</div>
                 </div>
                 {selected ? <Check size={16} className="shrink-0" /> : null}
               </button>
