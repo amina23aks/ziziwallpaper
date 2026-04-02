@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useTheme } from "@/app/_providers/theme-provider";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/upload";
 import { createCategory, listCategories } from "@/lib/firestore/categories";
 import { createQuestion } from "@/lib/firestore/questions";
@@ -75,6 +76,7 @@ export function WallpaperForm({
   initialWallpaper?: Wallpaper | null;
 }) {
   const router = useRouter();
+  const { isDark } = useTheme();
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0);
@@ -454,7 +456,9 @@ export function WallpaperForm({
                   onClick={() => toggleCategory(category.slug)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
+                      ? isDark
+                        ? "border-white bg-white text-black"
+                        : "border-black bg-black text-white"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -506,7 +510,9 @@ export function WallpaperForm({
                   onClick={() => toggleQuestion(prompt.id)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
+                      ? isDark
+                        ? "border-white bg-white text-black"
+                        : "border-black bg-black text-white"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -652,8 +658,12 @@ export function WallpaperForm({
           <div
             className={`rounded-xl border px-4 py-3 text-sm font-medium ${
               statusMessage.type === "success"
-                ? "border-[#bbf7d0] bg-[#ecfdf3] text-[#166534] dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
-                : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+                ? mode === "create" && !isDark
+                  ? "border-[#86efac] bg-white text-[#166534]"
+                  : "border-[#bbf7d0] bg-[#ecfdf3] text-[#166534] dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
+                : mode === "create" && !isDark
+                  ? "border-[#fecaca] bg-white text-[#991b1b]"
+                  : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
             }`}
           >
             {statusMessage.message}
