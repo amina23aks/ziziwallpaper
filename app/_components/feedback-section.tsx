@@ -146,7 +146,7 @@ function IdentitySelectorSheet({
       <div
         ref={desktopRef}
         className={[
-          "absolute top-full z-50 mt-2 hidden w-72 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-2 shadow-[0_18px_50px_rgba(0,0,0,0.15)] dark:border-zinc-700 dark:bg-zinc-900 md:block",
+          "absolute top-full z-[70] mt-2 hidden w-72 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-2 shadow-[0_18px_50px_rgba(0,0,0,0.15)] dark:border-zinc-700 dark:bg-zinc-900 md:block",
           align === "left" ? "left-0" : "right-0",
         ].join(" ")}
       >

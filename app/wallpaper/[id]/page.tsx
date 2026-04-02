@@ -167,7 +167,7 @@ export default function WallpaperDetailsPage() {
         </Link>
       </header>
 
-      <article className={`mx-auto w-full max-w-6xl overflow-hidden rounded-2xl border p-3 shadow-sm sm:p-4 lg:max-w-[88rem] lg:p-5 ${isDark ? "border-zinc-800 bg-zinc-900" : "border-[#d4d4d8] bg-[#f8f8fa]"}`}>
+      <article className={`mx-auto w-full max-w-6xl overflow-visible rounded-2xl border p-3 shadow-sm sm:p-4 lg:max-w-[88rem] lg:p-5 ${isDark ? "border-zinc-800 bg-zinc-900" : "border-[#d4d4d8] bg-[#f8f8fa]"}`}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start lg:[direction:ltr]">
           <div className={`relative overflow-hidden rounded-2xl border ${isDark ? "border-zinc-800 bg-zinc-950" : "border-[#d4d4d8] bg-[#e7e7eb]"}`}>
             {hasMultipleImages ? (
