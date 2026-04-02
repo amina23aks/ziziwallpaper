@@ -76,7 +76,7 @@ function AvatarBadge({
     <div
       className={[
         "flex items-center justify-center rounded-full text-xs font-bold",
-        subtle ? "bg-zinc-100 text-zinc-700" : "bg-zinc-900/90 text-white",
+        subtle ? "bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-100" : "bg-zinc-900/90 text-white dark:bg-zinc-100 dark:text-zinc-900",
         subtle ? "h-7 w-7" : "h-9 w-9",
         className,
       ].join(" ")}
@@ -144,13 +144,13 @@ function IdentitySelectorSheet({
       <div
         ref={desktopRef}
         className={[
-          "absolute top-full z-50 mt-2 hidden w-72 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-2 shadow-[0_18px_50px_rgba(0,0,0,0.15)] md:block",
+          "absolute bottom-full z-50 mb-2 hidden w-72 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-2 shadow-[0_18px_50px_rgba(0,0,0,0.15)] dark:border-zinc-700 dark:bg-zinc-900 md:block",
           align === "left" ? "left-0" : "right-0",
         ].join(" ")}
       >
         <div className="px-2 pb-2 pt-1 text-right">
-          <p className="text-sm font-semibold text-zinc-900">اختر هوية النشر</p>
-          <p className="text-xs text-zinc-600">سيظهر التعليق أو الرد بالهوية المحددة.</p>
+          <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">اختر هوية النشر</p>
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">سيظهر التعليق أو الرد بالهوية المحددة.</p>
         </div>
         <div className="space-y-1">
           {DISPLAY_IDENTITY_OPTIONS.map((option) => {
@@ -167,13 +167,15 @@ function IdentitySelectorSheet({
                 }}
                 className={[
                   "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-right transition",
-                  selected ? "bg-zinc-900 text-white" : "text-zinc-900 hover:bg-zinc-50",
+                  selected
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
+                    : "text-zinc-900 hover:bg-zinc-50 dark:text-zinc-100 dark:hover:bg-zinc-800",
                 ].join(" ")}
               >
                 <AvatarBadge name={optionName} subtle={!selected} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
-                  <div className={selected ? "truncate text-sm font-semibold text-white" : "truncate text-sm font-semibold text-zinc-900"}>{optionName}</div>
-                  <div className={selected ? "text-xs text-white/80" : "text-xs text-zinc-700"}>{option.subtitle}</div>
+                  <div className={selected ? "truncate text-sm font-semibold text-white dark:text-black" : "truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100"}>{optionName}</div>
+                  <div className={selected ? "text-xs text-white/80 dark:text-black/70" : "text-xs text-zinc-700 dark:text-zinc-300"}>{option.subtitle}</div>
                 </div>
                 {selected ? <Check size={16} className="shrink-0" /> : null}
               </button>
@@ -184,12 +186,12 @@ function IdentitySelectorSheet({
 
       <div
         ref={mobileRef}
-        className="fixed inset-x-0 bottom-0 z-50 rounded-t-[28px] bg-white p-4 shadow-[0_-10px_35px_rgba(0,0,0,0.18)] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 rounded-t-[28px] bg-white p-4 shadow-[0_-10px_35px_rgba(0,0,0,0.18)] dark:bg-zinc-900 md:hidden"
       >
-        <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-zinc-200" />
+        <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-zinc-200 dark:bg-zinc-700" />
         <div className="mb-3 text-right">
-          <p className="text-sm font-semibold text-zinc-900">اختر هوية النشر</p>
-          <p className="text-xs text-zinc-600">سيظهر التعليق أو الرد بالهوية المحددة.</p>
+          <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">اختر هوية النشر</p>
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">سيظهر التعليق أو الرد بالهوية المحددة.</p>
         </div>
         <div className="space-y-2">
           {DISPLAY_IDENTITY_OPTIONS.map((option) => {
@@ -206,20 +208,22 @@ function IdentitySelectorSheet({
                 }}
                 className={[
                   "flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-right transition",
-                  selected ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-900",
+                  selected
+                    ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-black"
+                    : "border-zinc-200 bg-white text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100",
                 ].join(" ")}
               >
                 <AvatarBadge name={optionName} subtle={!selected} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
-                  <div className={selected ? "truncate text-sm font-semibold text-white" : "truncate text-sm font-semibold text-zinc-900"}>{optionName}</div>
-                  <div className={selected ? "text-xs text-white/80" : "text-xs text-zinc-700"}>{option.subtitle}</div>
+                  <div className={selected ? "truncate text-sm font-semibold text-white dark:text-black" : "truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100"}>{optionName}</div>
+                  <div className={selected ? "text-xs text-white/80 dark:text-black/70" : "text-xs text-zinc-700 dark:text-zinc-300"}>{option.subtitle}</div>
                 </div>
                 {selected ? <Check size={16} className="shrink-0" /> : null}
               </button>
             );
           })}
         </div>
-        <button type="button" onClick={onClose} className="mt-3 w-full rounded-2xl bg-zinc-100 px-4 py-3 text-sm font-medium text-zinc-800">
+        <button type="button" onClick={onClose} className="mt-3 w-full rounded-2xl bg-zinc-100 px-4 py-3 text-sm font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
           إغلاق
         </button>
       </div>

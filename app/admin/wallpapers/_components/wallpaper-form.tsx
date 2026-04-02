@@ -456,7 +456,7 @@ export function WallpaperForm({
                   onClick={() => toggleCategory(category.slug)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
+                      ? "border-black !bg-black !text-white dark:border-white dark:!bg-white dark:!text-black"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
@@ -508,7 +508,7 @@ export function WallpaperForm({
                   onClick={() => toggleQuestion(prompt.id)}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
-                      ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
+                      ? "border-black !bg-black !text-white dark:border-white dark:!bg-white dark:!text-black"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
                 >
