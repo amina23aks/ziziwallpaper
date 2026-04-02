@@ -139,7 +139,7 @@ export default function WallpaperDetailsPage() {
   const formattedDescription = wallpaper.description?.trim();
   const actionButtonClass = isDark
     ? "inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-200"
-    : "inline-flex h-9 w-9 items-center justify-center rounded-full border border-black bg-white text-zinc-700";
+    : "inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700";
 
   return (
     <main className={`min-h-screen w-full overflow-x-hidden px-4 py-6 pb-24 pt-16 md:pr-20 md:pt-6 ${isDark ? "bg-[var(--app-bg)]" : "bg-[#f3f3f5]"}`}>
@@ -241,7 +241,12 @@ export default function WallpaperDetailsPage() {
 
           <section className={`space-y-4 rounded-2xl border p-4 sm:p-5 [direction:rtl] ${isDark ? "border-zinc-800 bg-zinc-950/60" : "border-[#d4d4d8] bg-[#f1f1f3]"}`}>
             <div className="flex min-w-0 items-center justify-between gap-3">
-              <h1 className="min-w-0 flex-1 break-words text-lg font-bold text-black dark:text-zinc-100">{wallpaper.title}</h1>
+              <h1
+                className="min-w-0 flex-1 break-words text-lg font-bold text-black dark:text-zinc-100"
+                style={{ color: isDark ? undefined : "#000000" }}
+              >
+                {wallpaper.title}
+              </h1>
               <div className="flex shrink-0 items-center gap-2">
                 <button
                   type="button"
@@ -250,10 +255,7 @@ export default function WallpaperDetailsPage() {
                   className={`${actionButtonClass} disabled:cursor-not-allowed disabled:opacity-60`}
                   aria-label={isFavorited ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
                 >
-                  <Star
-                    size={16}
-                    className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-black dark:text-zinc-300"}
-                  />
+                  <Star size={16} className={isFavorited ? "fill-yellow-400 text-yellow-400" : "text-black [stroke-width:2.2] dark:text-zinc-300"} />
                 </button>
                 <button
                   type="button"
@@ -273,7 +275,14 @@ export default function WallpaperDetailsPage() {
               </div>
             </div>
 
-            {formattedDescription ? <p className="whitespace-pre-line text-right text-sm leading-7 text-black dark:text-zinc-300">{formattedDescription}</p> : null}
+            {formattedDescription ? (
+              <p
+                className="whitespace-pre-line text-right text-sm leading-7 text-black dark:text-zinc-300"
+                style={{ color: isDark ? undefined : "#000000" }}
+              >
+                {formattedDescription}
+              </p>
+            ) : null}
 
             <FeedbackSection
               comments={comments}
