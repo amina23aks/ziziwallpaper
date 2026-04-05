@@ -81,11 +81,11 @@ function AvatarBadge({
         "flex items-center justify-center rounded-full text-xs font-bold",
         subtle
           ? isDark
-            ? "border border-zinc-500 bg-zinc-600 text-zinc-100"
-            : "border border-zinc-300 bg-zinc-400 text-white"
+            ? "border border-zinc-500 bg-zinc-500 text-zinc-100"
+            : "border border-zinc-300 bg-zinc-300 text-zinc-800"
           : isDark
-            ? "border border-zinc-500 bg-zinc-600 text-zinc-100"
-            : "border border-zinc-300 bg-zinc-500 text-white",
+            ? "border border-zinc-500 bg-zinc-500 text-zinc-100"
+            : "border border-zinc-300 bg-zinc-400 text-zinc-900",
         subtle ? "h-7 w-7" : "h-9 w-9",
         className,
       ].join(" ")}
