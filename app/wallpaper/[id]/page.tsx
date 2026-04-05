@@ -149,7 +149,11 @@ export default function WallpaperDetailsPage() {
         <div className="flex min-h-10 items-center justify-start [direction:ltr]">
           <Link
             href="/"
-            className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40 dark:text-zinc-300 dark:hover:text-white dark:focus-visible:ring-zinc-600"
+            className={`inline-flex items-center justify-center px-1 leading-none transition focus-visible:outline-none focus-visible:ring-2 ${
+              isDark
+                ? "text-xl text-zinc-300 hover:text-white focus-visible:ring-zinc-600"
+                : "text-2xl text-black hover:text-zinc-900 focus-visible:ring-zinc-400/40"
+            }`}
             aria-label="رجوع"
           >
             ←
@@ -160,7 +164,11 @@ export default function WallpaperDetailsPage() {
       <header className={`mb-4 hidden items-center justify-start py-2 backdrop-blur [direction:ltr] md:sticky md:top-0 md:z-30 md:flex ${isDark ? "bg-[var(--app-bg)]/95" : "bg-[#f3f3f5]/95"}`}>
         <Link
           href="/"
-          className="inline-flex items-center justify-center px-1 text-xl leading-none text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40 dark:text-zinc-300 dark:hover:text-white dark:focus-visible:ring-zinc-600"
+          className={`inline-flex items-center justify-center px-1 leading-none transition focus-visible:outline-none focus-visible:ring-2 ${
+            isDark
+              ? "text-xl text-zinc-300 hover:text-white focus-visible:ring-zinc-600"
+              : "text-2xl text-black hover:text-zinc-900 focus-visible:ring-zinc-400/40"
+          }`}
           aria-label="رجوع"
         >
           ←
