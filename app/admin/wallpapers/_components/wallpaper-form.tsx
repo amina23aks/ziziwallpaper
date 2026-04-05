@@ -457,7 +457,7 @@ export function WallpaperForm({
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
                       ? isDark
-                        ? "border-white bg-white text-black"
+                        ? "border-white/80 bg-[#ffffff] text-black"
                         : "border-black bg-black text-white"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
@@ -511,7 +511,7 @@ export function WallpaperForm({
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
                     active
                       ? isDark
-                        ? "border-white bg-white text-black"
+                        ? "border-white/80 bg-[#ffffff] text-black"
                         : "border-black bg-black text-white"
                       : "border-[color:var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)]"
                   }`}
