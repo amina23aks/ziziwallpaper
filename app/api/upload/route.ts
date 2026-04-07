@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { getFirestore } from "firebase-admin/firestore";
 import { v2 as cloudinary } from "cloudinary";
-import { getAdminAuth } from "@/lib/firebase/admin";
+import { requireAuthorizationHeaderRole } from "@/lib/auth/server-access";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -13,22 +12,8 @@ const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 
 async function verifyAdminRequest(request: Request) {
-  const authorization = request.headers.get("authorization");
-
-  if (!authorization?.startsWith("Bearer ")) {
-    throw new Error("Unauthorized");
-  }
-
-  const token = authorization.slice("Bearer ".length).trim();
-  const decodedToken = await getAdminAuth().verifyIdToken(token);
-  const userSnapshot = await getFirestore().collection("users").doc(decodedToken.uid).get();
-  const role = userSnapshot.data()?.role;
-
-  if (role !== "admin" && role !== "superadmin") {
-    throw new Error("Forbidden");
-  }
-
-  return decodedToken.uid;
+  const actor = await requireAuthorizationHeaderRole(request, "admin");
+  return actor.uid;
 }
 
 export async function POST(request: Request) {

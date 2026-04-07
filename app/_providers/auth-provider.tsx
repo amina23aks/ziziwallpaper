@@ -9,8 +9,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { onAuthStateChanged, type User } from "firebase/auth";
+import { onAuthStateChanged, onIdTokenChanged, type User } from "firebase/auth";
 import { getClientAuth } from "@/lib/firebase/client";
+import { AUTH_TOKEN_COOKIE_NAME } from "@/lib/auth/constants";
 import { ensureUserProfileDocument, getUserProfile } from "@/lib/firestore/users";
 import type { UserProfile } from "@/types/user-profile";
 
@@ -64,6 +65,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } finally {
         setIsAuthLoading(false);
       }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const auth = getClientAuth();
+
+    const unsubscribe = onIdTokenChanged(auth, async (nextUser) => {
+      if (!nextUser) {
+        document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
+        return;
+      }
+
+      const token = await nextUser.getIdToken();
+      document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=${token}; Path=/; Max-Age=3600; SameSite=Lax`;
     });
 
     return unsubscribe;

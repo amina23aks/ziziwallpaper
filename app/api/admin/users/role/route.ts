@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
-import { getAdminAuth } from "@/lib/firebase/admin";
+import { requireAuthorizationHeaderRole } from "@/lib/auth/server-access";
 import type { UserProfile } from "@/types/user-profile";
 
 type ManageableRole = Exclude<UserProfile["role"], "guest">;
@@ -12,23 +12,8 @@ function toErrorResponse(message: string, status: number) {
 }
 
 async function requireSuperAdmin(request: Request) {
-  const authorization = request.headers.get("authorization");
-  if (!authorization?.startsWith("Bearer ")) {
-    throw new Error("Unauthorized");
-  }
-
-  const token = authorization.slice("Bearer ".length).trim();
-  const decodedToken = await getAdminAuth().verifyIdToken(token);
-  const firestore = getFirestore();
-  const actorRef = firestore.collection("users").doc(decodedToken.uid);
-  const actorSnapshot = await actorRef.get();
-  const role = actorSnapshot.data()?.role;
-
-  if (role !== "superadmin") {
-    throw new Error("Forbidden");
-  }
-
-  return decodedToken.uid;
+  const actor = await requireAuthorizationHeaderRole(request, "superadmin");
+  return actor.uid;
 }
 
 export async function POST(request: Request) {
