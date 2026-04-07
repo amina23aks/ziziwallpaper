@@ -7,6 +7,8 @@ import { getAdminAuth } from "@/lib/firebase/admin";
 
 type AppRole = Exclude<UserRole, "guest">;
 type RequiredRole = "admin" | "superadmin";
+const UNAUTHORIZED_MESSAGE = "Unauthorized";
+const FORBIDDEN_MESSAGE = "Forbidden";
 
 const ROLE_PRIORITY: Record<AppRole, number> = {
   user: 1,
@@ -44,19 +46,24 @@ export async function requireAuthorizationHeaderRole(request: Request, requiredR
   const authorization = request.headers.get("authorization");
 
   if (!authorization?.startsWith("Bearer ")) {
-    throw new Error("Unauthorized");
+    throw new Error(UNAUTHORIZED_MESSAGE);
   }
 
   const token = authorization.slice("Bearer ".length).trim();
   if (!token) {
-    throw new Error("Unauthorized");
+    throw new Error(UNAUTHORIZED_MESSAGE);
   }
 
-  const decodedToken = await getAdminAuth().verifyIdToken(token);
+  let decodedToken: DecodedIdToken;
+  try {
+    decodedToken = await getAdminAuth().verifyIdToken(token);
+  } catch {
+    throw new Error(UNAUTHORIZED_MESSAGE);
+  }
   const role = await resolveRole(decodedToken);
 
   if (!hasRequiredRole(role, requiredRole)) {
-    throw new Error("Forbidden");
+    throw new Error(FORBIDDEN_MESSAGE);
   }
 
   return { uid: decodedToken.uid, role };
@@ -65,15 +72,27 @@ export async function requireAuthorizationHeaderRole(request: Request, requiredR
 export async function requireCookieRole(cookiesStore: ReadonlyRequestCookies, requiredRole: RequiredRole) {
   const token = cookiesStore.get(AUTH_TOKEN_COOKIE_NAME)?.value?.trim();
   if (!token) {
-    throw new Error("Unauthorized");
+    throw new Error(UNAUTHORIZED_MESSAGE);
   }
 
-  const decodedToken = await getAdminAuth().verifyIdToken(token);
+  let decodedToken: DecodedIdToken;
+  try {
+    decodedToken = await getAdminAuth().verifyIdToken(token);
+  } catch {
+    throw new Error(UNAUTHORIZED_MESSAGE);
+  }
   const role = await resolveRole(decodedToken);
 
   if (!hasRequiredRole(role, requiredRole)) {
-    throw new Error("Forbidden");
+    throw new Error(FORBIDDEN_MESSAGE);
   }
 
   return { uid: decodedToken.uid, role };
+}
+
+export function getAuthErrorStatus(error: unknown): 401 | 403 | null {
+  const message = error instanceof Error ? error.message : "";
+  if (message === UNAUTHORIZED_MESSAGE) return 401;
+  if (message === FORBIDDEN_MESSAGE) return 403;
+  return null;
 }
