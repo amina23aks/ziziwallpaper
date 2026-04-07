@@ -66,9 +66,11 @@ function chunkIds(ids: string[]) {
 }
 
 export async function createWallpaper(data: CreateWallpaperInput) {
-  const { questionId, ...rest } = data;
+  const { questionId, questionIds = [], ...rest } = data;
+  const normalizedQuestionIds = Array.from(new Set([questionId, ...questionIds].filter(Boolean)));
   const docRef = await addDoc(wallpapersCollection, {
     ...rest,
+    ...(normalizedQuestionIds.length > 0 ? { questionIds: normalizedQuestionIds } : { questionIds: [] }),
     ...(questionId ? { questionId } : {}),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -78,9 +80,11 @@ export async function createWallpaper(data: CreateWallpaperInput) {
 }
 
 export async function updateWallpaper(id: string, data: UpdateWallpaperInput) {
-  const { questionId, ...rest } = data;
+  const { questionId, questionIds = [], ...rest } = data;
+  const normalizedQuestionIds = Array.from(new Set([questionId, ...questionIds].filter(Boolean)));
   await updateDoc(doc(db, "wallpapers", id), {
     ...rest,
+    ...(normalizedQuestionIds.length > 0 ? { questionIds: normalizedQuestionIds } : { questionIds: [] }),
     ...(questionId ? { questionId } : { questionId: deleteField() }),
     updatedAt: serverTimestamp(),
   });
@@ -208,16 +212,30 @@ export async function listPublishedWallpapersPage(
   maxItems = 18,
   cursor?: QueryDocumentSnapshot<DocumentData> | null
 ): Promise<PublishedWallpapersPage> {
-  const constraints = [where("isPublished", "==", true), orderBy("createdAt", "desc")] as const;
   const paginationConstraint = cursor ? [startAfter(cursor)] : [];
-  const snapshot = await getDocs(
-    query(wallpapersCollection, ...constraints, ...paginationConstraint, limit(maxItems))
-  );
+  let snapshot;
+
+  try {
+    snapshot = await getDocs(
+      query(
+        wallpapersCollection,
+        where("isPublished", "==", true),
+        orderBy("createdAt", "desc"),
+        ...paginationConstraint,
+        limit(maxItems)
+      )
+    );
+  } catch {
+    snapshot = await getDocs(
+      query(wallpapersCollection, where("isPublished", "==", true), ...paginationConstraint, limit(maxItems))
+    );
+  }
+
   const items = snapshot.docs.map((item) => mapWallpaper(item));
   const lastVisible = snapshot.docs.at(-1) ?? null;
 
   return {
-    items,
+    items: sortWallpapersByNewest(items).slice(0, maxItems),
     cursor: lastVisible,
     hasMore: snapshot.docs.length === maxItems,
   };
@@ -346,7 +364,25 @@ export async function listPublishedWallpapersByQuestion(questionId: string, ques
     }
   });
 
-  return sortWallpapersByNewest(Array.from(merged.values())).slice(0, maxItems);
+  const mergedItems = sortWallpapersByNewest(Array.from(merged.values())).slice(0, maxItems);
+
+  if (mergedItems.length > 0) {
+    return mergedItems;
+  }
+
+  const fallbackScanSize = Math.max(maxItems, 60);
+  const recentPublished = await listPublishedWallpapers(fallbackScanSize);
+
+  return sortWallpapersByNewest(
+    recentPublished.filter((item) => {
+      const matchesQuestionId = item.questionId === questionId || item.questionIds?.includes(questionId);
+      const matchesSlug = questionSlug
+        ? item.questionPromptSlugs?.includes(questionSlug) || item.questionPromptSlugs?.includes(questionId)
+        : false;
+
+      return matchesQuestionId || matchesSlug;
+    })
+  ).slice(0, maxItems);
 }
 
 export function buildWallpaperQuestionFields(input: {

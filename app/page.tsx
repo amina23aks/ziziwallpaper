@@ -60,6 +60,8 @@ export default function HomePage() {
       nextCursorRef.current = page.cursor;
       setHasMoreWallpapers(page.hasMore && page.cursor !== null);
       hasLoadedInitialWallpapersRef.current = true;
+    } catch {
+      setHasMoreWallpapers(false);
     } finally {
       setIsLoadingMore(false);
     }
