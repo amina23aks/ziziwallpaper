@@ -7,6 +7,7 @@ import {
   updateProfile,
   type UserCredential,
 } from "firebase/auth";
+import { AUTH_TOKEN_COOKIE_NAME } from "@/lib/auth/constants";
 import { getClientAuth } from "@/lib/firebase/client";
 
 const googleProvider = new GoogleAuthProvider();
@@ -35,5 +36,9 @@ export async function signUpWithEmail({
 }
 
 export async function signOutUser() {
-  await signOut(getClientAuth());
+  try {
+    await signOut(getClientAuth());
+  } finally {
+    document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
+  }
 }

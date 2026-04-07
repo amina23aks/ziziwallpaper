@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { getFirestore } from "firebase-admin/firestore";
 import { v2 as cloudinary } from "cloudinary";
-import { getAdminAuth } from "@/lib/firebase/admin";
+import { getAuthErrorStatus, requireAuthorizationHeaderRole } from "@/lib/auth/server-access";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,30 +11,16 @@ cloudinary.config({
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 
-async function verifyAdminRequest(request: Request) {
-  const authorization = request.headers.get("authorization");
-
-  if (!authorization?.startsWith("Bearer ")) {
-    throw new Error("Unauthorized");
-  }
-
-  const token = authorization.slice("Bearer ".length).trim();
-  const decodedToken = await getAdminAuth().verifyIdToken(token);
-  const userSnapshot = await getFirestore().collection("users").doc(decodedToken.uid).get();
-  const role = userSnapshot.data()?.role;
-
-  if (role !== "admin" && role !== "superadmin") {
-    throw new Error("Forbidden");
-  }
-
-  return decodedToken.uid;
-}
-
 export async function POST(request: Request) {
   try {
-    await verifyAdminRequest(request);
+    await requireAuthorizationHeaderRole(request, "admin");
 
-    const formData = await request.formData();
+    let formData: FormData;
+    try {
+      formData = await request.formData();
+    } catch {
+      return NextResponse.json({ error: "Invalid multipart form data" }, { status: 400 });
+    }
     const file = formData.get("file");
 
     if (!(file instanceof File)) {
@@ -91,8 +76,9 @@ export async function POST(request: Request) {
       height: uploadResult.height,
     });
   } catch (error) {
+    const authStatus = getAuthErrorStatus(error);
     const message = error instanceof Error ? error.message : "Image upload failed";
-    const status = message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    const status = authStatus ?? 500;
     return NextResponse.json({ error: message }, { status });
   }
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
-import { getAdminAuth } from "@/lib/firebase/admin";
+import { getAuthErrorStatus, requireAuthorizationHeaderRole } from "@/lib/auth/server-access";
 import type { UserProfile } from "@/types/user-profile";
 
 type ManageableRole = Exclude<UserProfile["role"], "guest">;
@@ -12,29 +12,19 @@ function toErrorResponse(message: string, status: number) {
 }
 
 async function requireSuperAdmin(request: Request) {
-  const authorization = request.headers.get("authorization");
-  if (!authorization?.startsWith("Bearer ")) {
-    throw new Error("Unauthorized");
-  }
-
-  const token = authorization.slice("Bearer ".length).trim();
-  const decodedToken = await getAdminAuth().verifyIdToken(token);
-  const firestore = getFirestore();
-  const actorRef = firestore.collection("users").doc(decodedToken.uid);
-  const actorSnapshot = await actorRef.get();
-  const role = actorSnapshot.data()?.role;
-
-  if (role !== "superadmin") {
-    throw new Error("Forbidden");
-  }
-
-  return decodedToken.uid;
+  const actor = await requireAuthorizationHeaderRole(request, "superadmin");
+  return actor.uid;
 }
 
 export async function POST(request: Request) {
   try {
     const actorUid = await requireSuperAdmin(request);
-    const payload = (await request.json()) as { targetUid?: string; role?: ManageableRole };
+    let payload: { targetUid?: string; role?: ManageableRole };
+    try {
+      payload = (await request.json()) as { targetUid?: string; role?: ManageableRole };
+    } catch {
+      return toErrorResponse("Invalid payload", 400);
+    }
 
     const targetUid = payload?.targetUid?.trim();
     const nextRole = payload?.role;
@@ -62,8 +52,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
+    const authStatus = getAuthErrorStatus(error);
     const message = error instanceof Error ? error.message : "Failed to update role";
-    const status = message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    const status = authStatus ?? 500;
     return toErrorResponse(message, status);
   }
 }
