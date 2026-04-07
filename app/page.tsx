@@ -2,16 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
 import { FixedFeedHeader } from "@/app/_components/fixed-feed-header";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
-import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
+import { listPublishedWallpapersPage } from "@/lib/firestore/wallpapers";
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper } from "@/types/wallpaper";
+
+const HOME_WALLPAPER_PAGE_SIZE = 18;
 
 export default function HomePage() {
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
@@ -21,25 +24,73 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreWallpapers, setHasMoreWallpapers] = useState(true);
+  const nextCursorRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const hasLoadedInitialWallpapersRef = useRef(false);
+
+  const loadMoreWallpapers = useCallback(async () => {
+    if (isLoadingMore || !hasMoreWallpapers) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+
+    try {
+      const page = await listPublishedWallpapersPage(
+        HOME_WALLPAPER_PAGE_SIZE,
+        nextCursorRef.current
+      );
+
+      setWallpapers((previousItems) => {
+        if (previousItems.length === 0) {
+          return page.items;
+        }
+
+        const existingIds = new Set(previousItems.map((item) => item.id).filter(Boolean));
+        const uniqueNewItems = page.items.filter((item) => !item.id || !existingIds.has(item.id));
+
+        if (uniqueNewItems.length === 0) {
+          return previousItems;
+        }
+
+        return [...previousItems, ...uniqueNewItems];
+      });
+
+      nextCursorRef.current = page.cursor;
+      setHasMoreWallpapers(page.hasMore && page.cursor !== null);
+      hasLoadedInitialWallpapersRef.current = true;
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [hasMoreWallpapers, isLoadingMore]);
 
   useEffect(() => {
-    async function loadData() {
+    async function loadMetaData() {
+      const [activeCategories, prompts] = await Promise.all([
+        listActiveCategories(100),
+        listQuestionPrompts(),
+      ]);
+      setCategories(activeCategories);
+      setQuestionPrompts(prompts);
+    }
+
+    loadMetaData();
+  }, []);
+
+  useEffect(() => {
+    async function loadInitialWallpapers() {
       try {
-        const [publishedWallpapers, activeCategories, prompts] = await Promise.all([
-          listPublishedWallpapers(100),
-          listActiveCategories(100),
-          listQuestionPrompts(),
-        ]);
-        setWallpapers(publishedWallpapers);
-        setCategories(activeCategories);
-        setQuestionPrompts(prompts);
+        if (!hasLoadedInitialWallpapersRef.current) {
+          await loadMoreWallpapers();
+        }
       } finally {
         setIsLoading(false);
       }
     }
 
-    loadData();
-  }, []);
+    loadInitialWallpapers();
+  }, [loadMoreWallpapers]);
 
 
   const filteredWallpapers = useMemo(() => {
@@ -137,7 +188,21 @@ export default function HomePage() {
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
+          <>
+            <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
+            {hasMoreWallpapers && (
+              <div className="mt-5 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => void loadMoreWallpapers()}
+                  disabled={isLoadingMore}
+                  className="rounded-full border border-zinc-300 bg-white px-5 py-2 text-sm font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isLoadingMore ? "جاري التحميل..." : "تحميل المزيد"}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 

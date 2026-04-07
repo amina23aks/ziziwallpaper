@@ -1,10 +1,12 @@
 import {
   addDoc,
   collection,
+  type DocumentData,
   deleteField,
   deleteDoc,
   doc,
   documentId,
+  type QueryDocumentSnapshot,
   getCountFromServer,
   getDoc,
   getDocs,
@@ -12,6 +14,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  startAfter,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -193,6 +196,31 @@ export async function listPublishedWallpapers(maxItems = 30) {
   }
 
   return sortWallpapersByNewest(snapshot.docs.map((item) => mapWallpaper(item))).slice(0, maxItems);
+}
+
+type PublishedWallpapersPage = {
+  items: Wallpaper[];
+  cursor: QueryDocumentSnapshot<DocumentData> | null;
+  hasMore: boolean;
+};
+
+export async function listPublishedWallpapersPage(
+  maxItems = 18,
+  cursor?: QueryDocumentSnapshot<DocumentData> | null
+): Promise<PublishedWallpapersPage> {
+  const constraints = [where("isPublished", "==", true), orderBy("createdAt", "desc")] as const;
+  const paginationConstraint = cursor ? [startAfter(cursor)] : [];
+  const snapshot = await getDocs(
+    query(wallpapersCollection, ...constraints, ...paginationConstraint, limit(maxItems))
+  );
+  const items = snapshot.docs.map((item) => mapWallpaper(item));
+  const lastVisible = snapshot.docs.at(-1) ?? null;
+
+  return {
+    items,
+    cursor: lastVisible,
+    hasMore: snapshot.docs.length === maxItems,
+  };
 }
 
 export async function listPublishedWallpapersByCategory(categorySlug: string, maxItems = 12) {
