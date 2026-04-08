@@ -166,20 +166,25 @@ export default function WallpaperDetailsPage() {
         cursor: commentsCursor,
         loadedCount: comments.filter((item) => !item.parentId).length,
       });
+      let appendedCount = 0;
       setComments((prev) => {
         const existingIds = new Set(prev.map((item) => item.id).filter(Boolean));
         const merged = [...prev];
         nextPage.comments.forEach((item) => {
           if (!item.id || !existingIds.has(item.id)) {
             merged.push(item);
+            if (item.id && !item.parentId) {
+              appendedCount += 1;
+            }
           }
         });
         return merged;
       });
       setCommentsCursor(nextPage.cursor);
-      setHasMoreComments(nextPage.hasMore);
+      const hasProgress = appendedCount > 0;
+      setHasMoreComments(hasProgress ? nextPage.hasMore : false);
       const newRootIds = nextPage.comments.map((item) => item.id).filter(Boolean) as string[];
-      if (newRootIds.length > 0) {
+      if (hasProgress && newRootIds.length > 0) {
         const hasRepliesResults = await Promise.all(
           newRootIds.map(async (parentId) => ({
             parentId,
@@ -194,6 +199,9 @@ export default function WallpaperDetailsPage() {
           return next;
         });
       }
+    } catch (error) {
+      console.error("Failed to load more comments page", error);
+      setHasMoreComments(false);
     } finally {
       setIsCommentsLoadingMore(false);
     }
