@@ -29,9 +29,19 @@ export default function HomePage() {
   const nextCursorRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
   const hasLoadedInitialWallpapersRef = useRef(false);
   const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
+  const isLoadingMoreRef = useRef(false);
+  const hasMoreWallpapersRef = useRef(true);
+
+  useEffect(() => {
+    isLoadingMoreRef.current = isLoadingMore;
+  }, [isLoadingMore]);
+
+  useEffect(() => {
+    hasMoreWallpapersRef.current = hasMoreWallpapers;
+  }, [hasMoreWallpapers]);
 
   const loadMoreWallpapers = useCallback(async () => {
-    if (isLoadingMore || !hasMoreWallpapers) {
+    if (isLoadingMoreRef.current || !hasMoreWallpapersRef.current) {
       return;
     }
 
@@ -66,7 +76,7 @@ export default function HomePage() {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [hasMoreWallpapers, isLoadingMore]);
+  }, []);
 
   useEffect(() => {
     async function loadMetaData() {
@@ -82,17 +92,25 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadInitialWallpapers() {
       try {
         if (!hasLoadedInitialWallpapersRef.current) {
           await loadMoreWallpapers();
         }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadInitialWallpapers();
+
+    return () => {
+      isMounted = false;
+    };
   }, [loadMoreWallpapers]);
 
   useEffect(() => {

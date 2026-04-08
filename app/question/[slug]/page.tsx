@@ -14,16 +14,27 @@ import type { Wallpaper } from "@/types/wallpaper";
 
 export default function QuestionResultsPage() {
   const params = useParams<{ slug: string }>();
-  const slug = params.slug;
+  const rawSlug = params.slug;
+  const slug = (() => {
+    if (!rawSlug) return "";
+
+    try {
+      return decodeURIComponent(rawSlug);
+    } catch {
+      return rawSlug;
+    }
+  })();
   const [question, setQuestion] = useState<Question | null>(null);
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const questionTitle = question?.title ?? question?.questionAr ?? slug?.replace(/-/g, " ") ?? "نتائج السؤال";
+  const questionTitle = question?.title ?? question?.questionAr ?? "نتائج السؤال";
 
   useEffect(() => {
     async function loadData() {
       try {
-        const selectedQuestion = await getQuestionBySlug(slug);
+        const selectedQuestion =
+          (await getQuestionBySlug(slug)) ??
+          (rawSlug && slug !== rawSlug ? await getQuestionBySlug(rawSlug) : null);
         setQuestion(selectedQuestion);
 
         if (selectedQuestion?.id) {
@@ -42,7 +53,7 @@ export default function QuestionResultsPage() {
     if (slug) {
       loadData();
     }
-  }, [slug]);
+  }, [rawSlug, slug]);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl bg-zinc-50 px-4 py-6 sm:px-6">
