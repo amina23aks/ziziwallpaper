@@ -25,7 +25,7 @@ import {
   createWallpaperComment,
   deleteWallpaperComment,
   listCommentDescendantIds,
-  listCommentDirectReplies,
+  listCommentReplyTree,
   listWallpaperRootCommentsPage,
   toClientTimestamp,
   updateWallpaperComment,
@@ -208,7 +208,7 @@ export default function WallpaperDetailsPage() {
   const ensureRepliesLoaded = useCallback(
     async (parentId: string) => {
       if (!wallpaper?.id || loadedReplyParentIds.has(parentId)) return;
-      const replies = await listCommentDirectReplies({
+      const replies = await listCommentReplyTree({
         wallpaperId: wallpaper.id,
         parentId,
       });

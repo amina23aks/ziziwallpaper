@@ -46,29 +46,45 @@ export async function listWallpaperRootCommentsPage(input: {
   loadedCount?: number;
 }): Promise<RootCommentsPageResult> {
   const pageSize = Math.max(1, input.pageSize ?? DEFAULT_ROOT_PAGE_SIZE);
+  const scanBatchSize = Math.max(pageSize * 3, pageSize + 1);
 
-  const constraints = [
-    where("wallpaperId", "==", input.wallpaperId),
-    where("parentId", "==", null),
-    orderBy("createdAt", "asc"),
-    orderBy(documentId(), "asc"),
-    limit(pageSize + 1),
-  ] as const;
+  const constraints = [where("wallpaperId", "==", input.wallpaperId), orderBy("createdAt", "asc"), orderBy(documentId(), "asc")] as const;
 
   try {
-    const baseQuery = input.cursor
-      ? query(commentsCollection, ...constraints, startAfter(input.cursor))
-      : query(commentsCollection, ...constraints);
+    let cursor = input.cursor ?? null;
+    const rootComments: WallpaperComment[] = [];
+    const seenIds = new Set<string>();
+    let hasMoreDocs = true;
 
-    const snapshot = await getDocs(baseQuery);
-    const docs = snapshot.docs as QueryDocumentSnapshot<CommentDoc>[];
-    const hasMore = docs.length > pageSize;
-    const pageDocs = hasMore ? docs.slice(0, pageSize) : docs;
+    while (rootComments.length < pageSize && hasMoreDocs) {
+      const scanQuery = cursor
+        ? query(commentsCollection, ...constraints, startAfter(cursor), limit(scanBatchSize))
+        : query(commentsCollection, ...constraints, limit(scanBatchSize));
+
+      const snapshot = await getDocs(scanQuery);
+      const docs = snapshot.docs as QueryDocumentSnapshot<CommentDoc>[];
+      if (docs.length === 0) {
+        hasMoreDocs = false;
+        break;
+      }
+
+      cursor = docs.at(-1) ?? cursor;
+      hasMoreDocs = docs.length === scanBatchSize;
+
+      docs.forEach((docItem) => {
+        if (rootComments.length >= pageSize) return;
+        const mapped = mapCommentSnapshot(docItem);
+        if (mapped.parentId) return;
+        if (seenIds.has(mapped.id ?? "")) return;
+        seenIds.add(mapped.id ?? "");
+        rootComments.push(mapped);
+      });
+    }
 
     return {
-      comments: pageDocs.map(mapCommentSnapshot),
-      cursor: pageDocs.at(-1) ?? null,
-      hasMore,
+      comments: rootComments,
+      cursor,
+      hasMore: hasMoreDocs,
     };
   } catch {
     const loadedCount = Math.max(0, input.loadedCount ?? 0);
@@ -132,6 +148,42 @@ export async function listCommentDirectReplies(input: {
         return (left.id ?? "").localeCompare(right.id ?? "");
       });
   }
+}
+
+export async function listCommentReplyTree(input: {
+  wallpaperId: string;
+  parentId: string;
+}): Promise<WallpaperComment[]> {
+  const collected = new Map<string, WallpaperComment>();
+  let frontier = [input.parentId];
+
+  while (frontier.length > 0) {
+    const chunk = frontier.slice(0, 10);
+    frontier = frontier.slice(10);
+
+    const snapshot = await getDocs(
+      query(
+        commentsCollection,
+        where("wallpaperId", "==", input.wallpaperId),
+        where("parentId", "in", chunk)
+      )
+    );
+
+    const children = snapshot.docs.map((item) => ({ id: item.id, ...(item.data() as CommentDoc) }));
+    children.forEach((child) => {
+      if (child.id) {
+        collected.set(child.id, child);
+        frontier.push(child.id);
+      }
+    });
+  }
+
+  return [...collected.values()].sort((left, right) => {
+    const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
+    const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
+    if (leftSeconds !== rightSeconds) return leftSeconds - rightSeconds;
+    return (left.id ?? "").localeCompare(right.id ?? "");
+  });
 }
 
 export async function checkCommentHasDirectReplies(input: {
