@@ -139,16 +139,10 @@ export default function WallpaperDetailsPage() {
   const appendComment = useCallback((input: WallpaperComment) => {
     setComments((prev) => {
       const deduped = prev.filter((item) => item.id !== input.id);
-      return [...deduped, input].sort((left, right) => {
-        const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-        const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-
-        if (leftSeconds !== rightSeconds) {
-          return leftSeconds - rightSeconds;
-        }
-
-        return (left.id ?? "").localeCompare(right.id ?? "");
-      });
+      if (!input.parentId) {
+        return [input, ...deduped];
+      }
+      return [...deduped, input];
     });
   }, []);
 
