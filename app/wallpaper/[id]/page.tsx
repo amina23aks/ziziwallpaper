@@ -105,24 +105,31 @@ export default function WallpaperDetailsPage() {
         if (wallpaperData?.id) {
           const wallpaperId = wallpaperData.id;
           setIsCommentsInitialLoading(true);
-          const firstPage = await listWallpaperRootCommentsPage({
-            wallpaperId,
-            pageSize: INITIAL_COMMENTS_PAGE_SIZE,
-          });
-          setComments(firstPage.comments);
-          setCommentsCursor(firstPage.cursor);
-          setHasMoreComments(firstPage.hasMore);
-          const firstPageRootIds = firstPage.comments.map((item) => item.id).filter(Boolean) as string[];
-          if (firstPageRootIds.length > 0) {
-            const hasRepliesResults = await Promise.all(
-              firstPageRootIds.map(async (parentId) => ({
-                parentId,
-                hasReplies: await checkCommentHasDirectReplies({ wallpaperId, parentId }),
-              }))
-            );
-            setRootCommentsWithReplies(
-              new Set(hasRepliesResults.filter((item) => item.hasReplies).map((item) => item.parentId))
-            );
+          try {
+            const firstPage = await listWallpaperRootCommentsPage({
+              wallpaperId,
+              pageSize: INITIAL_COMMENTS_PAGE_SIZE,
+            });
+            setComments(firstPage.comments);
+            setCommentsCursor(firstPage.cursor);
+            setHasMoreComments(firstPage.hasMore);
+            const firstPageRootIds = firstPage.comments.map((item) => item.id).filter(Boolean) as string[];
+            if (firstPageRootIds.length > 0) {
+              const hasRepliesResults = await Promise.all(
+                firstPageRootIds.map(async (parentId) => ({
+                  parentId,
+                  hasReplies: await checkCommentHasDirectReplies({ wallpaperId, parentId }),
+                }))
+              );
+              setRootCommentsWithReplies(
+                new Set(hasRepliesResults.filter((item) => item.hasReplies).map((item) => item.parentId))
+              );
+            }
+          } catch (error) {
+            console.error("Failed to load initial comments page", error);
+            setComments([]);
+            setCommentsCursor(null);
+            setHasMoreComments(false);
           }
         }
       } finally {
@@ -166,16 +173,15 @@ export default function WallpaperDetailsPage() {
         cursor: commentsCursor,
         loadedCount: comments.filter((item) => !item.parentId).length,
       });
-      let appendedCount = 0;
+      const existingIds = new Set(comments.map((item) => item.id).filter(Boolean));
+      const appendableRoots = nextPage.comments.filter((item) => item.id && !existingIds.has(item.id ?? ""));
+      const appendedCount = appendableRoots.length;
       setComments((prev) => {
-        const existingIds = new Set(prev.map((item) => item.id).filter(Boolean));
+        const currentIds = new Set(prev.map((item) => item.id).filter(Boolean));
         const merged = [...prev];
         nextPage.comments.forEach((item) => {
-          if (!item.id || !existingIds.has(item.id)) {
+          if (!item.id || !currentIds.has(item.id)) {
             merged.push(item);
-            if (item.id && !item.parentId) {
-              appendedCount += 1;
-            }
           }
         });
         return merged;

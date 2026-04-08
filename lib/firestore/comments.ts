@@ -69,7 +69,14 @@ export async function listWallpaperRootCommentsPage(input: {
       cursor,
       hasMore,
     };
-  } catch {
+  } catch (error) {
+    const errorCode = (error as { code?: string } | null)?.code ?? "";
+    const errorMessage = (error as { message?: string } | null)?.message ?? "";
+    const isIndexError = errorCode === "failed-precondition" || /index/i.test(errorMessage);
+    if (isIndexError) {
+      throw error;
+    }
+
     const loadedCount = Math.max(0, input.loadedCount ?? 0);
     const fallbackSnapshot = await getDocs(
       query(
