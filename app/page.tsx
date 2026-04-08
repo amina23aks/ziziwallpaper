@@ -28,6 +28,7 @@ export default function HomePage() {
   const [hasMoreWallpapers, setHasMoreWallpapers] = useState(true);
   const nextCursorRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
   const hasLoadedInitialWallpapersRef = useRef(false);
+  const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
 
   const loadMoreWallpapers = useCallback(async () => {
     if (isLoadingMore || !hasMoreWallpapers) {
@@ -94,6 +95,29 @@ export default function HomePage() {
     loadInitialWallpapers();
   }, [loadMoreWallpapers]);
 
+  useEffect(() => {
+    const sentinel = loadMoreSentinelRef.current;
+
+    if (!sentinel || !hasMoreWallpapers) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+
+        if (entry?.isIntersecting) {
+          void loadMoreWallpapers();
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [hasMoreWallpapers, loadMoreWallpapers]);
+
 
   const filteredWallpapers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -108,16 +132,6 @@ export default function HomePage() {
           wallpaper.searchKeywords?.some((item) => item.toLowerCase().includes(query));
 
         return matchesCategory && matchesSearch;
-      })
-      .sort((left, right) => {
-        const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-        const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-
-        if (rightSeconds !== leftSeconds) {
-          return rightSeconds - leftSeconds;
-        }
-
-        return (right.id ?? "").localeCompare(left.id ?? "");
       });
   }, [wallpapers, searchQuery, selectedCategory]);
 
@@ -184,7 +198,14 @@ export default function HomePage() {
 
 
         {isLoading ? (
-          <p className="text-sm text-zinc-600">جاري تحميل الخلفيات...</p>
+          <div className="grid grid-cols-2 gap-3 [direction:rtl] xl:grid-cols-5">
+            {Array.from({ length: 10 }, (_, index) => (
+              <div
+                key={`feed-skeleton-${index}`}
+                className="h-40 animate-pulse rounded-2xl border border-zinc-200 bg-zinc-100"
+              />
+            ))}
+          </div>
         ) : filteredWallpapers.length === 0 ? (
           <p className="rounded-2xl border border-zinc-200 bg-white px-4 py-6 text-center text-sm text-zinc-600">
             لا توجد خلفيات مطابقة حالياً.
@@ -192,17 +213,9 @@ export default function HomePage() {
         ) : (
           <>
             <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
-            {hasMoreWallpapers && (
-              <div className="mt-5 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => void loadMoreWallpapers()}
-                  disabled={isLoadingMore}
-                  className="rounded-full border border-zinc-300 bg-white px-5 py-2 text-sm font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isLoadingMore ? "جاري التحميل..." : "تحميل المزيد"}
-                </button>
-              </div>
+            <div ref={loadMoreSentinelRef} className="h-1 w-full" aria-hidden="true" />
+            {isLoadingMore && (
+              <p className="mt-4 text-center text-xs font-medium text-zinc-500">جاري تحميل المزيد...</p>
             )}
           </>
         )}

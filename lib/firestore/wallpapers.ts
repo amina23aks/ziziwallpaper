@@ -269,28 +269,14 @@ export async function listPublishedWallpapersByCategory(categorySlug: string, ma
 }
 
 export async function listPublishedWallpapersByQuestionPrompt(questionPromptSlug: string, maxItems = 50) {
-  let snapshot;
-
-  try {
-    snapshot = await getDocs(
-      query(
-        wallpapersCollection,
-        where("isPublished", "==", true),
-        where("questionPromptSlugs", "array-contains", questionPromptSlug),
-        orderBy("createdAt", "desc"),
-        limit(maxItems)
-      )
-    );
-  } catch {
-    snapshot = await getDocs(
-      query(
-        wallpapersCollection,
-        where("isPublished", "==", true),
-        where("questionPromptSlugs", "array-contains", questionPromptSlug),
-        limit(maxItems)
-      )
-    );
-  }
+  const snapshot = await getDocs(
+    query(
+      wallpapersCollection,
+      where("isPublished", "==", true),
+      where("questionPromptSlugs", "array-contains", questionPromptSlug),
+      limit(maxItems)
+    )
+  );
 
   return sortWallpapersByNewest(snapshot.docs.map((item) => mapWallpaper(item))).slice(0, maxItems);
 }
@@ -298,54 +284,26 @@ export async function listPublishedWallpapersByQuestionPrompt(questionPromptSlug
 export async function listPublishedWallpapersByQuestion(questionId: string, questionSlug?: string, maxItems = 50) {
   const lookups: Array<() => Promise<Wallpaper[]>> = [
     async () => {
-      let snapshot;
-
-      try {
-        snapshot = await getDocs(
-          query(
-            wallpapersCollection,
-            where("isPublished", "==", true),
-            where("questionId", "==", questionId),
-            orderBy("createdAt", "desc"),
-            limit(maxItems)
-          )
-        );
-      } catch {
-        snapshot = await getDocs(
-          query(
-            wallpapersCollection,
-            where("isPublished", "==", true),
-            where("questionId", "==", questionId),
-            limit(maxItems)
-          )
-        );
-      }
+      const snapshot = await getDocs(
+        query(
+          wallpapersCollection,
+          where("isPublished", "==", true),
+          where("questionId", "==", questionId),
+          limit(maxItems)
+        )
+      );
 
       return snapshot.docs.map((item) => mapWallpaper(item));
     },
     async () => {
-      let snapshot;
-
-      try {
-        snapshot = await getDocs(
-          query(
-            wallpapersCollection,
-            where("isPublished", "==", true),
-            where("questionIds", "array-contains", questionId),
-            orderBy("createdAt", "desc"),
-            limit(maxItems)
-          )
-        );
-      } catch {
-        snapshot = await getDocs(
-          query(
-            wallpapersCollection,
-            where("isPublished", "==", true),
-            where("questionIds", "array-contains", questionId),
-            limit(maxItems)
-          )
-        );
-      }
+      const snapshot = await getDocs(
+        query(
+          wallpapersCollection,
+          where("isPublished", "==", true),
+          where("questionIds", "array-contains", questionId),
+          limit(maxItems)
+        )
+      );
 
       return snapshot.docs.map((item) => mapWallpaper(item));
     },
