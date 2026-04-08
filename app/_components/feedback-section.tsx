@@ -832,6 +832,8 @@ export function FeedbackSection({
   const [replyIdentityMode, setReplyIdentityMode] = useState<CommentDisplayIdentityMode>("real");
   const [expandedThreadIds, setExpandedThreadIds] = useState<Set<string>>(new Set());
   const [loadingThreadIds, setLoadingThreadIds] = useState<Set<string>>(new Set());
+  const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
+  const isAutoLoadingRef = useRef(false);
 
   const rootComments = useMemo(() => comments.filter((item) => !item.parentId), [comments]);
   const repliesByParent = useMemo(() => {
@@ -866,6 +868,28 @@ export function FeedbackSection({
 
     return map;
   }, [repliesByParent, rootComments]);
+
+  useEffect(() => {
+    const target = loadMoreSentinelRef.current;
+    if (!target || !hasMoreComments) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry?.isIntersecting) return;
+        if (isLoadingMore || isAutoLoadingRef.current || !hasMoreComments) return;
+
+        isAutoLoadingRef.current = true;
+        void onLoadMoreComments().finally(() => {
+          isAutoLoadingRef.current = false;
+        });
+      },
+      { root: null, rootMargin: "320px 0px", threshold: 0 }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasMoreComments, isLoadingMore, onLoadMoreComments]);
 
   return (
     <section id="comments" className="space-y-3.5 [direction:rtl]">
@@ -979,18 +1003,10 @@ export function FeedbackSection({
           ))
         )}
 
-        {hasMoreComments ? (
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={() => {
-                void onLoadMoreComments();
-              }}
-              disabled={isLoadingMore}
-              className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm disabled:opacity-60"
-            >
-              {isLoadingMore ? "جاري تحميل المزيد..." : "تحميل المزيد من التعليقات"}
-            </button>
+        {hasMoreComments ? <div ref={loadMoreSentinelRef} className="h-1 w-full" aria-hidden="true" /> : null}
+        {isLoadingMore ? (
+          <div className="pt-2 text-center text-xs text-zinc-500">
+            جاري تحميل المزيد...
           </div>
         ) : null}
       </div>
