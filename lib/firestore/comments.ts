@@ -4,49 +4,116 @@ import {
   collection,
   deleteDoc,
   doc,
+  documentId,
   getDocs,
   limit,
   orderBy,
   query,
   serverTimestamp,
+  startAfter,
   updateDoc,
   where,
   writeBatch,
+  type DocumentSnapshot,
+  type QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import type { CommentDisplayIdentityMode, WallpaperComment } from "@/types/comment";
 
 const commentsCollection = collection(db, "comments");
+const DEFAULT_ROOT_PAGE_SIZE = 12;
+
+type CommentDoc = Omit<WallpaperComment, "id">;
+
+type RootCommentsPageResult = {
+  comments: WallpaperComment[];
+  cursor: QueryDocumentSnapshot<CommentDoc> | null;
+  hasMore: boolean;
+};
 
 export function toClientTimestamp(date = new Date()) {
   return Timestamp.fromDate(date);
 }
 
-export async function listWallpaperComments(wallpaperId: string, maxItems = 200) {
-  let snapshot;
+function mapCommentSnapshot(snapshot: DocumentSnapshot<CommentDoc>): WallpaperComment {
+  return { id: snapshot.id, ...(snapshot.data() as CommentDoc) };
+}
 
-  try {
-    snapshot = await getDocs(
+export async function listWallpaperRootCommentsPage(input: {
+  wallpaperId: string;
+  pageSize?: number;
+  cursor?: QueryDocumentSnapshot<CommentDoc> | null;
+}): Promise<RootCommentsPageResult> {
+  const pageSize = Math.max(1, input.pageSize ?? DEFAULT_ROOT_PAGE_SIZE);
+
+  const constraints = [
+    where("wallpaperId", "==", input.wallpaperId),
+    where("parentId", "==", null),
+    orderBy("createdAt", "asc"),
+    orderBy(documentId(), "asc"),
+    limit(pageSize + 1),
+  ] as const;
+
+  const baseQuery = input.cursor
+    ? query(commentsCollection, ...constraints, startAfter(input.cursor))
+    : query(commentsCollection, ...constraints);
+
+  const snapshot = await getDocs(baseQuery);
+  const docs = snapshot.docs as QueryDocumentSnapshot<CommentDoc>[];
+  const hasMore = docs.length > pageSize;
+  const pageDocs = hasMore ? docs.slice(0, pageSize) : docs;
+
+  return {
+    comments: pageDocs.map(mapCommentSnapshot),
+    cursor: pageDocs.at(-1) ?? null,
+    hasMore,
+  };
+}
+
+export async function listCommentDirectReplies(input: {
+  wallpaperId: string;
+  parentId: string;
+}): Promise<WallpaperComment[]> {
+  const snapshot = await getDocs(
+    query(
+      commentsCollection,
+      where("wallpaperId", "==", input.wallpaperId),
+      where("parentId", "==", input.parentId),
+      orderBy("createdAt", "asc"),
+      orderBy(documentId(), "asc")
+    )
+  );
+
+  return snapshot.docs.map((item) => ({ id: item.id, ...(item.data() as CommentDoc) }));
+}
+
+export async function listCommentDescendantIds(input: {
+  wallpaperId: string;
+  parentId: string;
+}): Promise<string[]> {
+  const descendants: string[] = [];
+  let frontier = [input.parentId];
+
+  while (frontier.length > 0) {
+    const parentChunk = frontier.slice(0, 10);
+    frontier = frontier.slice(10);
+
+    const snapshot = await getDocs(
       query(
         commentsCollection,
-        where("wallpaperId", "==", wallpaperId),
-        orderBy("createdAt", "asc"),
-        limit(maxItems)
+        where("wallpaperId", "==", input.wallpaperId),
+        where("parentId", "in", parentChunk)
       )
     );
-  } catch {
-    snapshot = await getDocs(
-      query(commentsCollection, where("wallpaperId", "==", wallpaperId), limit(maxItems))
-    );
+
+    const childIds = snapshot.docs.map((item) => item.id);
+    if (childIds.length === 0) continue;
+
+    descendants.push(...childIds);
+    frontier.push(...childIds);
   }
 
-  return snapshot.docs
-    .map((item) => ({ id: item.id, ...(item.data() as Omit<WallpaperComment, "id">) }))
-    .sort((a, b) => {
-      const aSec = (a.createdAt as { seconds?: number } | undefined)?.seconds ?? 0;
-      const bSec = (b.createdAt as { seconds?: number } | undefined)?.seconds ?? 0;
-      return aSec - bSec;
-    });
+  return descendants;
 }
 
 export async function createWallpaperComment(input: {
@@ -99,9 +166,11 @@ export async function deleteWallpaperComment(input: {
     return;
   }
 
-  const batch = writeBatch(db);
-  ids.forEach((id) => {
-    batch.delete(doc(commentsCollection, id));
-  });
-  await batch.commit();
+  for (let index = 0; index < ids.length; index += 500) {
+    const batch = writeBatch(db);
+    ids.slice(index, index + 500).forEach((id) => {
+      batch.delete(doc(commentsCollection, id));
+    });
+    await batch.commit();
+  }
 }

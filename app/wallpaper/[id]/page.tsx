@@ -11,6 +11,7 @@ import { Download, Star } from "lucide-react";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
+import type { QueryDocumentSnapshot } from "firebase/firestore";
 import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { ImageLightbox } from "@/app/_components/image-lightbox";
 import { FeedbackSection } from "@/app/_components/feedback-section";
@@ -22,7 +23,9 @@ import { isAdminRole } from "@/lib/auth/roles";
 import {
   createWallpaperComment,
   deleteWallpaperComment,
-  listWallpaperComments,
+  listCommentDescendantIds,
+  listCommentDirectReplies,
+  listWallpaperRootCommentsPage,
   toClientTimestamp,
   updateWallpaperComment,
 } from "@/lib/firestore/comments";
@@ -34,6 +37,8 @@ import { useToggleFavorite } from "@/lib/hooks/use-favorites";
 import { downloadImageFromUrl } from "@/lib/utils/download";
 import type { WallpaperComment } from "@/types/comment";
 import type { Wallpaper } from "@/types/wallpaper";
+
+const INITIAL_COMMENTS_PAGE_SIZE = 12;
 
 function ArrowLeftIcon() {
   return (
@@ -62,6 +67,11 @@ export default function WallpaperDetailsPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [comments, setComments] = useState<WallpaperComment[]>([]);
+  const [isCommentsInitialLoading, setIsCommentsInitialLoading] = useState(true);
+  const [isCommentsLoadingMore, setIsCommentsLoadingMore] = useState(false);
+  const [hasMoreComments, setHasMoreComments] = useState(false);
+  const [commentsCursor, setCommentsCursor] = useState<QueryDocumentSnapshot<Omit<WallpaperComment, "id">> | null>(null);
+  const [loadedReplyParentIds, setLoadedReplyParentIds] = useState<Set<string>>(new Set());
   const [suggestedWallpapers, setSuggestedWallpapers] = useState<Wallpaper[]>([]);
   const [isCommentSaving, setIsCommentSaving] = useState(false);
   const [isFavoriteLoginDialogOpen, setIsFavoriteLoginDialogOpen] = useState(false);
@@ -84,12 +94,23 @@ export default function WallpaperDetailsPage() {
           setSuggestedWallpapers([]);
         }
 
+        setComments([]);
+        setLoadedReplyParentIds(new Set());
+        setCommentsCursor(null);
+        setHasMoreComments(false);
+
         if (wallpaperData?.id) {
-          setComments(await listWallpaperComments(wallpaperData.id, 200));
-        } else {
-          setComments([]);
+          setIsCommentsInitialLoading(true);
+          const firstPage = await listWallpaperRootCommentsPage({
+            wallpaperId: wallpaperData.id,
+            pageSize: INITIAL_COMMENTS_PAGE_SIZE,
+          });
+          setComments(firstPage.comments);
+          setCommentsCursor(firstPage.cursor);
+          setHasMoreComments(firstPage.hasMore);
         }
       } finally {
+        setIsCommentsInitialLoading(false);
         setIsLoading(false);
       }
     }
@@ -100,8 +121,9 @@ export default function WallpaperDetailsPage() {
   }, [id]);
 
   const appendComment = useCallback((input: WallpaperComment) => {
-    setComments((prev) =>
-      [...prev, input].sort((left, right) => {
+    setComments((prev) => {
+      const deduped = prev.filter((item) => item.id !== input.id);
+      return [...deduped, input].sort((left, right) => {
         const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
         const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
 
@@ -110,8 +132,8 @@ export default function WallpaperDetailsPage() {
         }
 
         return (left.id ?? "").localeCompare(right.id ?? "");
-      })
-    );
+      });
+    });
   }, []);
 
   const updateCommentInState = useCallback((commentId: string, updater: (item: WallpaperComment) => WallpaperComment) => {
@@ -122,6 +144,54 @@ export default function WallpaperDetailsPage() {
     const idsToRemove = new Set([commentId, ...replyIds]);
     setComments((prev) => prev.filter((item) => !item.id || !idsToRemove.has(item.id)));
   }, []);
+
+  const loadMoreComments = useCallback(async () => {
+    if (!wallpaper?.id || !commentsCursor || isCommentsLoadingMore) return;
+    setIsCommentsLoadingMore(true);
+    try {
+      const nextPage = await listWallpaperRootCommentsPage({
+        wallpaperId: wallpaper.id,
+        pageSize: INITIAL_COMMENTS_PAGE_SIZE,
+        cursor: commentsCursor,
+      });
+      setComments((prev) => {
+        const existingIds = new Set(prev.map((item) => item.id).filter(Boolean));
+        const merged = [...prev];
+        nextPage.comments.forEach((item) => {
+          if (!item.id || !existingIds.has(item.id)) {
+            merged.push(item);
+          }
+        });
+        return merged;
+      });
+      setCommentsCursor(nextPage.cursor);
+      setHasMoreComments(nextPage.hasMore);
+    } finally {
+      setIsCommentsLoadingMore(false);
+    }
+  }, [commentsCursor, isCommentsLoadingMore, wallpaper?.id]);
+
+  const ensureRepliesLoaded = useCallback(
+    async (parentId: string) => {
+      if (!wallpaper?.id || loadedReplyParentIds.has(parentId)) return;
+      const replies = await listCommentDirectReplies({
+        wallpaperId: wallpaper.id,
+        parentId,
+      });
+      setComments((prev) => {
+        const existingIds = new Set(prev.map((item) => item.id).filter(Boolean));
+        const merged = [...prev];
+        replies.forEach((reply) => {
+          if (!reply.id || !existingIds.has(reply.id)) {
+            merged.push(reply);
+          }
+        });
+        return merged;
+      });
+      setLoadedReplyParentIds((prev) => new Set(prev).add(parentId));
+    },
+    [loadedReplyParentIds, wallpaper?.id]
+  );
 
 
   if (isLoading) {
@@ -295,11 +365,16 @@ export default function WallpaperDetailsPage() {
 
             <FeedbackSection
               comments={comments}
+              isInitialLoading={isCommentsInitialLoading}
+              isLoadingMore={isCommentsLoadingMore}
+              hasMoreComments={hasMoreComments}
               isSignedIn={isSignedIn}
               currentUserId={user?.uid}
               currentUserName={userProfile?.displayName?.trim() || "مستخدم"}
               isAdmin={isAdmin}
               onLogin={() => router.push("/login")}
+              onLoadMoreComments={loadMoreComments}
+              onThreadExpand={ensureRepliesLoaded}
               isSaving={isCommentSaving}
               onSubmitFeedback={async (value, identityMode) => {
                 if (!user || !id || !value.trim()) return;
@@ -385,16 +460,20 @@ export default function WallpaperDetailsPage() {
                 }
               }}
               onDeleteComment={async (comment, replyIds) => {
-                if (!user || !comment.id) return;
+                if (!user || !comment.id || !wallpaper?.id) return;
                 const isOwner = comment.userId === user.uid;
                 if (!isOwner && !isAdmin) return;
                 setIsCommentSaving(true);
                 try {
+                  const allReplyIds =
+                    comment.parentId || (replyIds && replyIds.length > 0)
+                      ? replyIds ?? []
+                      : await listCommentDescendantIds({ wallpaperId: wallpaper.id, parentId: comment.id });
                   await deleteWallpaperComment({
                     commentId: comment.id,
-                    replyIds,
+                    replyIds: allReplyIds,
                   });
-                  removeCommentTree(comment.id, replyIds);
+                  removeCommentTree(comment.id, allReplyIds);
                 } finally {
                   setIsCommentSaving(false);
                 }
