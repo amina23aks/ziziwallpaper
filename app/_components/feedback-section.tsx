@@ -649,6 +649,7 @@ type CommentNodeProps = {
   item: WallpaperComment;
   repliesByParent: Map<string, WallpaperComment[]>;
   descendantIdsByParent: Map<string, string[]>;
+  rootCommentsWithReplies: Set<string>;
   expandedThreadIds: Set<string>;
   loadingThreadIds: Set<string>;
   depth?: number;
@@ -673,6 +674,7 @@ function CommentThreadNode({
   item,
   repliesByParent,
   descendantIdsByParent,
+  rootCommentsWithReplies,
   expandedThreadIds,
   loadingThreadIds,
   depth = 0,
@@ -700,6 +702,7 @@ function CommentThreadNode({
   const childReplies = repliesByParent.get(itemId ?? "") ?? [];
   const isExpanded = itemId ? expandedThreadIds.has(itemId) : false;
   const isThreadLoading = itemId ? loadingThreadIds.has(itemId) : false;
+  const hasKnownReplies = itemId ? rootCommentsWithReplies.has(itemId) : false;
   const isReply = depth > 0;
   const nestedRepliesClass =
     depth === 0
@@ -743,6 +746,7 @@ function CommentThreadNode({
                   item={reply}
                   repliesByParent={repliesByParent}
                   descendantIdsByParent={descendantIdsByParent}
+                  rootCommentsWithReplies={rootCommentsWithReplies}
                   expandedThreadIds={expandedThreadIds}
                   loadingThreadIds={loadingThreadIds}
                   depth={depth + 1}
@@ -768,7 +772,7 @@ function CommentThreadNode({
             <div className="rounded-2xl border border-zinc-200 bg-white/80 px-3 py-2 text-xs text-zinc-500">جاري تحميل الردود...</div>
           ) : null}
 
-          {itemId && depth === 0 ? (
+          {itemId && depth === 0 && hasKnownReplies ? (
             <button
               type="button"
               onClick={() => onThreadToggle(itemId)}
@@ -786,6 +790,7 @@ function CommentThreadNode({
 
 export function FeedbackSection({
   comments,
+  rootCommentsWithReplies,
   isInitialLoading,
   isLoadingMore,
   hasMoreComments,
@@ -803,6 +808,7 @@ export function FeedbackSection({
   isSaving,
 }: {
   comments: WallpaperComment[];
+  rootCommentsWithReplies: Set<string>;
   isInitialLoading: boolean;
   isLoadingMore: boolean;
   hasMoreComments: boolean;
@@ -916,6 +922,7 @@ export function FeedbackSection({
               item={comment}
               repliesByParent={repliesByParent}
               descendantIdsByParent={descendantIdsByParent}
+              rootCommentsWithReplies={rootCommentsWithReplies}
               expandedThreadIds={expandedThreadIds}
               loadingThreadIds={loadingThreadIds}
               activeReplyId={activeReplyId}

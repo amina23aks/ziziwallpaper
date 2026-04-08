@@ -21,6 +21,7 @@ import { useAuth } from "@/app/_providers/auth-provider";
 import { useTheme } from "@/app/_providers/theme-provider";
 import { isAdminRole } from "@/lib/auth/roles";
 import {
+  checkCommentHasDirectReplies,
   createWallpaperComment,
   deleteWallpaperComment,
   listCommentDescendantIds,
@@ -72,6 +73,7 @@ export default function WallpaperDetailsPage() {
   const [hasMoreComments, setHasMoreComments] = useState(false);
   const [commentsCursor, setCommentsCursor] = useState<QueryDocumentSnapshot<Omit<WallpaperComment, "id">> | null>(null);
   const [loadedReplyParentIds, setLoadedReplyParentIds] = useState<Set<string>>(new Set());
+  const [rootCommentsWithReplies, setRootCommentsWithReplies] = useState<Set<string>>(new Set());
   const [suggestedWallpapers, setSuggestedWallpapers] = useState<Wallpaper[]>([]);
   const [isCommentSaving, setIsCommentSaving] = useState(false);
   const [isFavoriteLoginDialogOpen, setIsFavoriteLoginDialogOpen] = useState(false);
@@ -96,18 +98,32 @@ export default function WallpaperDetailsPage() {
 
         setComments([]);
         setLoadedReplyParentIds(new Set());
+        setRootCommentsWithReplies(new Set());
         setCommentsCursor(null);
         setHasMoreComments(false);
 
         if (wallpaperData?.id) {
+          const wallpaperId = wallpaperData.id;
           setIsCommentsInitialLoading(true);
           const firstPage = await listWallpaperRootCommentsPage({
-            wallpaperId: wallpaperData.id,
+            wallpaperId,
             pageSize: INITIAL_COMMENTS_PAGE_SIZE,
           });
           setComments(firstPage.comments);
           setCommentsCursor(firstPage.cursor);
           setHasMoreComments(firstPage.hasMore);
+          const firstPageRootIds = firstPage.comments.map((item) => item.id).filter(Boolean) as string[];
+          if (firstPageRootIds.length > 0) {
+            const hasRepliesResults = await Promise.all(
+              firstPageRootIds.map(async (parentId) => ({
+                parentId,
+                hasReplies: await checkCommentHasDirectReplies({ wallpaperId, parentId }),
+              }))
+            );
+            setRootCommentsWithReplies(
+              new Set(hasRepliesResults.filter((item) => item.hasReplies).map((item) => item.parentId))
+            );
+          }
         }
       } finally {
         setIsCommentsInitialLoading(false);
@@ -147,12 +163,14 @@ export default function WallpaperDetailsPage() {
 
   const loadMoreComments = useCallback(async () => {
     if (!wallpaper?.id || !commentsCursor || isCommentsLoadingMore) return;
+    const wallpaperId = wallpaper.id;
     setIsCommentsLoadingMore(true);
     try {
       const nextPage = await listWallpaperRootCommentsPage({
-        wallpaperId: wallpaper.id,
+        wallpaperId,
         pageSize: INITIAL_COMMENTS_PAGE_SIZE,
         cursor: commentsCursor,
+        loadedCount: comments.filter((item) => !item.parentId).length,
       });
       setComments((prev) => {
         const existingIds = new Set(prev.map((item) => item.id).filter(Boolean));
@@ -166,10 +184,26 @@ export default function WallpaperDetailsPage() {
       });
       setCommentsCursor(nextPage.cursor);
       setHasMoreComments(nextPage.hasMore);
+      const newRootIds = nextPage.comments.map((item) => item.id).filter(Boolean) as string[];
+      if (newRootIds.length > 0) {
+        const hasRepliesResults = await Promise.all(
+          newRootIds.map(async (parentId) => ({
+            parentId,
+            hasReplies: await checkCommentHasDirectReplies({ wallpaperId, parentId }),
+          }))
+        );
+        setRootCommentsWithReplies((prev) => {
+          const next = new Set(prev);
+          hasRepliesResults.forEach((item) => {
+            if (item.hasReplies) next.add(item.parentId);
+          });
+          return next;
+        });
+      }
     } finally {
       setIsCommentsLoadingMore(false);
     }
-  }, [commentsCursor, isCommentsLoadingMore, wallpaper?.id]);
+  }, [comments, commentsCursor, isCommentsLoadingMore, wallpaper?.id]);
 
   const ensureRepliesLoaded = useCallback(
     async (parentId: string) => {
@@ -365,6 +399,7 @@ export default function WallpaperDetailsPage() {
 
             <FeedbackSection
               comments={comments}
+              rootCommentsWithReplies={rootCommentsWithReplies}
               isInitialLoading={isCommentsInitialLoading}
               isLoadingMore={isCommentsLoadingMore}
               hasMoreComments={hasMoreComments}
@@ -436,6 +471,7 @@ export default function WallpaperDetailsPage() {
                     createdAt: toClientTimestamp(),
                     updatedAt: toClientTimestamp(),
                   });
+                  setRootCommentsWithReplies((prev) => new Set(prev).add(parentId));
                 } finally {
                   setIsCommentSaving(false);
                 }

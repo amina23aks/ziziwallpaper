@@ -43,6 +43,7 @@ export async function listWallpaperRootCommentsPage(input: {
   wallpaperId: string;
   pageSize?: number;
   cursor?: QueryDocumentSnapshot<CommentDoc> | null;
+  loadedCount?: number;
 }): Promise<RootCommentsPageResult> {
   const pageSize = Math.max(1, input.pageSize ?? DEFAULT_ROOT_PAGE_SIZE);
 
@@ -54,37 +55,98 @@ export async function listWallpaperRootCommentsPage(input: {
     limit(pageSize + 1),
   ] as const;
 
-  const baseQuery = input.cursor
-    ? query(commentsCollection, ...constraints, startAfter(input.cursor))
-    : query(commentsCollection, ...constraints);
+  try {
+    const baseQuery = input.cursor
+      ? query(commentsCollection, ...constraints, startAfter(input.cursor))
+      : query(commentsCollection, ...constraints);
 
-  const snapshot = await getDocs(baseQuery);
-  const docs = snapshot.docs as QueryDocumentSnapshot<CommentDoc>[];
-  const hasMore = docs.length > pageSize;
-  const pageDocs = hasMore ? docs.slice(0, pageSize) : docs;
+    const snapshot = await getDocs(baseQuery);
+    const docs = snapshot.docs as QueryDocumentSnapshot<CommentDoc>[];
+    const hasMore = docs.length > pageSize;
+    const pageDocs = hasMore ? docs.slice(0, pageSize) : docs;
 
-  return {
-    comments: pageDocs.map(mapCommentSnapshot),
-    cursor: pageDocs.at(-1) ?? null,
-    hasMore,
-  };
+    return {
+      comments: pageDocs.map(mapCommentSnapshot),
+      cursor: pageDocs.at(-1) ?? null,
+      hasMore,
+    };
+  } catch {
+    const loadedCount = Math.max(0, input.loadedCount ?? 0);
+    const fallbackSnapshot = await getDocs(
+      query(
+        commentsCollection,
+        where("wallpaperId", "==", input.wallpaperId),
+        where("parentId", "==", null),
+        limit(loadedCount + pageSize + 1)
+      )
+    );
+    const fallbackItems = fallbackSnapshot.docs
+      .map((item) => ({ id: item.id, ...(item.data() as CommentDoc) }))
+      .sort((left, right) => {
+        const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
+        const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
+        if (leftSeconds !== rightSeconds) return leftSeconds - rightSeconds;
+        return (left.id ?? "").localeCompare(right.id ?? "");
+      });
+    const paged = fallbackItems.slice(loadedCount, loadedCount + pageSize);
+
+    return {
+      comments: paged,
+      cursor: null,
+      hasMore: fallbackItems.length > loadedCount + pageSize,
+    };
+  }
 }
 
 export async function listCommentDirectReplies(input: {
   wallpaperId: string;
   parentId: string;
 }): Promise<WallpaperComment[]> {
+  try {
+    const snapshot = await getDocs(
+      query(
+        commentsCollection,
+        where("wallpaperId", "==", input.wallpaperId),
+        where("parentId", "==", input.parentId),
+        orderBy("createdAt", "asc"),
+        orderBy(documentId(), "asc")
+      )
+    );
+
+    return snapshot.docs.map((item) => ({ id: item.id, ...(item.data() as CommentDoc) }));
+  } catch {
+    const fallbackSnapshot = await getDocs(
+      query(
+        commentsCollection,
+        where("wallpaperId", "==", input.wallpaperId),
+        where("parentId", "==", input.parentId)
+      )
+    );
+
+    return fallbackSnapshot.docs
+      .map((item) => ({ id: item.id, ...(item.data() as CommentDoc) }))
+      .sort((left, right) => {
+        const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
+        const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
+        if (leftSeconds !== rightSeconds) return leftSeconds - rightSeconds;
+        return (left.id ?? "").localeCompare(right.id ?? "");
+      });
+  }
+}
+
+export async function checkCommentHasDirectReplies(input: {
+  wallpaperId: string;
+  parentId: string;
+}): Promise<boolean> {
   const snapshot = await getDocs(
     query(
       commentsCollection,
       where("wallpaperId", "==", input.wallpaperId),
       where("parentId", "==", input.parentId),
-      orderBy("createdAt", "asc"),
-      orderBy(documentId(), "asc")
+      limit(1)
     )
   );
-
-  return snapshot.docs.map((item) => ({ id: item.id, ...(item.data() as CommentDoc) }));
+  return !snapshot.empty;
 }
 
 export async function listCommentDescendantIds(input: {
