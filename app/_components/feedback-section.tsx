@@ -2,6 +2,7 @@
 
 import {
   Check,
+  ChevronLeft,
   ChevronDown,
   MessageCircleMore,
   MoreHorizontal,
@@ -648,6 +649,9 @@ type CommentNodeProps = {
   item: WallpaperComment;
   repliesByParent: Map<string, WallpaperComment[]>;
   descendantIdsByParent: Map<string, string[]>;
+  rootCommentsWithReplies: Set<string>;
+  expandedThreadIds: Set<string>;
+  loadingThreadIds: Set<string>;
   depth?: number;
   activeReplyId: string | null;
   activeReplyText: string;
@@ -658,6 +662,7 @@ type CommentNodeProps = {
   isSaving: boolean;
   canReply: boolean;
   onReplyToggle: (id: string) => void;
+  onThreadToggle: (id: string) => void;
   onReplyTextChange: (value: string) => void;
   onReplyIdentityModeChange: (value: CommentDisplayIdentityMode) => void;
   onReplySubmit: (parentId: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
@@ -669,6 +674,9 @@ function CommentThreadNode({
   item,
   repliesByParent,
   descendantIdsByParent,
+  rootCommentsWithReplies,
+  expandedThreadIds,
+  loadingThreadIds,
   depth = 0,
   activeReplyId,
   activeReplyText,
@@ -679,6 +687,7 @@ function CommentThreadNode({
   isSaving,
   canReply,
   onReplyToggle,
+  onThreadToggle,
   onReplyTextChange,
   onReplyIdentityModeChange,
   onReplySubmit,
@@ -691,6 +700,9 @@ function CommentThreadNode({
   const canDelete = canEdit || isAdmin;
   const isReplying = activeReplyId === itemId;
   const childReplies = repliesByParent.get(itemId ?? "") ?? [];
+  const isExpanded = itemId ? expandedThreadIds.has(itemId) : false;
+  const isThreadLoading = itemId ? loadingThreadIds.has(itemId) : false;
+  const hasKnownReplies = itemId ? rootCommentsWithReplies.has(itemId) : false;
   const isReply = depth > 0;
   const nestedRepliesClass =
     depth === 0
@@ -726,7 +738,7 @@ function CommentThreadNode({
             isSaving={isSaving}
           />
 
-          {childReplies.length > 0 ? (
+          {childReplies.length > 0 && (depth > 0 || isExpanded) ? (
             <div className={nestedRepliesClass}>
               {childReplies.map((reply) => (
                 <CommentThreadNode
@@ -734,6 +746,9 @@ function CommentThreadNode({
                   item={reply}
                   repliesByParent={repliesByParent}
                   descendantIdsByParent={descendantIdsByParent}
+                  rootCommentsWithReplies={rootCommentsWithReplies}
+                  expandedThreadIds={expandedThreadIds}
+                  loadingThreadIds={loadingThreadIds}
                   depth={depth + 1}
                   activeReplyId={activeReplyId}
                   activeReplyText={activeReplyText}
@@ -744,6 +759,7 @@ function CommentThreadNode({
                   isSaving={isSaving}
                   canReply={canReply}
                   onReplyToggle={onReplyToggle}
+                  onThreadToggle={onThreadToggle}
                   onReplyTextChange={onReplyTextChange}
                   onReplyIdentityModeChange={onReplyIdentityModeChange}
                   onReplySubmit={onReplySubmit}
@@ -752,6 +768,19 @@ function CommentThreadNode({
                 />
               ))}
             </div>
+          ) : itemId && isExpanded && isThreadLoading ? (
+            <div className="rounded-2xl border border-zinc-200 bg-white/80 px-3 py-2 text-xs text-zinc-500">جاري تحميل الردود...</div>
+          ) : null}
+
+          {itemId && depth === 0 && hasKnownReplies ? (
+            <button
+              type="button"
+              onClick={() => onThreadToggle(itemId)}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-900"
+            >
+              <ChevronLeft size={14} className={["transition-transform", isExpanded ? "-rotate-90" : ""].join(" ")} />
+              {isExpanded ? "إخفاء الردود" : "عرض الردود"}
+            </button>
           ) : null}
         </div>
       </div>
@@ -761,11 +790,17 @@ function CommentThreadNode({
 
 export function FeedbackSection({
   comments,
+  rootCommentsWithReplies,
+  isInitialLoading,
+  isLoadingMore,
+  hasMoreComments,
   isSignedIn,
   currentUserId,
   currentUserName,
   isAdmin,
   onLogin,
+  onLoadMoreComments,
+  onThreadExpand,
   onSubmitFeedback,
   onSubmitReply,
   onEditComment,
@@ -773,11 +808,17 @@ export function FeedbackSection({
   isSaving,
 }: {
   comments: WallpaperComment[];
+  rootCommentsWithReplies: Set<string>;
+  isInitialLoading: boolean;
+  isLoadingMore: boolean;
+  hasMoreComments: boolean;
   isSignedIn: boolean;
   currentUserId?: string;
   currentUserName: string;
   isAdmin: boolean;
   onLogin: () => void;
+  onLoadMoreComments: () => Promise<void>;
+  onThreadExpand: (parentId: string) => Promise<void>;
   onSubmitFeedback: (value: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
   onSubmitReply: (parentId: string, value: string, identityMode: CommentDisplayIdentityMode) => Promise<void>;
   onEditComment: (comment: WallpaperComment, value: string) => Promise<void>;
@@ -789,6 +830,10 @@ export function FeedbackSection({
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
   const [activeReplyText, setActiveReplyText] = useState("");
   const [replyIdentityMode, setReplyIdentityMode] = useState<CommentDisplayIdentityMode>("real");
+  const [expandedThreadIds, setExpandedThreadIds] = useState<Set<string>>(new Set());
+  const [loadingThreadIds, setLoadingThreadIds] = useState<Set<string>>(new Set());
+  const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
+  const isAutoLoadingRef = useRef(false);
 
   const rootComments = useMemo(() => comments.filter((item) => !item.parentId), [comments]);
   const repliesByParent = useMemo(() => {
@@ -823,6 +868,28 @@ export function FeedbackSection({
 
     return map;
   }, [repliesByParent, rootComments]);
+
+  useEffect(() => {
+    const target = loadMoreSentinelRef.current;
+    if (!target || !hasMoreComments) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry?.isIntersecting) return;
+        if (isLoadingMore || isAutoLoadingRef.current || !hasMoreComments) return;
+
+        isAutoLoadingRef.current = true;
+        void onLoadMoreComments().finally(() => {
+          isAutoLoadingRef.current = false;
+        });
+      },
+      { root: null, rootMargin: "320px 0px", threshold: 0 }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasMoreComments, isLoadingMore, onLoadMoreComments]);
 
   return (
     <section id="comments" className="space-y-3.5 [direction:rtl]">
@@ -864,7 +931,11 @@ export function FeedbackSection({
       )}
 
       <div className="space-y-0.5">
-        {rootComments.length === 0 ? (
+        {isInitialLoading ? (
+          <div className="rounded-[26px] border border-zinc-200 bg-white px-4 py-6 text-center text-sm text-zinc-600 shadow-sm">
+            جاري تحميل التعليقات...
+          </div>
+        ) : rootComments.length === 0 ? (
           <div className="rounded-[26px] border border-dashed border-zinc-200 bg-white px-4 py-6 text-center text-sm text-zinc-600 shadow-sm">
             لا توجد تعليقات حتى الآن.
           </div>
@@ -875,6 +946,9 @@ export function FeedbackSection({
               item={comment}
               repliesByParent={repliesByParent}
               descendantIdsByParent={descendantIdsByParent}
+              rootCommentsWithReplies={rootCommentsWithReplies}
+              expandedThreadIds={expandedThreadIds}
+              loadingThreadIds={loadingThreadIds}
               activeReplyId={activeReplyId}
               activeReplyText={activeReplyText}
               activeReplyIdentityMode={replyIdentityMode}
@@ -894,6 +968,26 @@ export function FeedbackSection({
                 setActiveReplyText("");
                 setReplyIdentityMode("real");
               }}
+              onThreadToggle={(id) => {
+                if (expandedThreadIds.has(id)) {
+                  setExpandedThreadIds((prev) => {
+                    const next = new Set(prev);
+                    next.delete(id);
+                    return next;
+                  });
+                  return;
+                }
+
+                setExpandedThreadIds((prev) => new Set(prev).add(id));
+                setLoadingThreadIds((prev) => new Set(prev).add(id));
+                void onThreadExpand(id).finally(() => {
+                  setLoadingThreadIds((prev) => {
+                    const next = new Set(prev);
+                    next.delete(id);
+                    return next;
+                  });
+                });
+              }}
               onReplyTextChange={setActiveReplyText}
               onReplyIdentityModeChange={setReplyIdentityMode}
               onReplySubmit={async (parentId, identityMode) => {
@@ -908,6 +1002,13 @@ export function FeedbackSection({
             />
           ))
         )}
+
+        {hasMoreComments ? <div ref={loadMoreSentinelRef} className="h-1 w-full" aria-hidden="true" /> : null}
+        {isLoadingMore ? (
+          <div className="pt-2 text-center text-xs text-zinc-500">
+            جاري تحميل المزيد...
+          </div>
+        ) : null}
       </div>
     </section>
   );
