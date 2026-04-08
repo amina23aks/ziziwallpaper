@@ -2,16 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
 import { FixedFeedHeader } from "@/app/_components/fixed-feed-header";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
-import { listPublishedWallpapers } from "@/lib/firestore/wallpapers";
+import { listPublishedWallpapersPage } from "@/lib/firestore/wallpapers";
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper } from "@/types/wallpaper";
+
+const HOME_WALLPAPER_PAGE_SIZE = 18;
 
 export default function HomePage() {
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
@@ -21,25 +24,117 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreWallpapers, setHasMoreWallpapers] = useState(true);
+  const nextCursorRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const hasLoadedInitialWallpapersRef = useRef(false);
+  const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
+  const isLoadingMoreRef = useRef(false);
+  const hasMoreWallpapersRef = useRef(true);
 
   useEffect(() => {
-    async function loadData() {
+    isLoadingMoreRef.current = isLoadingMore;
+  }, [isLoadingMore]);
+
+  useEffect(() => {
+    hasMoreWallpapersRef.current = hasMoreWallpapers;
+  }, [hasMoreWallpapers]);
+
+  const loadMoreWallpapers = useCallback(async () => {
+    if (isLoadingMoreRef.current || !hasMoreWallpapersRef.current) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+
+    try {
+      const page = await listPublishedWallpapersPage(
+        HOME_WALLPAPER_PAGE_SIZE,
+        nextCursorRef.current
+      );
+
+      setWallpapers((previousItems) => {
+        if (previousItems.length === 0) {
+          return page.items;
+        }
+
+        const existingIds = new Set(previousItems.map((item) => item.id).filter(Boolean));
+        const uniqueNewItems = page.items.filter((item) => !item.id || !existingIds.has(item.id));
+
+        if (uniqueNewItems.length === 0) {
+          return previousItems;
+        }
+
+        return [...previousItems, ...uniqueNewItems];
+      });
+
+      nextCursorRef.current = page.cursor;
+      setHasMoreWallpapers(page.hasMore && page.cursor !== null);
+      hasLoadedInitialWallpapersRef.current = true;
+    } catch {
+      setHasMoreWallpapers(false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    async function loadMetaData() {
+      const [activeCategories, prompts] = await Promise.all([
+        listActiveCategories(100),
+        listQuestionPrompts(),
+      ]);
+      setCategories(activeCategories);
+      setQuestionPrompts(prompts);
+    }
+
+    loadMetaData();
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadInitialWallpapers() {
       try {
-        const [publishedWallpapers, activeCategories, prompts] = await Promise.all([
-          listPublishedWallpapers(100),
-          listActiveCategories(100),
-          listQuestionPrompts(),
-        ]);
-        setWallpapers(publishedWallpapers);
-        setCategories(activeCategories);
-        setQuestionPrompts(prompts);
+        if (!hasLoadedInitialWallpapersRef.current) {
+          await loadMoreWallpapers();
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
-    loadData();
-  }, []);
+    loadInitialWallpapers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loadMoreWallpapers]);
+
+  useEffect(() => {
+    const sentinel = loadMoreSentinelRef.current;
+
+    if (!sentinel || !hasMoreWallpapers) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+
+        if (entry?.isIntersecting) {
+          void loadMoreWallpapers();
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [hasMoreWallpapers, loadMoreWallpapers]);
 
 
   const filteredWallpapers = useMemo(() => {
@@ -55,16 +150,6 @@ export default function HomePage() {
           wallpaper.searchKeywords?.some((item) => item.toLowerCase().includes(query));
 
         return matchesCategory && matchesSearch;
-      })
-      .sort((left, right) => {
-        const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-        const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-
-        if (rightSeconds !== leftSeconds) {
-          return rightSeconds - leftSeconds;
-        }
-
-        return (right.id ?? "").localeCompare(left.id ?? "");
       });
   }, [wallpapers, searchQuery, selectedCategory]);
 
@@ -131,13 +216,26 @@ export default function HomePage() {
 
 
         {isLoading ? (
-          <p className="text-sm text-zinc-600">جاري تحميل الخلفيات...</p>
+          <div className="grid grid-cols-2 gap-3 [direction:rtl] xl:grid-cols-5">
+            {Array.from({ length: 10 }, (_, index) => (
+              <div
+                key={`feed-skeleton-${index}`}
+                className="h-40 animate-pulse rounded-2xl border border-zinc-200 bg-zinc-100"
+              />
+            ))}
+          </div>
         ) : filteredWallpapers.length === 0 ? (
           <p className="rounded-2xl border border-zinc-200 bg-white px-4 py-6 text-center text-sm text-zinc-600">
             لا توجد خلفيات مطابقة حالياً.
           </p>
         ) : (
-          <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
+          <>
+            <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
+            <div ref={loadMoreSentinelRef} className="h-1 w-full" aria-hidden="true" />
+            {isLoadingMore && (
+              <p className="mt-4 text-center text-xs font-medium text-zinc-500">جاري تحميل المزيد...</p>
+            )}
+          </>
         )}
       </div>
 

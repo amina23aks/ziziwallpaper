@@ -134,6 +134,7 @@ export default function WallpaperDetailsPage() {
 
   const hasMultipleImages = (wallpaper.images?.length ?? 0) > 1;
   const imageCount = wallpaper.images?.length ?? 0;
+  const displayTitle = wallpaper.title?.trim() || "خلفية بدون عنوان";
   const canGoPrev = hasMultipleImages && activeImageIndex > 0;
   const canGoNext = hasMultipleImages && activeImageIndex < imageCount - 1;
   const formattedDescription = wallpaper.description?.trim();
@@ -216,7 +217,7 @@ export default function WallpaperDetailsPage() {
                       >
                         <Image
                           src={image.secureUrl}
-                          alt={image.alt || wallpaper.title}
+                          alt={image.alt || displayTitle}
                           fill
                           className="object-contain"
                           sizes="(max-width: 1024px) 100vw, 54vw"
@@ -236,7 +237,7 @@ export default function WallpaperDetailsPage() {
                 {wallpaper.images?.[0]?.secureUrl && (
                   <Image
                     src={wallpaper.images[0].secureUrl}
-                    alt={wallpaper.images[0].alt || wallpaper.title}
+                    alt={wallpaper.images[0].alt || displayTitle}
                     fill
                     className="object-contain"
                     sizes="(max-width: 1024px) 100vw, 54vw"
@@ -253,7 +254,7 @@ export default function WallpaperDetailsPage() {
                 className="min-w-0 flex-1 break-words text-lg font-bold text-black dark:text-zinc-100"
                 style={{ color: isDark ? undefined : "#000000" }}
               >
-                {wallpaper.title}
+                {displayTitle}
               </h1>
               <div className="flex shrink-0 items-center gap-2">
                 <button
@@ -272,7 +273,7 @@ export default function WallpaperDetailsPage() {
                     if (!imageUrl) return;
                     await downloadImageFromUrl({
                       imageUrl,
-                      filename: `${(wallpaper.title || "wallpaper").replace(/\s+/g, "-")}.jpg`,
+                      filename: `${displayTitle.replace(/\s+/g, "-")}.jpg`,
                     });
                   }}
                   className={actionButtonClass}
@@ -435,7 +436,7 @@ export default function WallpaperDetailsPage() {
           images={wallpaper.images}
           initialIndex={activeImageIndex}
           onClose={() => setIsLightboxOpen(false)}
-          title={wallpaper.title}
+          title={displayTitle}
         />
       )}
     </main>
