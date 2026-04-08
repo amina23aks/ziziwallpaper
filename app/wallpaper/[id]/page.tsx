@@ -162,7 +162,7 @@ export default function WallpaperDetailsPage() {
   }, []);
 
   const loadMoreComments = useCallback(async () => {
-    if (!wallpaper?.id || !commentsCursor || isCommentsLoadingMore) return;
+    if (!wallpaper?.id || isCommentsLoadingMore || !hasMoreComments) return;
     const wallpaperId = wallpaper.id;
     setIsCommentsLoadingMore(true);
     try {
@@ -203,7 +203,7 @@ export default function WallpaperDetailsPage() {
     } finally {
       setIsCommentsLoadingMore(false);
     }
-  }, [comments, commentsCursor, isCommentsLoadingMore, wallpaper?.id]);
+  }, [comments, commentsCursor, hasMoreComments, isCommentsLoadingMore, wallpaper?.id]);
 
   const ensureRepliesLoaded = useCallback(
     async (parentId: string) => {
