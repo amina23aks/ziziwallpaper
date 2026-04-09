@@ -78,6 +78,7 @@ export default function WallpaperDetailsPage() {
   const [isCommentSaving, setIsCommentSaving] = useState(false);
   const [isFavoriteLoginDialogOpen, setIsFavoriteLoginDialogOpen] = useState(false);
   const swiperRef = useRef<SwiperType | null>(null);
+  const noProgressLoadAttemptsRef = useRef(0);
   const isAdmin = isAdminRole(userProfile);
   const { isFavorited, isLoading: isFavoriteLoading, isToggling, toggleFavorite } = useToggleFavorite(id, {
     onAuthRequired: () => setIsFavoriteLoginDialogOpen(true),
@@ -105,24 +106,32 @@ export default function WallpaperDetailsPage() {
         if (wallpaperData?.id) {
           const wallpaperId = wallpaperData.id;
           setIsCommentsInitialLoading(true);
-          const firstPage = await listWallpaperRootCommentsPage({
-            wallpaperId,
-            pageSize: INITIAL_COMMENTS_PAGE_SIZE,
-          });
-          setComments(firstPage.comments);
-          setCommentsCursor(firstPage.cursor);
-          setHasMoreComments(firstPage.hasMore);
-          const firstPageRootIds = firstPage.comments.map((item) => item.id).filter(Boolean) as string[];
-          if (firstPageRootIds.length > 0) {
-            const hasRepliesResults = await Promise.all(
-              firstPageRootIds.map(async (parentId) => ({
-                parentId,
-                hasReplies: await checkCommentHasDirectReplies({ wallpaperId, parentId }),
-              }))
-            );
-            setRootCommentsWithReplies(
-              new Set(hasRepliesResults.filter((item) => item.hasReplies).map((item) => item.parentId))
-            );
+          try {
+            const firstPage = await listWallpaperRootCommentsPage({
+              wallpaperId,
+              pageSize: INITIAL_COMMENTS_PAGE_SIZE,
+            });
+            setComments(firstPage.comments);
+            setCommentsCursor(firstPage.cursor);
+            setHasMoreComments(firstPage.hasMore);
+            noProgressLoadAttemptsRef.current = 0;
+            const firstPageRootIds = firstPage.comments.map((item) => item.id).filter(Boolean) as string[];
+            if (firstPageRootIds.length > 0) {
+              const hasRepliesResults = await Promise.all(
+                firstPageRootIds.map(async (parentId) => ({
+                  parentId,
+                  hasReplies: await checkCommentHasDirectReplies({ wallpaperId, parentId }),
+                }))
+              );
+              setRootCommentsWithReplies(
+                new Set(hasRepliesResults.filter((item) => item.hasReplies).map((item) => item.parentId))
+              );
+            }
+          } catch (error) {
+            console.error("Failed to load initial comments page", error);
+            setComments([]);
+            setCommentsCursor(null);
+            setHasMoreComments(false);
           }
         }
       } finally {
@@ -139,16 +148,10 @@ export default function WallpaperDetailsPage() {
   const appendComment = useCallback((input: WallpaperComment) => {
     setComments((prev) => {
       const deduped = prev.filter((item) => item.id !== input.id);
-      return [...deduped, input].sort((left, right) => {
-        const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-        const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-
-        if (leftSeconds !== rightSeconds) {
-          return leftSeconds - rightSeconds;
-        }
-
-        return (left.id ?? "").localeCompare(right.id ?? "");
-      });
+      if (!input.parentId) {
+        return [input, ...deduped];
+      }
+      return [...deduped, input];
     });
   }, []);
 
@@ -172,34 +175,58 @@ export default function WallpaperDetailsPage() {
         cursor: commentsCursor,
         loadedCount: comments.filter((item) => !item.parentId).length,
       });
+      const existingIds = new Set(comments.map((item) => item.id).filter(Boolean));
+      const appendableRoots = nextPage.comments.filter((item) => item.id && !existingIds.has(item.id ?? ""));
+      const appendedCount = appendableRoots.length;
       setComments((prev) => {
-        const existingIds = new Set(prev.map((item) => item.id).filter(Boolean));
+        const currentIds = new Set(prev.map((item) => item.id).filter(Boolean));
         const merged = [...prev];
         nextPage.comments.forEach((item) => {
-          if (!item.id || !existingIds.has(item.id)) {
+          if (!item.id || !currentIds.has(item.id)) {
             merged.push(item);
           }
         });
         return merged;
       });
+      const previousCursorId = commentsCursor?.id ?? null;
+      const nextCursorId = nextPage.cursor?.id ?? null;
       setCommentsCursor(nextPage.cursor);
-      setHasMoreComments(nextPage.hasMore);
-      const newRootIds = nextPage.comments.map((item) => item.id).filter(Boolean) as string[];
-      if (newRootIds.length > 0) {
-        const hasRepliesResults = await Promise.all(
-          newRootIds.map(async (parentId) => ({
-            parentId,
-            hasReplies: await checkCommentHasDirectReplies({ wallpaperId, parentId }),
-          }))
-        );
-        setRootCommentsWithReplies((prev) => {
-          const next = new Set(prev);
-          hasRepliesResults.forEach((item) => {
-            if (item.hasReplies) next.add(item.parentId);
-          });
-          return next;
-        });
+      const hasProgress = appendedCount > 0;
+      if (hasProgress) {
+        noProgressLoadAttemptsRef.current = 0;
+        setHasMoreComments(nextPage.hasMore);
+      } else {
+        const cursorAdvanced = previousCursorId !== nextCursorId;
+        if (nextPage.hasMore && cursorAdvanced && noProgressLoadAttemptsRef.current < 2) {
+          noProgressLoadAttemptsRef.current += 1;
+          setHasMoreComments(true);
+        } else {
+          setHasMoreComments(false);
+        }
       }
+      const newRootIds = nextPage.comments.map((item) => item.id).filter(Boolean) as string[];
+      if (hasProgress && newRootIds.length > 0) {
+        try {
+          const hasRepliesResults = await Promise.all(
+            newRootIds.map(async (parentId) => ({
+              parentId,
+              hasReplies: await checkCommentHasDirectReplies({ wallpaperId, parentId }),
+            }))
+          );
+          setRootCommentsWithReplies((prev) => {
+            const next = new Set(prev);
+            hasRepliesResults.forEach((item) => {
+              if (item.hasReplies) next.add(item.parentId);
+            });
+            return next;
+          });
+        } catch (error) {
+          console.error("Failed to check direct replies for loaded comments", error);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load more comments page", error);
+      setHasMoreComments(false);
     } finally {
       setIsCommentsLoadingMore(false);
     }

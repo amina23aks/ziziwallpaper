@@ -31,6 +31,46 @@ type RootCommentsPageResult = {
   hasMore: boolean;
 };
 
+async function listWallpaperRootCommentsPageCompat(input: {
+  wallpaperId: string;
+  pageSize: number;
+  cursor?: QueryDocumentSnapshot<CommentDoc> | null;
+}): Promise<RootCommentsPageResult> {
+  const scanBatchSize = Math.max(input.pageSize * 3, input.pageSize + 1);
+  const constraints = [where("wallpaperId", "==", input.wallpaperId), orderBy("createdAt", "desc"), orderBy(documentId(), "desc")] as const;
+  let cursor = input.cursor ?? null;
+  const rootComments: WallpaperComment[] = [];
+  let hasMoreDocs = true;
+
+  while (rootComments.length < input.pageSize && hasMoreDocs) {
+    const scanQuery = cursor
+      ? query(commentsCollection, ...constraints, startAfter(cursor), limit(scanBatchSize))
+      : query(commentsCollection, ...constraints, limit(scanBatchSize));
+    const snapshot = await getDocs(scanQuery);
+    const docs = snapshot.docs as QueryDocumentSnapshot<CommentDoc>[];
+    if (docs.length === 0) {
+      hasMoreDocs = false;
+      break;
+    }
+
+    cursor = docs.at(-1) ?? cursor;
+    hasMoreDocs = docs.length === scanBatchSize;
+
+    docs.forEach((docItem) => {
+      if (rootComments.length >= input.pageSize) return;
+      const mapped = mapCommentSnapshot(docItem);
+      if (mapped.parentId) return;
+      rootComments.push(mapped);
+    });
+  }
+
+  return {
+    comments: rootComments,
+    cursor,
+    hasMore: hasMoreDocs,
+  };
+}
+
 export function toClientTimestamp(date = new Date()) {
   return Timestamp.fromDate(date);
 }
@@ -46,63 +86,31 @@ export async function listWallpaperRootCommentsPage(input: {
   loadedCount?: number;
 }): Promise<RootCommentsPageResult> {
   const pageSize = Math.max(1, input.pageSize ?? DEFAULT_ROOT_PAGE_SIZE);
-  const scanBatchSize = Math.max(pageSize * 3, pageSize + 1);
-
-  const constraints = [where("wallpaperId", "==", input.wallpaperId), orderBy("createdAt", "asc"), orderBy(documentId(), "asc")] as const;
 
   try {
-    let cursor = input.cursor ?? null;
-    const rootComments: WallpaperComment[] = [];
-    const seenIds = new Set<string>();
-    let hasMoreDocs = true;
-
-    while (rootComments.length < pageSize && hasMoreDocs) {
-      const scanQuery = cursor
-        ? query(commentsCollection, ...constraints, startAfter(cursor), limit(scanBatchSize))
-        : query(commentsCollection, ...constraints, limit(scanBatchSize));
-
-      const snapshot = await getDocs(scanQuery);
-      const docs = snapshot.docs as QueryDocumentSnapshot<CommentDoc>[];
-      if (docs.length === 0) {
-        hasMoreDocs = false;
-        break;
-      }
-
-      cursor = docs.at(-1) ?? cursor;
-      hasMoreDocs = docs.length === scanBatchSize;
-
-      docs.forEach((docItem) => {
-        if (rootComments.length >= pageSize) return;
-        const mapped = mapCommentSnapshot(docItem);
-        if (mapped.parentId) return;
-        if (seenIds.has(mapped.id ?? "")) return;
-        seenIds.add(mapped.id ?? "");
-        rootComments.push(mapped);
-      });
-    }
-
-    return {
-      comments: rootComments,
-      cursor,
-      hasMore: hasMoreDocs,
-    };
+    return await listWallpaperRootCommentsPageCompat({
+      wallpaperId: input.wallpaperId,
+      pageSize,
+      cursor: input.cursor,
+    });
   } catch {
+
     const loadedCount = Math.max(0, input.loadedCount ?? 0);
     const fallbackSnapshot = await getDocs(
       query(
         commentsCollection,
         where("wallpaperId", "==", input.wallpaperId),
-        where("parentId", "==", null),
         limit(loadedCount + pageSize + 1)
       )
     );
     const fallbackItems = fallbackSnapshot.docs
       .map((item) => ({ id: item.id, ...(item.data() as CommentDoc) }))
+      .filter((item) => !item.parentId)
       .sort((left, right) => {
         const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
         const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
-        if (leftSeconds !== rightSeconds) return leftSeconds - rightSeconds;
-        return (left.id ?? "").localeCompare(right.id ?? "");
+        if (leftSeconds !== rightSeconds) return rightSeconds - leftSeconds;
+        return (right.id ?? "").localeCompare(left.id ?? "");
       });
     const paged = fallbackItems.slice(loadedCount, loadedCount + pageSize);
 
