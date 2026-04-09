@@ -8,6 +8,7 @@ import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import { deleteWallpaper, listWallpapers } from "@/lib/firestore/wallpapers";
 import type { Wallpaper } from "@/types/wallpaper";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 
 export default function AdminWallpapersPage() {
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
@@ -79,13 +80,12 @@ export default function AdminWallpapersPage() {
                 <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface-muted)]">
                   {wallpaper.images?.[0]?.secureUrl ? (
                     <Image
-                      src={wallpaper.images[0].secureUrl}
+                      src={getCloudinaryImageUrl(wallpaper.images[0].secureUrl, "thumbnail")}
                       alt={wallpaper.title}
                       fill
                       className="object-cover"
                       sizes="64px"
-                      unoptimized
-                    />
+                                          />
                   ) : null}
                 </div>
 

@@ -20,6 +20,7 @@ import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useTheme } from "@/app/_providers/theme-provider";
 import { isAdminRole } from "@/lib/auth/roles";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 import {
   checkCommentHasDirectReplies,
   createWallpaperComment,
@@ -347,12 +348,12 @@ export default function WallpaperDetailsPage() {
                         className="relative block aspect-[4/5] max-h-[72vh] w-full"
                       >
                         <Image
-                          src={image.secureUrl}
+                          src={getCloudinaryImageUrl(image.secureUrl, "detailMain")}
                           alt={image.alt || displayTitle}
                           fill
                           className="object-contain"
                           sizes="(max-width: 1024px) 100vw, 54vw"
-                          unoptimized
+                          priority={index === 0}
                         />
                       </button>
                     </SwiperSlide>
@@ -367,12 +368,12 @@ export default function WallpaperDetailsPage() {
               >
                 {wallpaper.images?.[0]?.secureUrl && (
                   <Image
-                    src={wallpaper.images[0].secureUrl}
+                    src={getCloudinaryImageUrl(wallpaper.images[0].secureUrl, "detailMain")}
                     alt={wallpaper.images[0].alt || displayTitle}
                     fill
                     className="object-contain"
                     sizes="(max-width: 1024px) 100vw, 54vw"
-                    unoptimized
+                    priority
                   />
                 )}
               </button>

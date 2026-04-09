@@ -15,6 +15,7 @@ import { buildWallpaperQuestionFields, createWallpaper, updateWallpaper } from "
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper, WallpaperImage } from "@/types/wallpaper";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 
 const wallpaperSchema = z.object({
   title: z.string().optional(),
@@ -545,13 +546,12 @@ export function WallpaperForm({
                   <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)]">
                     <div className="relative aspect-square bg-zinc-100 dark:bg-zinc-800">
                       <Image
-                        src={newQuestionImageUrl}
+                        src={getCloudinaryImageUrl(newQuestionImageUrl, "thumbnail")}
                         alt={newQuestionTitle || "صورة السؤال"}
                         fill
                         className="object-cover"
                         sizes="180px"
-                        unoptimized
-                      />
+                                              />
                     </div>
                     {newQuestionImagePublicId ? (
                       <button
@@ -632,13 +632,12 @@ export function WallpaperForm({
                   <article key={image.publicId} className="overflow-hidden rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)]">
                     <div className="relative aspect-square bg-zinc-100 dark:bg-zinc-800">
                       <Image
-                        src={image.secureUrl}
+                        src={getCloudinaryImageUrl(image.secureUrl, "thumbnail")}
                         alt={title.trim() || `صورة ${index + 1}`}
                         fill
                         className="object-cover"
                         sizes="(max-width: 640px) 50vw, 180px"
-                        unoptimized
-                      />
+                                              />
                     </div>
                     <button
                       type="button"

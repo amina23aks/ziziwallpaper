@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Download, MessageCircle, MoreHorizontal, Star } from "lucide-react";
 import { type MouseEvent, useEffect, useMemo, useState } from "react";
 import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 import { useToggleFavorite } from "@/lib/hooks/use-favorites";
 import { downloadImageFromUrl } from "@/lib/utils/download";
 import type { Wallpaper } from "@/types/wallpaper";
@@ -72,7 +73,7 @@ export function PublicWallpaperCard({
                 resolve(img.naturalHeight / img.naturalWidth);
               };
               img.onerror = () => resolve(4 / 3);
-              img.src = image.secureUrl;
+              img.src = getCloudinaryImageUrl(image.secureUrl, "feedCard");
             })
         )
       );
@@ -160,12 +161,11 @@ export function PublicWallpaperCard({
             <div className={`relative w-full overflow-hidden bg-zinc-100/80 ${imageAspectClassName}`} style={mediaStyle}>
               {currentImage?.secureUrl && (
                 <Image
-                  src={currentImage.secureUrl}
+                  src={getCloudinaryImageUrl(currentImage.secureUrl, "feedCard")}
                   alt={currentImage.alt || wallpaper.title || ""}
                   fill
                   className="object-contain"
                   sizes="(max-width: 768px) 50vw, 25vw"
-                  unoptimized
                 />
               )}
             </div>

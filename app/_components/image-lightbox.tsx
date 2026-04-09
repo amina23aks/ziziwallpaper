@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { type KeyboardEvent, useEffect, useState } from "react";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 import type { WallpaperImage } from "@/types/wallpaper";
 
 function ChevronLeftIcon() {
@@ -99,12 +100,11 @@ export function ImageLightbox({
         <div className="relative mx-auto aspect-[4/5] max-h-[90vh] w-full overflow-hidden rounded-2xl bg-zinc-900">
           {images[activeIndex]?.secureUrl && (
             <Image
-              src={images[activeIndex].secureUrl}
+              src={getCloudinaryImageUrl(images[activeIndex].secureUrl, "detailMain")}
               alt={images[activeIndex].alt || title || "Wallpaper"}
               fill
               className="object-contain"
               sizes="100vw"
-              unoptimized
             />
           )}
         </div>

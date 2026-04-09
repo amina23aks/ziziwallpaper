@@ -8,6 +8,7 @@ import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import { deleteQuestion, listQuestions } from "@/lib/firestore/questions";
 import type { Question } from "@/types/question";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 
 export default function AdminQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -78,7 +79,7 @@ export default function AdminQuestionsPage() {
               >
                 <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-[color:var(--app-border)] bg-[var(--app-surface-muted)]">
                   {question.imageUrl ? (
-                    <Image src={question.imageUrl} alt={question.title} fill className="object-cover" sizes="64px" unoptimized />
+                    <Image src={getCloudinaryImageUrl(question.imageUrl, "thumbnail")} alt={question.title} fill className="object-cover" sizes="64px" />
                   ) : null}
                 </div>
 

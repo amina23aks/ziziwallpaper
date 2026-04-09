@@ -9,6 +9,7 @@ import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import { uploadImageToCloudinary } from "@/lib/cloudinary/upload";
 import { createQuestion, updateQuestion } from "@/lib/firestore/questions";
 import type { Question } from "@/types/question";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 
 const questionSchema = z.object({
   title: z.string().trim().min(1, "نص السؤال مطلوب"),
@@ -187,13 +188,12 @@ export function QuestionForm({
             <div className="w-full max-w-[180px] overflow-hidden rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)]">
               <div className="relative aspect-square bg-zinc-100 dark:bg-zinc-800">
                 <Image
-                  src={imageUrl}
+                  src={getCloudinaryImageUrl(imageUrl, "thumbnail")}
                   alt={titleValue || "صورة السؤال"}
                   fill
                   className="object-cover"
                   sizes="180px"
-                  unoptimized
-                />
+                                  />
               </div>
             </div>
           ) : null}
