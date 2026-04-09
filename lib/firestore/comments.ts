@@ -86,56 +86,26 @@ export async function listWallpaperRootCommentsPage(input: {
   loadedCount?: number;
 }): Promise<RootCommentsPageResult> {
   const pageSize = Math.max(1, input.pageSize ?? DEFAULT_ROOT_PAGE_SIZE);
-  const constraints = [
-    where("wallpaperId", "==", input.wallpaperId),
-    where("parentId", "==", null),
-    orderBy("createdAt", "desc"),
-    orderBy(documentId(), "desc"),
-  ] as const;
 
   try {
-    const pageQuery = input.cursor
-      ? query(commentsCollection, ...constraints, startAfter(input.cursor), limit(pageSize + 1))
-      : query(commentsCollection, ...constraints, limit(pageSize + 1));
-    const snapshot = await getDocs(pageQuery);
-    const docs = snapshot.docs as QueryDocumentSnapshot<CommentDoc>[];
-    const hasMore = docs.length > pageSize;
-    const pageDocs = hasMore ? docs.slice(0, pageSize) : docs;
-    const rootComments = pageDocs.map((item) => mapCommentSnapshot(item));
-    const cursor = pageDocs.at(-1) ?? input.cursor ?? null;
-
-    if (rootComments.length === 0) {
-      return listWallpaperRootCommentsPageCompat({
-        wallpaperId: input.wallpaperId,
-        pageSize,
-        cursor: input.cursor,
-      });
-    }
-
-    return {
-      comments: rootComments,
-      cursor,
-      hasMore,
-    };
-  } catch (error) {
-    const errorCode = (error as { code?: string } | null)?.code ?? "";
-    const errorMessage = (error as { message?: string } | null)?.message ?? "";
-    const isIndexError = errorCode === "failed-precondition" || /index/i.test(errorMessage);
-    if (isIndexError) {
-      throw error;
-    }
+    return await listWallpaperRootCommentsPageCompat({
+      wallpaperId: input.wallpaperId,
+      pageSize,
+      cursor: input.cursor,
+    });
+  } catch {
 
     const loadedCount = Math.max(0, input.loadedCount ?? 0);
     const fallbackSnapshot = await getDocs(
       query(
         commentsCollection,
         where("wallpaperId", "==", input.wallpaperId),
-        where("parentId", "==", null),
         limit(loadedCount + pageSize + 1)
       )
     );
     const fallbackItems = fallbackSnapshot.docs
       .map((item) => ({ id: item.id, ...(item.data() as CommentDoc) }))
+      .filter((item) => !item.parentId)
       .sort((left, right) => {
         const leftSeconds = (left.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
         const rightSeconds = (right.createdAt as { seconds?: number } | null | undefined)?.seconds ?? 0;
