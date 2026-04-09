@@ -7,6 +7,7 @@ import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
 import { FixedFeedHeader } from "@/app/_components/fixed-feed-header";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
 import { listPublishedWallpapersPage } from "@/lib/firestore/wallpapers";
@@ -197,12 +198,11 @@ export default function HomePage() {
                     >
                       <div className="relative aspect-[4/3] bg-zinc-100">
                         <Image
-                          src={prompt.imageUrl}
+                          src={getCloudinaryImageUrl(prompt.imageUrl, "thumbnail")}
                           alt={prompt.questionAr}
                           fill
                           className="object-cover"
                           sizes="(max-width: 768px) 42vw, (max-width: 1280px) 28vw, 220px"
-                          unoptimized
                         />
                       </div>
                       <p className="p-2 text-center text-xs font-semibold text-zinc-800">{prompt.questionAr}</p>

@@ -8,6 +8,7 @@ import { AdminTopBar } from "@/app/admin/_components/admin-top-bar";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { isSuperAdminRole } from "@/lib/auth/roles";
 import type { Wallpaper } from "@/types/wallpaper";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 
 export default function AdminDashboardPage() {
   const { userProfile } = useAuth();
@@ -84,13 +85,12 @@ export default function AdminDashboardPage() {
                 <div className="relative aspect-square overflow-hidden rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface-muted)]">
                   {wallpaper.images?.[0]?.secureUrl && (
                     <Image
-                      src={wallpaper.images[0].secureUrl}
+                      src={getCloudinaryImageUrl(wallpaper.images[0].secureUrl, "thumbnail")}
                       alt={wallpaper.title}
                       fill
                       className="object-cover"
                       sizes="(max-width: 640px) 45vw, 180px"
-                      unoptimized
-                    />
+                                          />
                   )}
                 </div>
                 <p className="line-clamp-1 text-sm font-semibold text-[var(--app-text)]">{wallpaper.title}</p>
