@@ -31,6 +31,46 @@ type RootCommentsPageResult = {
   hasMore: boolean;
 };
 
+async function listWallpaperRootCommentsPageCompat(input: {
+  wallpaperId: string;
+  pageSize: number;
+  cursor?: QueryDocumentSnapshot<CommentDoc> | null;
+}): Promise<RootCommentsPageResult> {
+  const scanBatchSize = Math.max(input.pageSize * 3, input.pageSize + 1);
+  const constraints = [where("wallpaperId", "==", input.wallpaperId), orderBy("createdAt", "desc"), orderBy(documentId(), "desc")] as const;
+  let cursor = input.cursor ?? null;
+  const rootComments: WallpaperComment[] = [];
+  let hasMoreDocs = true;
+
+  while (rootComments.length < input.pageSize && hasMoreDocs) {
+    const scanQuery = cursor
+      ? query(commentsCollection, ...constraints, startAfter(cursor), limit(scanBatchSize))
+      : query(commentsCollection, ...constraints, limit(scanBatchSize));
+    const snapshot = await getDocs(scanQuery);
+    const docs = snapshot.docs as QueryDocumentSnapshot<CommentDoc>[];
+    if (docs.length === 0) {
+      hasMoreDocs = false;
+      break;
+    }
+
+    cursor = docs.at(-1) ?? cursor;
+    hasMoreDocs = docs.length === scanBatchSize;
+
+    docs.forEach((docItem) => {
+      if (rootComments.length >= input.pageSize) return;
+      const mapped = mapCommentSnapshot(docItem);
+      if (mapped.parentId) return;
+      rootComments.push(mapped);
+    });
+  }
+
+  return {
+    comments: rootComments,
+    cursor,
+    hasMore: hasMoreDocs,
+  };
+}
+
 export function toClientTimestamp(date = new Date()) {
   return Timestamp.fromDate(date);
 }
@@ -63,6 +103,14 @@ export async function listWallpaperRootCommentsPage(input: {
     const pageDocs = hasMore ? docs.slice(0, pageSize) : docs;
     const rootComments = pageDocs.map((item) => mapCommentSnapshot(item));
     const cursor = pageDocs.at(-1) ?? input.cursor ?? null;
+
+    if (rootComments.length === 0) {
+      return listWallpaperRootCommentsPageCompat({
+        wallpaperId: input.wallpaperId,
+        pageSize,
+        cursor: input.cursor,
+      });
+    }
 
     return {
       comments: rootComments,
