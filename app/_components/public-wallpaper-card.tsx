@@ -7,7 +7,7 @@ import { type MouseEvent, useEffect, useMemo, useState } from "react";
 import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 import { useToggleFavorite } from "@/lib/hooks/use-favorites";
-import { downloadImageFromUrl } from "@/lib/utils/download";
+import { downloadImageFromUrl, getWallpaperDownloadUrl } from "@/lib/utils/download";
 import type { Wallpaper } from "@/types/wallpaper";
 
 function ChevronLeftIcon() {
@@ -47,7 +47,7 @@ export function PublicWallpaperCard({
   });
 
   const currentImage = images[activeImageIndex] ?? images[0];
-  const imageUrl = currentImage?.secureUrl || images[0]?.secureUrl;
+  const imageUrl = getWallpaperDownloadUrl(currentImage ?? images[0]);
   const canGoPrev = hasMultipleImages && activeImageIndex > 0;
   const canGoNext = hasMultipleImages && activeImageIndex < images.length - 1;
 
