@@ -173,7 +173,7 @@ export default function AdminCategoriesPage() {
       </section>
 
       {statusMessage && (
-        <div className="rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-4 py-3 text-sm font-medium text-[var(--app-text)]">
+        <div className="rounded-xl border border-[color:var(--app-border)] bg-white px-4 py-3 text-sm font-medium text-[var(--app-text)] dark:bg-[var(--app-surface)]">
           {statusMessage}
         </div>
       )}
