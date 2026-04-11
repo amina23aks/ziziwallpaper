@@ -14,7 +14,10 @@ export default function AdminQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   async function loadQuestions() {
     setIsLoading(true);
@@ -36,9 +39,9 @@ export default function AdminQuestionsPage() {
     try {
       await deleteQuestion(deletingId);
       setQuestions((prev) => prev.filter((item) => item.id !== deletingId));
-      setStatusMessage("تم حذف السؤال.");
+      setStatusMessage({ type: "success", message: "تم حذف السؤال." });
     } catch {
-      setStatusMessage("تعذر حذف السؤال حالياً.");
+      setStatusMessage({ type: "error", message: "تعذر حذف السؤال حالياً." });
     } finally {
       setDeletingId(null);
     }
@@ -60,8 +63,15 @@ export default function AdminQuestionsPage() {
       </section>
 
       {statusMessage ? (
-        <div className="rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-4 py-3 text-sm font-medium text-[var(--app-text)]">
-          {statusMessage}
+        <div
+          data-admin-notice="true"
+          className={`rounded-xl border bg-white px-4 py-3 text-sm font-medium ${
+            statusMessage.type === "success"
+              ? "border-[#bbf7d0] text-[#166534] dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
+              : "border-red-200 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+          }`}
+        >
+          {statusMessage.message}
         </div>
       ) : null}
 

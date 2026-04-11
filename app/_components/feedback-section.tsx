@@ -433,7 +433,7 @@ function ReplyComposer({
           realName={currentUserName}
         />
       </div>
-      <label className="flex h-9 flex-1 items-center rounded-full border border-zinc-300 bg-white px-3 text-sm text-zinc-500 dark:border-transparent dark:bg-zinc-100">
+      <label className="flex h-9 flex-1 items-center rounded-full border border-zinc-500 bg-white px-3 text-sm text-zinc-500 dark:border-transparent dark:bg-zinc-100">
         <input
           value={value}
           onChange={(event) => onChange(event.target.value)}

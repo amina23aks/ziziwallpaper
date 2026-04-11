@@ -177,6 +177,7 @@ export default function AdminCategoriesPage() {
 
       {statusMessage && (
         <div
+          data-admin-notice="true"
           className={`rounded-xl border px-4 py-3 text-sm font-medium ${
             statusMessage.type === "success"
               ? "border-[#bbf7d0] bg-white text-[#166534] dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
