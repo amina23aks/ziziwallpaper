@@ -660,10 +660,10 @@ export function WallpaperForm({
               statusMessage.type === "success"
                 ? mode === "create" && !isDark
                   ? "border-[#86efac] bg-white text-[#166534]"
-                  : "border-[#bbf7d0] bg-[#ecfdf3] text-[#166534] dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
+                  : "border-[#bbf7d0] bg-white text-[#166534] dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
                 : mode === "create" && !isDark
                   ? "border-[#fecaca] bg-white text-[#991b1b]"
-                  : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+                  : "border-red-200 bg-white text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
             }`}
           >
             {statusMessage.message}

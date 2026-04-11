@@ -201,10 +201,11 @@ export function QuestionForm({
 
         {statusMessage ? (
           <div
+            data-admin-notice="true"
             className={`rounded-xl border px-4 py-3 text-sm font-medium ${
               statusMessage.type === "success"
-                ? "border-zinc-200 bg-white text-black dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
-                : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+                ? "border-[#bbf7d0] bg-white text-[#166534] dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
+                : "border-red-200 bg-white text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
             }`}
           >
             {statusMessage.message}

@@ -145,3 +145,8 @@ html:not(.dark) .admin-area textarea::placeholder {
 html:not(.dark) [data-admin-action="true"] {
   border-color: #d1d5db !important;
 }
+
+/* Light mode only: keep admin feedback banners on white backgrounds. */
+html:not(.dark) [data-admin-notice="true"] {
+  background-color: #ffffff !important;
+}
