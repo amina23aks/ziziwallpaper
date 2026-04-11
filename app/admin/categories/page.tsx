@@ -28,7 +28,10 @@ export default function AdminCategoriesPage() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [statusMessage, setStatusMessage] = useState<string>("");
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function loadCategories() {
@@ -50,24 +53,24 @@ export default function AdminCategoriesPage() {
   const handleStartEdit = (category: Category) => {
     setEditingId(category.id ?? null);
     setEditingName(category.nameAr);
-    setStatusMessage("");
+    setStatusMessage(null);
   };
 
   const handleCreate = async () => {
     const nameAr = newCategoryName.trim();
     if (!nameAr) {
-      setStatusMessage("يرجى إدخال اسم التصنيف.");
+      setStatusMessage({ type: "error", message: "يرجى إدخال اسم التصنيف." });
       return;
     }
 
     const slug = slugify(nameAr);
     if (!slug) {
-      setStatusMessage("تعذر إنشاء رابط للتصنيف. استخدم اسماً أوضح.");
+      setStatusMessage({ type: "error", message: "تعذر إنشاء رابط للتصنيف. استخدم اسماً أوضح." });
       return;
     }
 
     if (categories.some((item) => item.slug === slug)) {
-      setStatusMessage("هذا التصنيف موجود بالفعل.");
+      setStatusMessage({ type: "error", message: "هذا التصنيف موجود بالفعل." });
       return;
     }
 
@@ -82,9 +85,9 @@ export default function AdminCategoriesPage() {
       setCategories((prev) => [...prev, { id, nameAr, nameEn: slug, slug, order: categories.length, isActive: true }]);
       setNewCategoryName("");
       setShowAddForm(false);
-      setStatusMessage("تمت إضافة التصنيف.");
+      setStatusMessage({ type: "success", message: "تمت إضافة التصنيف." });
     } catch {
-      setStatusMessage("تعذر إضافة التصنيف حالياً.");
+      setStatusMessage({ type: "error", message: "تعذر إضافة التصنيف حالياً." });
     }
   };
 
@@ -93,13 +96,13 @@ export default function AdminCategoriesPage() {
 
     const nameAr = editingName.trim();
     if (!nameAr) {
-      setStatusMessage("يرجى إدخال الاسم العربي.");
+      setStatusMessage({ type: "error", message: "يرجى إدخال الاسم العربي." });
       return;
     }
 
     const slug = slugify(nameAr);
     if (!slug) {
-      setStatusMessage("تعذر إنشاء رابط للتصنيف. استخدم اسماً أوضح.");
+      setStatusMessage({ type: "error", message: "تعذر إنشاء رابط للتصنيف. استخدم اسماً أوضح." });
       return;
     }
 
@@ -110,9 +113,9 @@ export default function AdminCategoriesPage() {
       );
       setEditingId(null);
       setEditingName("");
-      setStatusMessage("تم تحديث التصنيف.");
+      setStatusMessage({ type: "success", message: "تم تحديث التصنيف." });
     } catch {
-      setStatusMessage("تعذر تحديث التصنيف حالياً.");
+      setStatusMessage({ type: "error", message: "تعذر تحديث التصنيف حالياً." });
     }
   };
 
@@ -122,13 +125,13 @@ export default function AdminCategoriesPage() {
     try {
       await deleteCategory(deletingId);
       setCategories((prev) => prev.filter((item) => item.id !== deletingId));
-      setStatusMessage("تم حذف التصنيف.");
+      setStatusMessage({ type: "success", message: "تم حذف التصنيف." });
       if (editingId === deletingId) {
         setEditingId(null);
         setEditingName("");
       }
     } catch {
-      setStatusMessage("تعذر حذف التصنيف حالياً.");
+      setStatusMessage({ type: "error", message: "تعذر حذف التصنيف حالياً." });
     } finally {
       setDeletingId(null);
     }
@@ -173,8 +176,14 @@ export default function AdminCategoriesPage() {
       </section>
 
       {statusMessage && (
-        <div className="rounded-xl border border-[color:var(--app-border)] bg-white px-4 py-3 text-sm font-medium text-[var(--app-text)] dark:bg-[var(--app-surface)]">
-          {statusMessage}
+        <div
+          className={`rounded-xl border px-4 py-3 text-sm font-medium ${
+            statusMessage.type === "success"
+              ? "border-[#bbf7d0] bg-white text-[#166534] dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300"
+              : "border-red-200 bg-white text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+          }`}
+        >
+          {statusMessage.message}
         </div>
       )}
 
