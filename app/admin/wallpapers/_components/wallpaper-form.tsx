@@ -134,7 +134,7 @@ export function WallpaperForm({
     setUploadedImages(
       (initialWallpaper.images ?? []).map((image, index) => ({
         ...image,
-        publicId: `existing-${index}-${image.secureUrl}`,
+        publicId: image.publicId || `existing-${index}-${image.secureUrl}`,
       }))
     );
     reset({
@@ -368,6 +368,7 @@ export function WallpaperForm({
       moodTags: splitCommaSeparated(values.moodTags),
       images: uploadedImages.map((image) => ({
         secureUrl: image.secureUrl,
+        ...(image.publicId && !image.publicId.startsWith("existing-") ? { publicId: image.publicId } : {}),
         alt: values.title?.trim() || "",
       })),
       isPublished: initialWallpaper?.isPublished ?? true,

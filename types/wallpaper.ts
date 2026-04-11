@@ -2,6 +2,7 @@ import type { FieldValue, Timestamp } from "firebase/firestore";
 
 export type WallpaperImage = {
   secureUrl: string;
+  publicId?: string;
   alt: string;
 };
 

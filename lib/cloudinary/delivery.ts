@@ -39,3 +39,48 @@ export function getCloudinaryImageUrl(url: string, context: CloudinaryImageConte
 
   return `${prefix}${CLOUDINARY_UPLOAD_MARKER}${mergedTransform}/${versionAndPath}`;
 }
+
+function getCloudinaryAssetExtension(url: string) {
+  const withoutQuery = url.split("?")[0] ?? "";
+  const extension = withoutQuery.split(".").pop()?.trim().toLowerCase() ?? "";
+  return extension && /^[a-z0-9]+$/.test(extension) ? extension : null;
+}
+
+export function getCloudinaryOriginalUrlFromPublicId(url: string, publicId: string) {
+  if (!url || !isCloudinaryUploadUrl(url) || !publicId) {
+    return url;
+  }
+
+  const [prefix] = url.split(CLOUDINARY_UPLOAD_MARKER);
+  if (!prefix) {
+    return url;
+  }
+
+  const extension = getCloudinaryAssetExtension(url);
+  const publicIdWithExtension = extension ? `${publicId}.${extension}` : publicId;
+
+  return `${prefix}${CLOUDINARY_UPLOAD_MARKER}v1/${publicIdWithExtension}`;
+}
+
+export function getCloudinaryOriginalUrl(url: string) {
+  if (!url || !isCloudinaryUploadUrl(url)) {
+    return url;
+  }
+
+  const [prefix, afterUpload] = url.split(CLOUDINARY_UPLOAD_MARKER);
+  if (!prefix || !afterUpload) {
+    return url;
+  }
+
+  const existingTransform = afterUpload.split("/")[0] ?? "";
+  if (existingTransform.startsWith("v")) {
+    return url;
+  }
+
+  const versionAndPath = afterUpload.split("/").slice(1).join("/");
+  if (!versionAndPath) {
+    return url;
+  }
+
+  return `${prefix}${CLOUDINARY_UPLOAD_MARKER}${versionAndPath}`;
+}

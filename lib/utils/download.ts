@@ -1,3 +1,18 @@
+import { getCloudinaryOriginalUrl, getCloudinaryOriginalUrlFromPublicId } from "@/lib/cloudinary/delivery";
+import type { WallpaperImage } from "@/types/wallpaper";
+
+export function getWallpaperDownloadUrl(image?: WallpaperImage | null) {
+  if (!image?.secureUrl) {
+    return "";
+  }
+
+  if (image.publicId) {
+    return getCloudinaryOriginalUrlFromPublicId(image.secureUrl, image.publicId);
+  }
+
+  return getCloudinaryOriginalUrl(image.secureUrl);
+}
+
 export async function downloadImageFromUrl({
   imageUrl,
   filename,

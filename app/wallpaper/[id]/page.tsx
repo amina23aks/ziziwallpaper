@@ -36,7 +36,7 @@ import {
   listPublishedWallpapersByCategory,
 } from "@/lib/firestore/wallpapers";
 import { useToggleFavorite } from "@/lib/hooks/use-favorites";
-import { downloadImageFromUrl } from "@/lib/utils/download";
+import { downloadImageFromUrl, getWallpaperDownloadUrl } from "@/lib/utils/download";
 import type { WallpaperComment } from "@/types/comment";
 import type { Wallpaper } from "@/types/wallpaper";
 
@@ -401,7 +401,7 @@ export default function WallpaperDetailsPage() {
                 <button
                   type="button"
                   onClick={async () => {
-                    const imageUrl = wallpaper.images?.[activeImageIndex]?.secureUrl || wallpaper.images?.[0]?.secureUrl;
+                    const imageUrl = getWallpaperDownloadUrl(wallpaper.images?.[activeImageIndex] ?? wallpaper.images?.[0]);
                     if (!imageUrl) return;
                     await downloadImageFromUrl({
                       imageUrl,
