@@ -435,6 +435,7 @@ function ReplyComposer({
       </div>
       <label className="flex flex-1 items-center">
         <input
+          data-reply-input="true"
           value={value}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={async (event) => {
