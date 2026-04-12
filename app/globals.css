@@ -150,3 +150,9 @@ html:not(.dark) [data-admin-action="true"] {
 html:not(.dark) [data-admin-notice="true"] {
   background-color: #ffffff !important;
 }
+
+/* Light mode only: force reply typing field to stay visibly white with a dark border. */
+html:not(.dark) [data-reply-input="true"] {
+  background-color: #ffffff !important;
+  border: 2px solid #111111 !important;
+}

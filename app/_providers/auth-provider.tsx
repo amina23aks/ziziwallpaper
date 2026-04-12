@@ -53,13 +53,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        const existingProfile = await getUserProfile(nextUser.uid);
-
-        if (existingProfile) {
-          setUserProfile(existingProfile);
-          return;
-        }
-
         const profile = await ensureUserProfileDocument(nextUser);
         setUserProfile(profile);
       } finally {

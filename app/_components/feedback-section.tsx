@@ -433,8 +433,9 @@ function ReplyComposer({
           realName={currentUserName}
         />
       </div>
-      <label className="flex h-9 flex-1 items-center rounded-full border border-zinc-500 bg-white px-3 text-sm text-zinc-500 dark:border-transparent dark:bg-zinc-100">
+      <label className="flex flex-1 items-center">
         <input
+          data-reply-input="true"
           value={value}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={async (event) => {
@@ -444,7 +445,7 @@ function ReplyComposer({
             await onSubmit();
           }}
           placeholder="اكتب ردك"
-          className="w-full bg-transparent text-right text-sm text-zinc-900 placeholder:text-zinc-500 outline-none"
+          className="h-9 w-full rounded-full border-2 border-black bg-white px-3 text-right text-sm text-zinc-900 placeholder:text-zinc-500 outline-none dark:border-transparent dark:bg-zinc-100"
         />
       </label>
       <button

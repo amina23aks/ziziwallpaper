@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 import { AUTH_TOKEN_COOKIE_NAME } from "@/lib/auth/constants";
 import { getClientAuth } from "@/lib/firebase/client";
+import { ensureUserProfileDocument } from "@/lib/firestore/users";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -32,6 +33,9 @@ export async function signUpWithEmail({
   const result = await createUserWithEmailAndPassword(getClientAuth(), email, password);
 
   await updateProfile(result.user, { displayName: displayName.trim() });
+  await result.user.reload();
+  const refreshedUser = getClientAuth().currentUser ?? result.user;
+  await ensureUserProfileDocument(refreshedUser);
   return result;
 }
 
