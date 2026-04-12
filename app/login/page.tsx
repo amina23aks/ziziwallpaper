@@ -127,7 +127,8 @@ export default function LoginPage() {
               type="text"
               value={displayName}
               onChange={(event) => setDisplayName(event.target.value)}
-              placeholder="الاسم"
+              placeholder="اسم الحساب"
+              aria-label="اسم الحساب"
               required
               className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] outline-none focus:border-zinc-500"
             />
