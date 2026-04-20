@@ -47,6 +47,7 @@ export default function LoginPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isGooglePopupClosedError = errorMessage === GOOGLE_POPUP_CLOSED_MESSAGE;
@@ -141,15 +142,37 @@ export default function LoginPage() {
             required
             className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] outline-none focus:border-zinc-500"
           />
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="كلمة المرور"
-            minLength={6}
-            required
-            className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] outline-none focus:border-zinc-500"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="كلمة المرور"
+              minLength={6}
+              required
+              className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] py-2.5 pl-10 pr-3 text-sm text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] outline-none focus:border-zinc-500"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+              className="absolute inset-y-0 left-0 inline-flex w-10 items-center justify-center text-[var(--app-text-muted)] transition hover:text-[var(--app-text)]"
+            >
+              {showPassword ? (
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path d="M3 3l18 18" />
+                  <path d="M10.6 10.6a2 2 0 102.8 2.8" />
+                  <path d="M9.9 5.1A10.7 10.7 0 0112 5c5.2 0 9.3 3.5 10.7 7-1 2.3-3 4.7-5.8 6" />
+                  <path d="M6.6 6.6C4.4 8 2.8 9.9 1.3 12c.8 1.8 2.1 3.6 3.9 5" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path d="M1.3 12C2.7 8.5 6.8 5 12 5s9.3 3.5 10.7 7c-1.4 3.5-5.5 7-10.7 7S2.7 15.5 1.3 12z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
+          </div>
 
           {errorMessage && (
             <p
