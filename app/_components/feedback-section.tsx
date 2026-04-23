@@ -21,7 +21,6 @@ const DISPLAY_IDENTITY_OPTIONS: Array<{
 }> = [
   { value: "real", subtitle: "النشر باسم ملفك الشخصي" },
   { value: "anonymous", subtitle: "إخفاء اسمك الحقيقي" },
-  { value: "blouza", subtitle: "النشر باسم بلوزة" },
 ];
 
 function formatTimestamp(value?: WallpaperComment["createdAt"]) {
