@@ -21,7 +21,6 @@ const DISPLAY_IDENTITY_OPTIONS: Array<{
 }> = [
   { value: "real", subtitle: "النشر باسم ملفك الشخصي" },
   { value: "anonymous", subtitle: "إخفاء اسمك الحقيقي" },
-  { value: "blouza", subtitle: "النشر باسم بلوزة" },
 ];
 
 function formatTimestamp(value?: WallpaperComment["createdAt"]) {
@@ -38,15 +37,14 @@ function formatTimestamp(value?: WallpaperComment["createdAt"]) {
 
 function getVisibleName(comment: Pick<WallpaperComment, "userDisplayName" | "displayIdentityMode" | "isAnonymous">) {
   if (comment.displayIdentityMode === "anonymous") return "Anonymous";
-  if (comment.displayIdentityMode === "blouza") return "بلوزة";
-  if (comment.isAnonymous) return "بلوزة";
+  if (comment.isAnonymous) return "Anonymous";
   return comment.userDisplayName;
 }
 
 function getIdentityLabel(mode: CommentDisplayIdentityMode, realName: string) {
   if (mode === "real") return realName;
   if (mode === "anonymous") return "Anonymous";
-  return "بلوزة";
+  return "Anonymous";
 }
 
 function avatarLabel(name: string) {
