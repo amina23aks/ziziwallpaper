@@ -1,6 +1,6 @@
 import type { FieldValue, Timestamp } from "firebase/firestore";
 
-export type CommentDisplayIdentityMode = "real" | "anonymous" | "blouza";
+export type CommentDisplayIdentityMode = "real" | "anonymous";
 
 export type WallpaperComment = {
   id?: string;
