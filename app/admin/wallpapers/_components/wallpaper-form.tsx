@@ -21,7 +21,6 @@ const wallpaperSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   searchKeywords: z.string().optional(),
-  moodTags: z.string().optional(),
 });
 
 const inlineCategorySchema = z.object({
@@ -111,7 +110,6 @@ export function WallpaperForm({
       title: initialWallpaper?.title ?? "",
       description: initialWallpaper?.description ?? "",
       searchKeywords: initialWallpaper?.searchKeywords?.join(", ") ?? "",
-      moodTags: initialWallpaper?.moodTags?.join(", ") ?? "",
     },
   });
 
@@ -141,7 +139,6 @@ export function WallpaperForm({
       title: initialWallpaper.title,
       description: initialWallpaper.description ?? "",
       searchKeywords: initialWallpaper.searchKeywords?.join(", ") ?? "",
-      moodTags: initialWallpaper.moodTags?.join(", ") ?? "",
     });
   }, [initialWallpaper, reset]);
 
@@ -365,7 +362,7 @@ export function WallpaperForm({
         legacyQuestionPromptSlug: questionPrompts.find((item) => item.id === selectedQuestionId)?.slug,
       }),
       searchKeywords: splitCommaSeparated(values.searchKeywords),
-      moodTags: splitCommaSeparated(values.moodTags),
+      moodTags: mode === "edit" ? initialWallpaper?.moodTags ?? [] : [],
       images: uploadedImages.map((image) => ({
         secureUrl: image.secureUrl,
         ...(image.publicId && !image.publicId.startsWith("existing-") ? { publicId: image.publicId } : {}),
@@ -383,7 +380,7 @@ export function WallpaperForm({
       } else {
         await createWallpaper(payload);
         setStatusMessage({ type: "success", message: "تم نشر الخلفية." });
-        reset({ title: "", description: "", searchKeywords: "", moodTags: "" });
+        reset({ title: "", description: "", searchKeywords: "" });
         setSelectedCategorySlugs([]);
         setSelectedQuestionId("");
         setUploadedImages([]);
@@ -584,31 +581,17 @@ export function WallpaperForm({
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label htmlFor="searchKeywords" className="block text-sm font-semibold text-[var(--app-text)]">
-              كلمات البحث
-            </label>
-            <input
-              id="searchKeywords"
-              type="text"
-              {...register("searchKeywords")}
-              className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm font-medium text-[var(--app-text)] placeholder:text-[var(--app-text-muted)]"
-              placeholder="ليل، هدوء، سماء"
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="moodTags" className="block text-sm font-semibold text-[var(--app-text)]">
-              كلمات المزاج
-            </label>
-            <input
-              id="moodTags"
-              type="text"
-              {...register("moodTags")}
-              className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm font-medium text-[var(--app-text)] placeholder:text-[var(--app-text-muted)]"
-              placeholder="هادئ، تركيز"
-            />
-          </div>
+        <div className="space-y-2">
+          <label htmlFor="searchKeywords" className="block text-sm font-semibold text-[var(--app-text)]">
+            كلمات البحث
+          </label>
+          <input
+            id="searchKeywords"
+            type="text"
+            {...register("searchKeywords")}
+            className="w-full rounded-xl border border-[color:var(--app-border)] bg-[var(--app-surface)] px-3 py-2.5 text-sm font-medium text-[var(--app-text)] placeholder:text-[var(--app-text-muted)]"
+            placeholder="ليل، هدوء، سماء"
+          />
         </div>
 
         <section className="space-y-3 rounded-2xl border border-dashed border-[color:var(--app-border)] bg-[var(--app-surface-muted)] p-4">
