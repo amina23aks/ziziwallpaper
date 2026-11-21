@@ -110,13 +110,14 @@ export async function getPublishedWallpaperById(id: string): Promise<Wallpaper |
   return wallpaper;
 }
 
-export async function listWallpapers(maxItems = 20) {
+export async function listWallpapers(maxItems?: number) {
+  const sizeConstraint = maxItems === undefined ? [] : [limit(maxItems)];
   let snapshot;
 
   try {
-    snapshot = await getDocs(query(wallpapersCollection, orderBy("createdAt", "desc"), limit(maxItems)));
+    snapshot = await getDocs(query(wallpapersCollection, orderBy("createdAt", "desc"), ...sizeConstraint));
   } catch {
-    snapshot = await getDocs(query(wallpapersCollection, limit(maxItems)));
+    snapshot = await getDocs(query(wallpapersCollection, ...sizeConstraint));
   }
 
   return snapshot.docs.map((item) => mapWallpaper(item));
@@ -202,41 +203,59 @@ export async function listPublishedWallpapers(maxItems = 30) {
   return sortWallpapersByNewest(snapshot.docs.map((item) => mapWallpaper(item))).slice(0, maxItems);
 }
 
+export type PublishedWallpapersCursor = {
+  document: QueryDocumentSnapshot<DocumentData>;
+  order: "newest" | "document-id";
+  categorySlug?: string;
+};
+
 type PublishedWallpapersPage = {
   items: Wallpaper[];
-  cursor: QueryDocumentSnapshot<DocumentData> | null;
+  cursor: PublishedWallpapersCursor | null;
   hasMore: boolean;
 };
 
 export async function listPublishedWallpapersPage(
-  maxItems = 18,
-  cursor?: QueryDocumentSnapshot<DocumentData> | null
+  maxItems = 6,
+  cursor?: PublishedWallpapersCursor | null,
+  categorySlug?: string
 ): Promise<PublishedWallpapersPage> {
-  const paginationConstraint = cursor ? [startAfter(cursor)] : [];
-  let snapshot;
-
-  try {
-    snapshot = await getDocs(
+  if (cursor && cursor.categorySlug !== categorySlug) {
+    throw new Error("Wallpaper cursor belongs to another category");
+  }
+  // Keep the same ordering for every page, including the missing-index fallback.
+  let order = cursor?.order ?? "newest";
+  const paginationConstraint = cursor ? [startAfter(cursor.document)] : [];
+  const readPage = (pageOrder: PublishedWallpapersCursor["order"]) =>
+    getDocs(
       query(
         wallpapersCollection,
         where("isPublished", "==", true),
-        orderBy("createdAt", "desc"),
+        ...(categorySlug ? [where("categorySlugs", "array-contains", categorySlug)] : []),
+        pageOrder === "newest" ? orderBy("createdAt", "desc") : orderBy(documentId()),
         ...paginationConstraint,
         limit(maxItems)
       )
     );
-  } catch {
-    snapshot = await getDocs(
-      query(wallpapersCollection, where("isPublished", "==", true), ...paginationConstraint, limit(maxItems))
-    );
+  let snapshot;
+
+  try {
+    snapshot = await readPage(order);
+  } catch (error) {
+    // Switching order after a cursor was issued can skip older wallpapers.
+    // Network and permission failures must remain retryable errors.
+    if (cursor || order !== "newest" || (error as { code?: string })?.code !== "failed-precondition") {
+      throw error;
+    }
+    order = "document-id";
+    snapshot = await readPage(order);
   }
 
-  const items = snapshot.docs.map((item) => mapWallpaper(item));
   const lastVisible = snapshot.docs.at(-1) ?? null;
 
   return {
-    items: sortWallpapersByNewest(items).slice(0, maxItems),
-    cursor: lastVisible,
+    items: sortWallpapersByNewest(snapshot.docs.map((item) => mapWallpaper(item))),
+    cursor: lastVisible ? { document: lastVisible, order, categorySlug } : null,
     hasMore: snapshot.docs.length === maxItems,
   };
 }

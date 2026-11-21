@@ -100,16 +100,10 @@ export default function AdminCategoriesPage() {
       return;
     }
 
-    const slug = slugify(nameAr);
-    if (!slug) {
-      setStatusMessage({ type: "error", message: "تعذر إنشاء رابط للتصنيف. استخدم اسماً أوضح." });
-      return;
-    }
-
     try {
-      await updateCategoryName(editingId, nameAr, slug);
+      await updateCategoryName(editingId, nameAr);
       setCategories((prev) =>
-        prev.map((item) => (item.id === editingId ? { ...item, nameAr, slug, nameEn: slug } : item))
+        prev.map((item) => (item.id === editingId ? { ...item, nameAr } : item))
       );
       setEditingId(null);
       setEditingName("");

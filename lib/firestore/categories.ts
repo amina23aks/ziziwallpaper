@@ -69,11 +69,10 @@ export async function listActiveCategories(maxItems = 30) {
   }));
 }
 
-export async function updateCategoryName(id: string, nameAr: string, slug: string) {
+export async function updateCategoryName(id: string, nameAr: string) {
+  // Wallpapers reference the slug, so a display-name edit must preserve it.
   await updateDoc(doc(db, "categories", id), {
     nameAr,
-    slug,
-    nameEn: slug,
     updatedAt: serverTimestamp(),
   });
 }

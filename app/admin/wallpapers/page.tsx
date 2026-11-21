@@ -19,7 +19,7 @@ export default function AdminWallpapersPage() {
   async function loadWallpapers() {
     setIsLoading(true);
     try {
-      const data = await listWallpapers(30);
+      const data = await listWallpapers();
       setWallpapers(data);
     } finally {
       setIsLoading(false);
