@@ -3,14 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
 import { FixedFeedHeader } from "@/app/_components/fixed-feed-header";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
-import { listPublishedWallpapersPage } from "@/lib/firestore/wallpapers";
+import { listPublishedWallpapersPage, type PublishedWallpapersCursor } from "@/lib/firestore/wallpapers";
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
 import type { Wallpaper } from "@/types/wallpaper";
@@ -27,26 +26,21 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMoreWallpapers, setHasMoreWallpapers] = useState(true);
-  const nextCursorRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const nextCursorRef = useRef<PublishedWallpapersCursor | null>(null);
   const hasLoadedInitialWallpapersRef = useRef(false);
   const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
   const isLoadingMoreRef = useRef(false);
   const hasMoreWallpapersRef = useRef(true);
-
-  useEffect(() => {
-    isLoadingMoreRef.current = isLoadingMore;
-  }, [isLoadingMore]);
-
-  useEffect(() => {
-    hasMoreWallpapersRef.current = hasMoreWallpapers;
-  }, [hasMoreWallpapers]);
 
   const loadMoreWallpapers = useCallback(async () => {
     if (isLoadingMoreRef.current || !hasMoreWallpapersRef.current) {
       return;
     }
 
+    isLoadingMoreRef.current = true;
     setIsLoadingMore(true);
+    setLoadError(false);
 
     try {
       const page = await listPublishedWallpapersPage(
@@ -70,11 +64,13 @@ export default function HomePage() {
       });
 
       nextCursorRef.current = page.cursor;
-      setHasMoreWallpapers(page.hasMore && page.cursor !== null);
+      hasMoreWallpapersRef.current = page.hasMore && page.cursor !== null;
+      setHasMoreWallpapers(hasMoreWallpapersRef.current);
       hasLoadedInitialWallpapersRef.current = true;
     } catch {
-      setHasMoreWallpapers(false);
+      setLoadError(true);
     } finally {
+      isLoadingMoreRef.current = false;
       setIsLoadingMore(false);
     }
   }, []);
@@ -89,7 +85,9 @@ export default function HomePage() {
       setQuestionPrompts(prompts);
     }
 
-    loadMetaData();
+    void loadMetaData().catch(() => {
+      // A metadata failure must not stop the wallpaper feed.
+    });
   }, []);
 
   useEffect(() => {
@@ -117,7 +115,8 @@ export default function HomePage() {
   useEffect(() => {
     const sentinel = loadMoreSentinelRef.current;
 
-    if (!sentinel || !hasMoreWallpapers) {
+    if (!sentinel || isLoading || isLoadingMore || loadError || !hasMoreWallpapers ||
+        typeof IntersectionObserver === "undefined") {
       return;
     }
 
@@ -135,7 +134,15 @@ export default function HomePage() {
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [hasMoreWallpapers, loadMoreWallpapers]);
+  }, [isLoading, isLoadingMore, loadError, hasMoreWallpapers, loadMoreWallpapers]);
+
+  // Search and category filters apply to the full catalogue, including older pages.
+  useEffect(() => {
+    if ((searchQuery.trim() || selectedCategory !== "all") &&
+        !isLoading && !isLoadingMore && !loadError && hasMoreWallpapers) {
+      void loadMoreWallpapers();
+    }
+  }, [searchQuery, selectedCategory, isLoading, isLoadingMore, loadError, hasMoreWallpapers, loadMoreWallpapers]);
 
 
   const filteredWallpapers = useMemo(() => {
@@ -226,16 +233,28 @@ export default function HomePage() {
           </div>
         ) : filteredWallpapers.length === 0 ? (
           <p className="rounded-2xl border border-zinc-200 bg-white px-4 py-6 text-center text-sm text-zinc-600">
-            لا توجد خلفيات مطابقة حالياً.
+            {loadError ? "تعذر تحميل الخلفيات. حاول مرة أخرى." :
+              hasMoreWallpapers ? "جاري البحث عن الخلفيات..." : "لا توجد خلفيات مطابقة حالياً."}
           </p>
         ) : (
-          <>
-            <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
-            <div ref={loadMoreSentinelRef} className="h-1 w-full" aria-hidden="true" />
-            {isLoadingMore && (
-              <p className="mt-4 text-center text-xs font-medium text-zinc-500">جاري تحميل المزيد...</p>
-            )}
-          </>
+          <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
+        )}
+        <div ref={loadMoreSentinelRef} className="h-1 w-full" aria-hidden="true" />
+        {isLoadingMore && (
+          <p role="status" className="mt-4 text-center text-xs font-medium text-zinc-500">جاري تحميل المزيد...</p>
+        )}
+        {!isLoading && hasMoreWallpapers && (
+          <div className="mt-4 text-center">
+            {loadError && <p role="alert" className="mb-2 text-sm text-red-700">تعذر تحميل المزيد من الخلفيات.</p>}
+            <button
+              type="button"
+              onClick={() => void loadMoreWallpapers()}
+              disabled={isLoadingMore}
+              className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-800 disabled:opacity-50"
+            >
+              {loadError ? "إعادة المحاولة" : "تحميل المزيد"}
+            </button>
+          </div>
         )}
       </div>
 
