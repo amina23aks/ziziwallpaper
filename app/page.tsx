@@ -2,78 +2,33 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DesktopWallpaperFeed } from "@/app/_components/desktop-wallpaper-feed";
 import { FixedFeedHeader } from "@/app/_components/fixed-feed-header";
 import { MobileBottomNav } from "@/app/_components/mobile-bottom-nav";
 import { getCloudinaryImageUrl } from "@/lib/cloudinary/delivery";
 import { listActiveCategories } from "@/lib/firestore/categories";
 import { listQuestionPrompts } from "@/lib/firestore/question-prompts";
-import { listPublishedWallpapersPage, type PublishedWallpapersCursor } from "@/lib/firestore/wallpapers";
+import { useWallpaperFeed } from "@/lib/hooks/use-wallpaper-feed";
 import type { Category } from "@/types/category";
 import type { QuestionPrompt } from "@/types/question-prompt";
-import type { Wallpaper } from "@/types/wallpaper";
-
-const HOME_WALLPAPER_PAGE_SIZE = 18;
 
 export default function HomePage() {
-  const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [questionPrompts, setQuestionPrompts] = useState<QuestionPrompt[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMoreWallpapers, setHasMoreWallpapers] = useState(true);
-  const [loadError, setLoadError] = useState(false);
-  const nextCursorRef = useRef<PublishedWallpapersCursor | null>(null);
-  const hasLoadedInitialWallpapersRef = useRef(false);
+  const {
+    items: wallpapers,
+    isLoading,
+    isLoadingMore,
+    hasMore: hasMoreWallpapers,
+    loadError,
+    loadMore: loadMoreWallpapers,
+  } = useWallpaperFeed(selectedCategory);
   const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
-  const isLoadingMoreRef = useRef(false);
-  const hasMoreWallpapersRef = useRef(true);
-
-  const loadMoreWallpapers = useCallback(async () => {
-    if (isLoadingMoreRef.current || !hasMoreWallpapersRef.current) {
-      return;
-    }
-
-    isLoadingMoreRef.current = true;
-    setIsLoadingMore(true);
-    setLoadError(false);
-
-    try {
-      const page = await listPublishedWallpapersPage(
-        HOME_WALLPAPER_PAGE_SIZE,
-        nextCursorRef.current
-      );
-
-      setWallpapers((previousItems) => {
-        if (previousItems.length === 0) {
-          return page.items;
-        }
-
-        const existingIds = new Set(previousItems.map((item) => item.id).filter(Boolean));
-        const uniqueNewItems = page.items.filter((item) => !item.id || !existingIds.has(item.id));
-
-        if (uniqueNewItems.length === 0) {
-          return previousItems;
-        }
-
-        return [...previousItems, ...uniqueNewItems];
-      });
-
-      nextCursorRef.current = page.cursor;
-      hasMoreWallpapersRef.current = page.hasMore && page.cursor !== null;
-      setHasMoreWallpapers(hasMoreWallpapersRef.current);
-      hasLoadedInitialWallpapersRef.current = true;
-    } catch {
-      setLoadError(true);
-    } finally {
-      isLoadingMoreRef.current = false;
-      setIsLoadingMore(false);
-    }
-  }, []);
+  const scrollPositionAtLastLoadRef = useRef(0);
 
   useEffect(() => {
     async function loadMetaData() {
@@ -91,59 +46,70 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadInitialWallpapers() {
-      try {
-        if (!hasLoadedInitialWallpapersRef.current) {
-          await loadMoreWallpapers();
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadInitialWallpapers();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [loadMoreWallpapers]);
+    // A visible sentinel on a tall screen must not fetch extra pages on opening.
+    scrollPositionAtLastLoadRef.current = window.scrollY;
+  }, [selectedCategory, searchQuery, wallpapers.length]);
 
   useEffect(() => {
     const sentinel = loadMoreSentinelRef.current;
 
-    if (!sentinel || isLoading || isLoadingMore || loadError || !hasMoreWallpapers ||
+    if (!sentinel || isQuestionsOpen || isLoading || isLoadingMore || loadError || !hasMoreWallpapers ||
         typeof IntersectionObserver === "undefined") {
       return;
     }
 
+    let isNearEnd = false;
+    let isActive = true;
+    let hasScrollIntent = false;
+    const loadAfterScroll = () => {
+      const scrollPosition = window.scrollY;
+      if (isActive && isNearEnd && (hasScrollIntent || scrollPosition > scrollPositionAtLastLoadRef.current)) {
+        hasScrollIntent = false;
+        scrollPositionAtLastLoadRef.current = scrollPosition;
+        void loadMoreWallpapers();
+      }
+    };
+    const onWheel = (event: WheelEvent) => {
+      if (event.deltaY > 0) {
+        hasScrollIntent = true;
+        loadAfterScroll();
+      }
+    };
+    let touchY: number | null = null;
+    const onTouchStart = (event: TouchEvent) => {
+      touchY = event.touches[0]?.clientY ?? null;
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      const nextTouchY = event.touches[0]?.clientY;
+      if (touchY !== null && nextTouchY !== undefined && nextTouchY < touchY) {
+        hasScrollIntent = true;
+        loadAfterScroll();
+      }
+      touchY = nextTouchY ?? null;
+    };
     const observer = new IntersectionObserver(
       (entries) => {
-        const [entry] = entries;
-
-        if (entry?.isIntersecting) {
-          void loadMoreWallpapers();
-        }
+        isNearEnd = Boolean(entries[0]?.isIntersecting);
+        loadAfterScroll();
       },
-      { rootMargin: "400px 0px" }
+      { rootMargin: "100px 0px" }
     );
 
     observer.observe(sentinel);
+    window.addEventListener("scroll", loadAfterScroll, { passive: true });
+    window.addEventListener("wheel", onWheel, { passive: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
 
-    return () => observer.disconnect();
-  }, [isLoading, isLoadingMore, loadError, hasMoreWallpapers, loadMoreWallpapers]);
-
-  // Search and category filters apply to the full catalogue, including older pages.
-  useEffect(() => {
-    if ((searchQuery.trim() || selectedCategory !== "all") &&
-        !isLoading && !isLoadingMore && !loadError && hasMoreWallpapers) {
-      void loadMoreWallpapers();
-    }
-  }, [searchQuery, selectedCategory, isLoading, isLoadingMore, loadError, hasMoreWallpapers, loadMoreWallpapers]);
-
+    return () => {
+      isActive = false;
+      observer.disconnect();
+      window.removeEventListener("scroll", loadAfterScroll);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+    };
+  }, [isQuestionsOpen, isLoading, isLoadingMore, loadError, hasMoreWallpapers, loadMoreWallpapers, searchQuery]);
 
   const filteredWallpapers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -224,7 +190,7 @@ export default function HomePage() {
 
         {isLoading ? (
           <div className="grid grid-cols-2 gap-3 [direction:rtl] xl:grid-cols-5">
-            {Array.from({ length: 10 }, (_, index) => (
+            {Array.from({ length: 6 }, (_, index) => (
               <div
                 key={`feed-skeleton-${index}`}
                 className="h-40 animate-pulse rounded-2xl border border-zinc-200 bg-zinc-100"
@@ -234,7 +200,7 @@ export default function HomePage() {
         ) : filteredWallpapers.length === 0 ? (
           <p className="rounded-2xl border border-zinc-200 bg-white px-4 py-6 text-center text-sm text-zinc-600">
             {loadError ? "تعذر تحميل الخلفيات. حاول مرة أخرى." :
-              hasMoreWallpapers ? "جاري البحث عن الخلفيات..." : "لا توجد خلفيات مطابقة حالياً."}
+              hasMoreWallpapers ? "مرّر أو اضغط تحميل المزيد للبحث في الخلفيات الأقدم." : "لا توجد خلفيات مطابقة حالياً."}
           </p>
         ) : (
           <DesktopWallpaperFeed wallpapers={filteredWallpapers} />
@@ -242,6 +208,11 @@ export default function HomePage() {
         <div ref={loadMoreSentinelRef} className="h-1 w-full" aria-hidden="true" />
         {isLoadingMore && (
           <p role="status" className="mt-4 text-center text-xs font-medium text-zinc-500">جاري تحميل المزيد...</p>
+        )}
+        {!isLoading && searchQuery.trim() && hasMoreWallpapers && filteredWallpapers.length > 0 && (
+          <p className="mt-4 text-center text-xs text-zinc-500">
+            للبحث في خلفيات أقدم، مرّر للأسفل أو اضغط تحميل المزيد.
+          </p>
         )}
         {!isLoading && hasMoreWallpapers && (
           <div className="mt-4 text-center">
